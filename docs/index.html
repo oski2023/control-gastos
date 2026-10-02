@@ -113,6 +113,12 @@
     // Ajustar vista en rotación de pantalla
     function handleResize() {
       window.scrollTo(0, 0);
+      const frame = document.getElementById('appFrame');
+      if (frame && frame.contentWindow) {
+        try {
+          frame.contentWindow.postMessage({ type: 'ORIENTATION_CHANGE', width: window.innerWidth, height: window.innerHeight }, '*');
+        } catch(e) {}
+      }
     }
     window.addEventListener('resize', handleResize);
     window.addEventListener('orientationchange', () => {

@@ -861,7 +861,7 @@ tbody tr:hover td {
 }
 
 /* RESPONSIVE */
-@media (max-width: 900px), (max-height: 550px) and (orientation: landscape) {
+@media (max-width: 900px), (max-height: 650px) and (orientation: landscape) {
   .sidebar {
     position: fixed;
     top: 0;
@@ -912,7 +912,7 @@ tbody tr:hover td {
   }
 }
 
-@media (min-width: 901px) and (min-height: 551px) {
+@media (min-width: 901px) and (min-height: 651px) {
   .bottom-nav {
     display: none;
   }
@@ -928,7 +928,7 @@ tbody tr:hover td {
 }
 
 /* ADAPTACIÓN MÓVIL EN PANTALLA HORIZONTAL (LANDSCAPE) */
-@media (orientation: landscape) and (max-height: 550px) {
+@media (orientation: landscape) and (max-height: 650px) {
   .top-app-bar {
     height: 48px;
     padding: 0 14px;
@@ -999,6 +999,36 @@ tbody tr:hover td {
   .chart-container {
     max-height: 220px;
   }
+}
+
+body.is-landscape .top-app-bar {
+  height: 48px;
+  padding: 0 14px;
+}
+body.is-landscape .top-brand .brand-subtitle {
+  display: none;
+}
+body.is-landscape .content {
+  padding: 10px 16px;
+  padding-bottom: 72px;
+}
+body.is-landscape .stats-grid {
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 8px !important;
+}
+body.is-landscape .grid {
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 8px !important;
+}
+body.is-landscape .grid .full {
+  grid-column: 1 / -1;
+}
+body.is-landscape .bottom-nav {
+  height: 52px;
+  display: flex !important;
+}
+body.is-landscape .hamburger-btn {
+  display: flex !important;
 }
 
 .top-brand {
@@ -1111,6 +1141,7 @@ tbody tr:hover td {
         <button type="button" class="btn-mes-nav" onclick="cambiarMesRelativo(1)" title="Mes siguiente" aria-label="Mes siguiente">▶</button>
       </div>
 
+      <div id="resumenContenido">
         <!-- CONTROL DE GASTOS FIJOS (PENDIENTES Y AL DIA) -->
         <div id="alertaFijos" class="alert-box alert-warning hidden" style="transition: all 0.3s ease;">
           <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
@@ -1524,6 +1555,12 @@ function cargarResumenMes() {
 /* ------------Reorienta la pantalla automaticamente----------- */
 
 function fixViewportWidth() {
+  const isLandscape = window.innerWidth > window.innerHeight;
+  if (isLandscape && window.innerHeight < 700) {
+    document.body.classList.add('is-landscape');
+  } else {
+    document.body.classList.remove('is-landscape');
+  }
   document.documentElement.style.width = '100%';
   document.body.style.width = '100%';
   document.documentElement.style.maxWidth = '100%';
@@ -1550,6 +1587,13 @@ if (window.screen && window.screen.orientation) {
     setTimeout(fixViewportWidth, 300);
   });
 }
+window.addEventListener('message', function(e) {
+  if (e && e.data && e.data.type === 'ORIENTATION_CHANGE') {
+    setTimeout(fixViewportWidth, 50);
+    setTimeout(fixViewportWidth, 150);
+  }
+});
+window.addEventListener('DOMContentLoaded', fixViewportWidth);
 fixViewportWidth();
 
 /* ------Fin reorientacion----------------- */
