@@ -800,6 +800,29 @@ tbody tr:hover td {
   box-shadow: 0 0 20px #38bdf8;
 }
 
+/* BOTON GASTO RAYO AZUL */
+.icon-bolt-blue {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(56, 189, 248, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.nav-item:active .icon-bolt-blue {
+  transform: scale(0.9);
+}
+
+.nav-item.active .icon-bolt-blue {
+  box-shadow: 0 0 14px #38bdf8;
+}
+
 /* HISTORIAL TABS */
 .historial-tabs {
   display: flex;
@@ -892,10 +915,9 @@ tbody tr:hover td {
 <div class="layout">
   <!-- SIDEBAR (Para escritorio o drawer en móvil) -->
   <nav class="sidebar" id="sidebar">
-    <h1>CONTROL DE GASTOS</h1>
     <button type="button" class="tab active" data-tab="resumen" onclick="showTab('resumen',this)">📊 Resumen</button>
-    <button type="button" class="tab" data-tab="gasto" onclick="showTab('gasto',this)">💸 + Gasto</button>
-    <button type="button" class="tab" data-tab="rapido" onclick="showTab('rapido',this)">⚡ Gasto rápido</button>
+    <button type="button" class="tab" data-tab="detalle" onclick="showTab('detalle',this)">📋 Detalle Categorías</button>
+    <button type="button" class="tab" data-tab="gasto" onclick="showTab('gasto',this)">⚡ + Gasto</button>
     <button type="button" class="tab" data-tab="ingreso" onclick="showTab('ingreso',this)">📥 + Ingreso</button>
     <button type="button" class="tab" data-tab="tarjeta" onclick="showTab('tarjeta',this)">💳 + Tarjeta</button>
     <button type="button" class="tab" data-tab="historial" onclick="showTab('historial',this)">📜 Historial</button>
@@ -1024,18 +1046,11 @@ tbody tr:hover td {
           <canvas id="graficoEvolucion"></canvas>
         </div>
 
-        <h3>Detalle por categoría</h3>
-        <div style="overflow-x:auto;">
-          <table>
-            <thead>
-              <tr>
-                <th>Categoría</th>
-                <th style="text-align:right">Total</th>
-              </tr>
-            </thead>
-            <tbody id="categorias"></tbody>
-          </table>
-        </div>  
+        <div style="text-align:center;margin-top:14px;margin-bottom:8px;">
+          <button type="button" onclick="showTab('detalle', this)" style="width:100%;padding:14px;background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.25);color:var(--primary);font-size:14px;font-weight:700;border-radius:var(--radius-md);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <span>📋</span> Ver Detalle por Categoría Completo ➔
+          </button>
+        </div>
 
       </div><!-- fin resumenContenido -->
 
@@ -1054,6 +1069,34 @@ tbody tr:hover td {
         </div>  
       </div>
 
+    </section>
+
+    <!-- DETALLE POR CATEGORIA -->
+    <section id="detalle" class="card hidden">
+      <h2>📋 Detalle por Categoría</h2>
+
+      <div class="mes-bar">
+        <button type="button" class="btn-mes-nav" onclick="cambiarMesRelativo(-1)" title="Mes anterior">◀</button>
+        <div style="flex:1;text-align:center;font-weight:700;font-size:15px;color:#fff;" id="detalleMesTexto"></div>
+        <button type="button" class="btn-mes-nav" onclick="cambiarMesRelativo(1)" title="Mes siguiente">▶</button>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.04);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:18px;">
+        <span style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;">Total Gastado en el Mes:</span>
+        <span id="detalleTotalMonto" style="font-size:20px;font-weight:800;color:var(--primary);">$ 0,00</span>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Categoría</th>
+              <th style="text-align:right">Total</th>
+            </tr>
+          </thead>
+          <tbody id="categorias"></tbody>
+        </table>
+      </div>
     </section>
 
     <!-- GASTO COMPLETO -->
@@ -1249,12 +1292,12 @@ tbody tr:hover td {
     <span class="nav-label">Inicio</span>
   </button>
   <button type="button" class="nav-item" data-tab="gasto" onclick="showTab('gasto',this)">
-    <span class="nav-icon">💸</span>
+    <div class="icon-bolt-blue">⚡</div>
     <span class="nav-label">Gasto</span>
   </button>
-  <button type="button" class="nav-item nav-fab" data-tab="rapido" onclick="showTab('rapido',this)">
-    <span class="fab-circle">⚡</span>
-    <span class="nav-label">Rápido</span>
+  <button type="button" class="nav-item" data-tab="detalle" onclick="showTab('detalle',this)">
+    <span class="nav-icon">📋</span>
+    <span class="nav-label">Detalle</span>
   </button>
   <button type="button" class="nav-item" data-tab="ingreso" onclick="showTab('ingreso',this)">
     <span class="nav-icon">📥</span>
@@ -1658,7 +1701,7 @@ function toggleSidebar(){
 
 function showTab(id, btn){
 
-  ['resumen','gasto','rapido','ingreso', 'historial', 'tarjeta'].forEach(x => {
+  ['resumen','detalle','gasto','rapido','ingreso', 'historial', 'tarjeta'].forEach(x => {
     const seccion = $(x);
     if(seccion) seccion.classList.add('hidden');
   });
@@ -1934,6 +1977,13 @@ function renderResumen(r){
         '<td style="padding:12px 10px;text-align:right;font-weight:700;color:var(--text-main);">' + money((r.porCategoria && r.porCategoria[c]) || 0) + '</td>';
       tbody.appendChild(tr);
     });
+  }
+
+  if ($('detalleMesTexto')) {
+    $('detalleMesTexto').textContent = nombreMes(mesActualSeleccionado) + ' ' + anioActualSeleccionado;
+  }
+  if ($('detalleTotalMonto')) {
+    $('detalleTotalMonto').textContent = money(r.gastoTotal || 0);
   }
 
   renderGraficoCategorias(r.porCategoria || {});
