@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Control de Gastos</title>
   
   <meta name="theme-color" content="#0b0f19">
@@ -73,13 +73,15 @@
     }
     
     iframe {
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       border: none;
       display: block;
-      position: absolute;
+      position: fixed;
       top: 0;
       left: 0;
+      right: 0;
+      bottom: 0;
     }
   </style>
 </head>
@@ -107,6 +109,16 @@
     }
     // Timeout de seguridad para ocultar spinner en caso de delay
     setTimeout(hideLoader, 3500);
+
+    // Ajustar vista en rotación de pantalla
+    function handleResize() {
+      window.scrollTo(0, 0);
+    }
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(handleResize, 100);
+      setTimeout(handleResize, 300);
+    });
 
     // Registrar Service Worker para PWA
     if ('serviceWorker' in navigator) {
