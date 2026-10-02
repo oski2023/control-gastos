@@ -720,6 +720,270 @@ tbody tr:hover td {
 .hidden { display: none !important; }
 .opcional { font-weight: 400; color: var(--text-dim); text-transform: none; }
 
+/* MODALES DE CONFIRMACIÓN Y ELIMINACIÓN */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(11, 15, 25, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10005;
+  padding: 16px;
+  box-sizing: border-box;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-card {
+  background: #131c2e;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 22px;
+  padding: 24px 20px;
+  max-width: 380px;
+  width: 100%;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+  text-align: center;
+  transform: translateY(20px) scale(0.96);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.modal-overlay.active .modal-card {
+  transform: translateY(0) scale(1);
+}
+
+.modal-icon-badge {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.2);
+}
+
+.modal-icon-badge.green {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
+}
+
+.modal-icon-badge.orange {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.2);
+}
+
+.modal-icon-badge.purple {
+  background: rgba(168, 85, 247, 0.15);
+  border-color: rgba(168, 85, 247, 0.3);
+  box-shadow: 0 4px 16px rgba(168, 85, 247, 0.2);
+}
+
+.modal-icon-badge.delete {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.25);
+}
+
+.modal-title {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+}
+
+.modal-subtitle {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin: 0 0 16px;
+  line-height: 1.4;
+}
+
+.modal-monto-wrap {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+
+.modal-monto-wrap.delete {
+  background: rgba(239, 68, 68, 0.06);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.modal-monto-label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.modal-monto {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.modal-monto.green { color: #10b981; }
+.modal-monto.orange { color: #f59e0b; }
+.modal-monto.purple { color: #c084fc; }
+.modal-monto.delete { color: #f87171; }
+
+.modal-details-box {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin-bottom: 18px;
+  text-align: left;
+  font-size: 13px;
+}
+
+.modal-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.modal-detail-row:last-child {
+  border-bottom: none;
+}
+
+.modal-detail-label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.modal-detail-value {
+  color: #fff;
+  font-weight: 600;
+  text-align: right;
+  max-width: 60%;
+  word-break: break-word;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.modal-btn-cancel {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-main);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.modal-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.modal-btn-cancel:active {
+  transform: scale(0.97);
+}
+
+.modal-btn-confirm {
+  flex: 1.3;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #fff;
+  transition: all 0.15s ease;
+  background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.35);
+}
+
+.modal-btn-confirm.green {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+}
+
+.modal-btn-confirm.orange {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+}
+
+.modal-btn-confirm.purple {
+  background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+  box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35);
+}
+
+.modal-btn-confirm.delete {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+}
+
+.modal-btn-confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.modal-btn-confirm:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.btn-del-action {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  border-radius: 8px;
+  padding: 5px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  transition: all 0.15s ease;
+}
+
+.btn-del-action:hover, .btn-del-action:active {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: #ef4444;
+  color: #fff;
+  transform: scale(0.95);
+}
+
 /* BOTTOM NAVIGATION BAR (FinTech Native) */
 .bottom-nav {
   position: fixed;
@@ -1513,6 +1777,56 @@ body.is-landscape .hamburger-btn {
   </button>
 </nav>
 
+<!-- MODAL DE CONFIRMACION DE CARGA -->
+<div id="modalConfirmarCarga" class="modal-overlay" onclick="if(event.target===this) cerrarModalConfirmarCarga()">
+  <div class="modal-card">
+    <div id="modalCargaIconBadge" class="modal-icon-badge">📥</div>
+    <h3 id="modalCargaTitulo" class="modal-title">¿Registrar Ingreso?</h3>
+    <p id="modalCargaSubtitulo" class="modal-subtitle">Por favor revisá los datos antes de guardar</p>
+    
+    <div id="modalCargaMontoWrap" class="modal-monto-wrap">
+      <span class="modal-monto-label">Importe a registrar</span>
+      <div id="modalCargaMonto" class="modal-monto">$ 0,00</div>
+    </div>
+
+    <div id="modalCargaDetalles" class="modal-details-box"></div>
+
+    <div class="modal-actions">
+      <button type="button" class="modal-btn-cancel" onclick="cerrarModalConfirmarCarga()">
+        ✏️ Corregir
+      </button>
+      <button type="button" id="modalCargaBtnConfirmar" class="modal-btn-confirm" onclick="confirmarGuardadoAccion()">
+        ✓ Sí, Registrar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DE CONFIRMACION DE BORRADO -->
+<div id="modalConfirmarEliminar" class="modal-overlay" onclick="if(event.target===this) cerrarModalConfirmarEliminar()">
+  <div class="modal-card">
+    <div class="modal-icon-badge delete">🗑️</div>
+    <h3 id="modalEliminarTitulo" class="modal-title">¿Eliminar movimiento?</h3>
+    <p class="modal-subtitle">Esta acción quitará el registro y actualizará los balances</p>
+
+    <div class="modal-monto-wrap delete">
+      <span class="modal-monto-label">Monto del movimiento</span>
+      <div id="modalEliminarMonto" class="modal-monto delete">$ 0,00</div>
+    </div>
+
+    <div id="modalEliminarDetalles" class="modal-details-box"></div>
+
+    <div class="modal-actions">
+      <button type="button" class="modal-btn-cancel" onclick="cerrarModalConfirmarEliminar()">
+        Cancelar
+      </button>
+      <button type="button" id="modalEliminarBtnConfirmar" class="modal-btn-confirm delete" onclick="ejecutarEliminarAccion()">
+        🗑️ Sí, Eliminar
+      </button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 
@@ -1532,6 +1846,215 @@ let config = {
 
 const SERVER_IS_DEMO = <?!= (typeof isDemoParam !== 'undefined' && isDemoParam) ? 'true' : 'false' ?>;
 let isDemoMode = SERVER_IS_DEMO;
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function formatFechaVisual(str) {
+  if (!str) return '';
+  if (str instanceof Date) {
+    const d = String(str.getDate()).padStart(2, '0');
+    const m = String(str.getMonth() + 1).padStart(2, '0');
+    return d + '/' + m + '/' + str.getFullYear();
+  }
+  const clean = String(str).split('T')[0];
+  const p = clean.split('-');
+  if (p.length === 3) return p[2] + '/' + p[1] + '/' + p[0];
+  return clean;
+}
+
+// GESTIÓN DE MODAL DE CONFIRMACIÓN DE CARGA
+let accionConfirmarCargaPendiente = null;
+
+function abrirModalConfirmarCarga(configModal) {
+  accionConfirmarCargaPendiente = configModal.onConfirm;
+
+  const modal = $('modalConfirmarCarga');
+  const badge = $('modalCargaIconBadge');
+  const titulo = $('modalCargaTitulo');
+  const subtitulo = $('modalCargaSubtitulo');
+  const monto = $('modalCargaMonto');
+  const detalles = $('modalCargaDetalles');
+  const btn = $('modalCargaBtnConfirmar');
+
+  badge.className = 'modal-icon-badge ' + (configModal.colorTema || '');
+  badge.textContent = configModal.icono || '📝';
+
+  titulo.textContent = configModal.titulo || '¿Confirmar registro?';
+  subtitulo.textContent = configModal.subtitulo || 'Por favor revisá los datos antes de guardar';
+
+  monto.className = 'modal-monto ' + (configModal.colorTema || '');
+  monto.textContent = money(configModal.monto || 0);
+
+  let htmlDetalles = '';
+  (configModal.filas || []).forEach(f => {
+    if (f.valor !== undefined && f.valor !== null && f.valor !== '') {
+      htmlDetalles += `
+        <div class="modal-detail-row">
+          <span class="modal-detail-label">${escapeHtml(f.label)}</span>
+          <span class="modal-detail-value">${escapeHtml(String(f.valor))}</span>
+        </div>
+      `;
+    }
+  });
+  detalles.innerHTML = htmlDetalles;
+
+  btn.className = 'modal-btn-confirm ' + (configModal.colorTema || '');
+  btn.disabled = false;
+  btn.innerHTML = '✓ Sí, Registrar';
+
+  modal.classList.add('active');
+}
+
+function cerrarModalConfirmarCarga() {
+  const modal = $('modalConfirmarCarga');
+  if (modal) modal.classList.remove('active');
+  accionConfirmarCargaPendiente = null;
+}
+
+function confirmarGuardadoAccion() {
+  if (typeof accionConfirmarCargaPendiente === 'function') {
+    const btn = $('modalCargaBtnConfirmar');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Guardando...';
+    }
+    const fn = accionConfirmarCargaPendiente;
+    accionConfirmarCargaPendiente = null;
+    fn();
+  }
+}
+
+// GESTIÓN DE MODAL DE CONFIRMACIÓN DE BORRADO
+let itemAEliminarPendiente = null;
+
+function abrirModalConfirmarEliminar(item) {
+  itemAEliminarPendiente = item;
+  const modal = $('modalConfirmarEliminar');
+  const titulo = $('modalEliminarTitulo');
+  const monto = $('modalEliminarMonto');
+  const detalles = $('modalEliminarDetalles');
+  const btn = $('modalEliminarBtnConfirmar');
+
+  const nombresTipo = {
+    ingreso: 'Ingreso',
+    gasto: 'Gasto',
+    tarjeta: 'Compra con Tarjeta'
+  };
+
+  const nombreTipo = nombresTipo[item.tipo] || 'Movimiento';
+  titulo.textContent = '¿Eliminar ' + nombreTipo + '?';
+  monto.textContent = money(item.monto || 0);
+
+  let html = `
+    <div class="modal-detail-row">
+      <span class="modal-detail-label">Concepto</span>
+      <span class="modal-detail-value">${escapeHtml(item.descripcion || '-')}</span>
+    </div>
+    <div class="modal-detail-row">
+      <span class="modal-detail-label">Fecha</span>
+      <span class="modal-detail-value">${escapeHtml(item.fecha || '-')}</span>
+    </div>
+  `;
+  detalles.innerHTML = html;
+
+  btn.disabled = false;
+  btn.innerHTML = '🗑️ Sí, Eliminar';
+
+  modal.classList.add('active');
+}
+
+function cerrarModalConfirmarEliminar() {
+  const modal = $('modalConfirmarEliminar');
+  if (modal) modal.classList.remove('active');
+  itemAEliminarPendiente = null;
+}
+
+function eliminarMovimientoDemo(tipo, id, itemVerif) {
+  let clave = 'demo_gastos';
+  if (tipo === 'ingreso' || tipo === 'ingresos') clave = 'demo_ingresos';
+  else if (tipo === 'tarjeta' || tipo === 'tarjetas' || tipo === 'tarjetas_consumo') clave = 'demo_tarjetas';
+
+  let items = JSON.parse(localStorage.getItem(clave) || '[]');
+  let idx = -1;
+  if (id) {
+    idx = items.findIndex(x => x.id === id);
+  }
+  if (idx === -1 && itemVerif) {
+    idx = items.findIndex(x => {
+      const mismoImporte = Math.abs((Number(x.importe) || 0) - (Number(itemVerif.monto) || 0)) < 0.01;
+      const fVisual = formatFechaVisual(x.fecha);
+      const mismaFecha = x.fecha === itemVerif.fecha || fVisual === itemVerif.fecha;
+      return mismoImporte && mismaFecha;
+    });
+  }
+
+  if (idx !== -1) {
+    items.splice(idx, 1);
+    localStorage.setItem(clave, JSON.stringify(items));
+    return true;
+  }
+  return false;
+}
+
+function ejecutarEliminarAccion() {
+  if (!itemAEliminarPendiente) return;
+  const item = itemAEliminarPendiente;
+  const btn = $('modalEliminarBtnConfirmar');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Eliminando...';
+  }
+
+  if (isDemoMode) {
+    const ok = eliminarMovimientoDemo(item.tipo, item.id, item);
+    cerrarModalConfirmarEliminar();
+    if (ok) {
+      renderResumen(getDemoResumen(mesActualSeleccionado, anioActualSeleccionado));
+      if (item.origenVista === 'detalle') {
+        const tituloBase = (document.getElementById('tituloDetalle').innerText || '').split('(')[0].trim();
+        verDetalle(item.tipoDetalle, tituloBase);
+      } else if (item.origenVista === 'historial') {
+        cargarHistorial();
+      }
+      mensaje('Movimiento eliminado correctamente.');
+    } else {
+      mensaje('No se pudo encontrar el movimiento para eliminar.', true);
+    }
+    return;
+  }
+
+  google.script.run
+    .withSuccessHandler(r => {
+      cerrarModalConfirmarEliminar();
+      renderResumen(r);
+      if (item.origenVista === 'detalle') {
+        const tituloBase = (document.getElementById('tituloDetalle').innerText || '').split('(')[0].trim();
+        verDetalle(item.tipoDetalle, tituloBase);
+      } else if (item.origenVista === 'historial') {
+        cargarHistorial();
+      }
+      mensaje('Movimiento eliminado correctamente.');
+    })
+    .withFailureHandler(e => {
+      cerrarModalConfirmarEliminar();
+      mensaje('Error al eliminar: ' + e.message, true);
+    })
+    .eliminarMovimiento(item.tipo, item.fila, {
+      monto: item.monto,
+      descripcion: item.descripcion,
+      fecha: item.fecha,
+      mes: mesActualSeleccionado,
+      anio: anioActualSeleccionado
+    });
+}
 
 try {
   const _params = new URLSearchParams(window.location.search);
@@ -1848,25 +2371,41 @@ function verDetalle(tipo, titulo) {
   document.getElementById('vistaDetalle').style.display = 'block';
   document.getElementById('tituloDetalle').innerText = titulo + ' (' + nombreMes(mesActualSeleccionado) + ' ' + anioActualSeleccionado + ')';
   document.getElementById('cabeceraDetalle').innerHTML = '';
-  document.getElementById('filasDetalle').innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text-muted)">Cargando detalle...</td></tr>';
+  document.getElementById('filasDetalle').innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted)">Cargando detalle...</td></tr>';
 
   if (isDemoMode) {
     let datos = [];
     if (tipo === 'ingresos') {
       const ing = JSON.parse(localStorage.getItem('demo_ingresos') || '[]');
+      let mod = false;
+      ing.forEach(x => {
+        if (!x.id) { x.id = 'ing_' + Math.random().toString(36).substring(2, 10); mod = true; }
+      });
+      if (mod) localStorage.setItem('demo_ingresos', JSON.stringify(ing));
+
       datos = ing.filter(x => {
         const p = String(x.fecha || '').split('-');
         return Number(p[0]) === anioActualSeleccionado && Number(p[1]) === mesActualSeleccionado;
       }).map(x => ({
-        fecha: x.fecha,
+        id: x.id,
+        tipoRegistro: 'ingreso',
+        fecha: formatFechaVisual(x.fecha),
         descripcion: x.descripcion || 'Ingreso',
-        tipo: x.tipo || 'General',
+        tipoIngreso: x.tipo || 'General',
         monto: Number(x.importe) || 0
       }));
     } else if (tipo === 'tarjetas_a_pagar' || tipo === 'tarjetas') {
       const tar = JSON.parse(localStorage.getItem('demo_tarjetas') || '[]');
+      let mod = false;
+      tar.forEach(x => {
+        if (!x.id) { x.id = 'tar_' + Math.random().toString(36).substring(2, 10); mod = true; }
+      });
+      if (mod) localStorage.setItem('demo_tarjetas', JSON.stringify(tar));
+
       datos = tar.map(x => ({
-        fecha: x.fecha,
+        id: x.id,
+        tipoRegistro: 'tarjeta',
+        fecha: formatFechaVisual(x.fecha),
         descripcion: x.descripcion || 'Tarjeta',
         entidad: x.entidad || 'Tarjeta',
         cuota: (x.cuotas || 1) + ' cuota(s)',
@@ -1874,11 +2413,19 @@ function verDetalle(tipo, titulo) {
       }));
     } else if (tipo === 'tarjetas_consumo') {
       const tar = JSON.parse(localStorage.getItem('demo_tarjetas') || '[]');
+      let mod = false;
+      tar.forEach(x => {
+        if (!x.id) { x.id = 'tar_' + Math.random().toString(36).substring(2, 10); mod = true; }
+      });
+      if (mod) localStorage.setItem('demo_tarjetas', JSON.stringify(tar));
+
       datos = tar.filter(x => {
         const p = String(x.fecha || '').split('-');
         return Number(p[0]) === anioActualSeleccionado && Number(p[1]) === mesActualSeleccionado;
       }).map(x => ({
-        fecha: x.fecha,
+        id: x.id,
+        tipoRegistro: 'tarjeta',
+        fecha: formatFechaVisual(x.fecha),
         descripcion: x.descripcion || 'Tarjeta',
         entidad: x.entidad || 'Tarjeta',
         cuotas: x.cuotas || 1,
@@ -1886,11 +2433,19 @@ function verDetalle(tipo, titulo) {
       }));
     } else {
       const gas = JSON.parse(localStorage.getItem('demo_gastos') || '[]');
+      let mod = false;
+      gas.forEach(x => {
+        if (!x.id) { x.id = 'gas_' + Math.random().toString(36).substring(2, 10); mod = true; }
+      });
+      if (mod) localStorage.setItem('demo_gastos', JSON.stringify(gas));
+
       datos = gas.filter(x => {
         const p = String(x.fecha || '').split('-');
         return Number(p[0]) === anioActualSeleccionado && Number(p[1]) === mesActualSeleccionado;
       }).map(x => ({
-        fecha: x.fecha,
+        id: x.id,
+        tipoRegistro: 'gasto',
+        fecha: formatFechaVisual(x.fecha),
         categoria: x.categoria || '',
         entidad: x.entidad || '',
         descripcion: x.descripcion || '',
@@ -1906,7 +2461,7 @@ function verDetalle(tipo, titulo) {
       renderizarDetalle(tipo, datos);
     })
     .withFailureHandler(function(error) {
-      document.getElementById('filasDetalle').innerHTML = '<tr><td colspan="4" style="color:var(--danger)">ERROR: ' + error.message + '</td></tr>';
+      document.getElementById('filasDetalle').innerHTML = '<tr><td colspan="5" style="color:var(--danger)">ERROR: ' + error.message + '</td></tr>';
     })
     .obtenerDetalleV2(tipo, mesActualSeleccionado, anioActualSeleccionado);
 }
@@ -1916,13 +2471,23 @@ function renderizarDetalle(tipo, datos) {
   const filas = document.getElementById('filasDetalle');
   filas.innerHTML = '';
 
+  const puedeBorrar = (tipo === 'ingresos' || tipo === 'gastos' || tipo === 'tarjetas_consumo' || tipo === 'tarjetas' || tipo === 'tarjetas_a_pagar');
   let columnas;
   if (tipo === 'ingresos') columnas = ['Fecha','Descripción','Tipo','Monto'];
   else if (tipo === 'tarjetas_a_pagar' || tipo === 'tarjetas') columnas = ['Fecha compra','Descripción','Entidad','Cuota / Estado','Monto a pagar'];
   else if (tipo === 'tarjetas_consumo') columnas = ['Fecha compra','Descripción','Entidad','Cuotas','Monto total'];
   else columnas = ['Fecha','Categoría','Entidad','Monto'];
 
-  cabecera.innerHTML = '<tr>' + columnas.map((c, i) => '<th style="' + (i === columnas.length - 1 ? 'text-align:right' : '') + '">' + c + '</th>').join('') + '</tr>';
+  if (puedeBorrar) {
+    columnas.push('Acción');
+  }
+
+  cabecera.innerHTML = '<tr>' + columnas.map((c, i) => {
+    let st = '';
+    if (c === 'Acción') st = 'text-align:center;width:48px;';
+    else if (i === columnas.length - (puedeBorrar ? 2 : 1)) st = 'text-align:right;';
+    return '<th style="' + st + '">' + c + '</th>';
+  }).join('') + '</tr>';
 
   if (!datos || datos.length === 0) {
     filas.innerHTML = '<tr><td colspan="'+columnas.length+'" style="text-align:center;padding:20px;color:var(--text-dim)">Sin movimientos para este período</td></tr>';
@@ -1932,11 +2497,48 @@ function renderizarDetalle(tipo, datos) {
   datos.forEach(d => {
     let celdas;
     if (tipo === 'ingresos') celdas = [d.fecha, d.descripcion, d.tipoIngreso, money(d.monto)];
-    else if (tipo === 'tarjetas_a_pagar' || tipo === 'tarjetas') celdas = [d.fecha, d.descripcion, d.entidad, d.cuotas, money(d.monto)];
+    else if (tipo === 'tarjetas_a_pagar' || tipo === 'tarjetas') celdas = [d.fecha, d.descripcion, d.entidad, d.cuotas || d.cuota, money(d.monto)];
     else if (tipo === 'tarjetas_consumo') celdas = [d.fecha, d.descripcion, d.entidad, d.cuotas, money(d.monto)];
     else celdas = [d.fecha, d.categoria, d.entidad, money(d.monto)];
 
-    filas.innerHTML += '<tr>' + celdas.map((c, i) => '<td style="' + (i === celdas.length - 1 ? 'text-align:right;font-weight:700' : '') + '">' + c + '</td>').join('') + '</tr>';
+    const tr = document.createElement('tr');
+    celdas.forEach((c, i) => {
+      const td = document.createElement('td');
+      if (i === celdas.length - 1) {
+        td.style.textAlign = 'right';
+        td.style.fontWeight = '700';
+      }
+      td.textContent = c;
+      tr.appendChild(td);
+    });
+
+    if (puedeBorrar) {
+      const tdAccion = document.createElement('td');
+      tdAccion.style.textAlign = 'center';
+      tdAccion.style.width = '48px';
+      const btnDel = document.createElement('button');
+      btnDel.type = 'button';
+      btnDel.className = 'btn-del-action';
+      btnDel.title = 'Eliminar este registro';
+      btnDel.innerHTML = '🗑️';
+      btnDel.onclick = function() {
+        const tipoItem = tipo === 'ingresos' ? 'ingreso' : ((tipo === 'tarjetas_consumo' || tipo === 'tarjetas' || tipo === 'tarjetas_a_pagar') ? 'tarjeta' : 'gasto');
+        abrirModalConfirmarEliminar({
+          tipo: tipoItem,
+          id: d.id || '',
+          fila: d.fila || 0,
+          fecha: d.fecha || '',
+          descripcion: d.descripcion || d.categoria || 'Movimiento',
+          monto: d.monto || 0,
+          origenVista: 'detalle',
+          tipoDetalle: tipo
+        });
+      };
+      tdAccion.appendChild(btnDel);
+      tr.appendChild(tdAccion);
+    }
+
+    filas.appendChild(tr);
   });
 }
 
@@ -2035,8 +2637,8 @@ function cargarHistorial(){
   const filtros = { tipo: tipoSolicitado, mes: $('h_mes').value, anio: $('h_anio').value, categoria: $('h_categoria').value };
   const thead = $('h_thead');
   thead.innerHTML = tipoSolicitado === 'gasto'
-    ? '<tr><th>Fecha</th><th>Descripción</th><th>Categoría</th><th>Medio</th><th>Importe</th></tr>'
-    : '<tr><th>Fecha</th><th>Descripción</th><th>Importe</th></tr>';
+    ? '<tr><th>Fecha</th><th>Descripción</th><th>Categoría</th><th>Medio</th><th style="text-align:right;">Importe</th><th style="text-align:center;width:48px;">Acción</th></tr>'
+    : '<tr><th>Fecha</th><th>Descripción</th><th style="text-align:right;">Importe</th><th style="text-align:center;width:48px;">Acción</th></tr>';
 
   if (isDemoMode) {
     let items = [];
@@ -2045,6 +2647,18 @@ function cargarHistorial(){
     } else {
       items = JSON.parse(localStorage.getItem('demo_ingresos') || '[]');
     }
+
+    let mod = false;
+    items.forEach(x => {
+      if (!x.id) {
+        x.id = (tipoSolicitado === 'gasto' ? 'gas_' : 'ing_') + Math.random().toString(36).substring(2, 10);
+        mod = true;
+      }
+    });
+    if (mod) {
+      localStorage.setItem(tipoSolicitado === 'gasto' ? 'demo_gastos' : 'demo_ingresos', JSON.stringify(items));
+    }
+
     const mesFiltro = filtros.mes ? Number(filtros.mes) : null;
     const anioFiltro = filtros.anio ? Number(filtros.anio) : null;
     const catFiltro = filtros.categoria || '';
@@ -2065,9 +2679,41 @@ function cargarHistorial(){
       const imp = Number(f.importe) || 0;
       total += imp;
       const tr = document.createElement('tr');
-      tr.innerHTML = tipoSolicitado === 'gasto'
-        ? '<td>'+f.fecha+'</td><td>'+(f.descripcion||'')+'</td><td>'+(f.categoria||'')+'</td><td>'+(f.medio||'')+'</td><td>'+money(imp)+'</td>'
-        : '<td>'+f.fecha+'</td><td>'+(f.descripcion||'')+'</td><td>'+money(imp)+'</td>';
+      const celdas = tipoSolicitado === 'gasto'
+        ? [formatFechaVisual(f.fecha), f.descripcion || '', f.categoria || '', f.medio || '', money(imp)]
+        : [formatFechaVisual(f.fecha), f.descripcion || '', money(imp)];
+
+      celdas.forEach((c, i) => {
+        const td = document.createElement('td');
+        if (i === celdas.length - 1) {
+          td.style.textAlign = 'right';
+          td.style.fontWeight = '700';
+        }
+        td.textContent = c;
+        tr.appendChild(td);
+      });
+
+      const tdAccion = document.createElement('td');
+      tdAccion.style.textAlign = 'center';
+      tdAccion.style.width = '48px';
+      const btnDel = document.createElement('button');
+      btnDel.type = 'button';
+      btnDel.className = 'btn-del-action';
+      btnDel.title = 'Eliminar este registro';
+      btnDel.innerHTML = '🗑️';
+      btnDel.onclick = function() {
+        abrirModalConfirmarEliminar({
+          tipo: tipoSolicitado,
+          id: f.id || '',
+          fila: 0,
+          fecha: formatFechaVisual(f.fecha),
+          descripcion: f.descripcion || f.categoria || 'Movimiento',
+          monto: imp,
+          origenVista: 'historial'
+        });
+      };
+      tdAccion.appendChild(btnDel);
+      tr.appendChild(tdAccion);
       tbody.appendChild(tr);
     });
     const etiqueta = tipoSolicitado === 'gasto' ? 'gastos' : 'ingresos';
@@ -2076,9 +2722,9 @@ function cargarHistorial(){
   }
 
   google.script.run
-    .withSuccessHandler(filas=>{
-      if(tipoSolicitado !== h_tipo) return; // llegó tarde, ya cambiaste de tab: ignorar
-      if(!filas){
+    .withSuccessHandler(filas => {
+      if (tipoSolicitado !== h_tipo) return;
+      if (!filas) {
         console.error('getHistorial devolvió null/undefined');
         $('h_total').textContent = 'Error: no se pudo cargar (revisar consola).';
         return;
@@ -2086,18 +2732,50 @@ function cargarHistorial(){
       const tbody = $('h_tabla');
       tbody.innerHTML = '';
       let total = 0;
-      filas.forEach(f=>{
+      filas.forEach(f => {
         total += f.importe;
         const tr = document.createElement('tr');
-        tr.innerHTML = tipoSolicitado === 'gasto'
-          ? '<td>'+f.fecha+'</td><td>'+f.descripcion+'</td><td>'+f.categoria+'</td><td>'+f.medio+'</td><td>'+money(f.importe)+'</td>'
-          : '<td>'+f.fecha+'</td><td>'+f.descripcion+'</td><td>'+money(f.importe)+'</td>';
+        const celdas = tipoSolicitado === 'gasto'
+          ? [f.fecha, f.descripcion, f.categoria, f.medio, money(f.importe)]
+          : [f.fecha, f.descripcion, money(f.importe)];
+
+        celdas.forEach((c, i) => {
+          const td = document.createElement('td');
+          if (i === celdas.length - 1) {
+            td.style.textAlign = 'right';
+            td.style.fontWeight = '700';
+          }
+          td.textContent = c;
+          tr.appendChild(td);
+        });
+
+        const tdAccion = document.createElement('td');
+        tdAccion.style.textAlign = 'center';
+        tdAccion.style.width = '48px';
+        const btnDel = document.createElement('button');
+        btnDel.type = 'button';
+        btnDel.className = 'btn-del-action';
+        btnDel.title = 'Eliminar este registro';
+        btnDel.innerHTML = '🗑️';
+        btnDel.onclick = function() {
+          abrirModalConfirmarEliminar({
+            tipo: tipoSolicitado,
+            id: '',
+            fila: f.fila || 0,
+            fecha: f.fecha,
+            descripcion: f.descripcion || f.categoria || 'Movimiento',
+            monto: f.importe,
+            origenVista: 'historial'
+          });
+        };
+        tdAccion.appendChild(btnDel);
+        tr.appendChild(tdAccion);
         tbody.appendChild(tr);
       });
       const etiqueta = tipoSolicitado === 'gasto' ? 'gastos' : 'ingresos';
       $('h_total').textContent = 'Total: ' + money(total) + ' (' + filas.length + ' ' + etiqueta + ')';
     })
-    .withFailureHandler(e=>mensaje(e.message,true))
+    .withFailureHandler(e => mensaje(e.message, true))
     .getHistorial(filtros);
 }
 
@@ -2867,30 +3545,49 @@ window.addEventListener('online', sincronizarPendientes);
 // --- Fin Bloque de guardado offline ---
 
 function guardarGasto(){
-
   const d = {
-    fecha:$('g_fecha').value,
-    importe:$('g_importe').value,
-    descripcion:$('g_desc').value,
-    categoria:$('g_categoria').value,
-    entidad:$('g_entidad').value,
-    medio:$('g_medio').value,
+    fecha: $('g_fecha').value,
+    importe: $('g_importe').value,
+    descripcion: $('g_desc').value,
+    categoria: $('g_categoria').value,
+    entidad: $('g_entidad').value,
+    medio: $('g_medio').value,
     mesSeleccionado: mesActualSeleccionado,
     anioSeleccionado: anioActualSeleccionado
   };
 
   if(!d.fecha || !d.importe || !d.categoria || !d.medio){
-    mensaje('Completá fecha, importe, categoría y medio de pago.',true);
+    mensaje('Completá fecha, importe, categoría y medio de pago.', true);
     return;
   }
 
-  localStorage.setItem('ultimaCategoria',d.categoria);
-  localStorage.setItem('ultimaEntidad',d.entidad);
-  localStorage.setItem('ultimoMedio',d.medio);
+  abrirModalConfirmarCarga({
+    tipo: 'gasto',
+    titulo: '¿Registrar Gasto?',
+    subtitulo: 'Revisá los datos antes de guardar',
+    icono: '💸',
+    colorTema: 'orange',
+    monto: Number(d.importe),
+    filas: [
+      { label: 'Fecha', valor: formatFechaVisual(d.fecha) },
+      { label: 'Categoría', valor: d.categoria },
+      { label: 'Medio de pago', valor: d.medio },
+      { label: 'Entidad', valor: d.entidad },
+      { label: 'Descripción', valor: d.descripcion || 'Sin descripción' }
+    ],
+    onConfirm: () => ejecutarGuardarGasto(d)
+  });
+}
+
+function ejecutarGuardarGasto(d){
+  localStorage.setItem('ultimaCategoria', d.categoria);
+  localStorage.setItem('ultimaEntidad', d.entidad);
+  localStorage.setItem('ultimoMedio', d.medio);
 
   if (isDemoMode) {
     const gastos = JSON.parse(localStorage.getItem('demo_gastos') || '[]');
     gastos.push({
+      id: 'gas_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9),
       fecha: d.fecha,
       importe: Number(d.importe),
       descripcion: d.descripcion,
@@ -2899,48 +3596,45 @@ function guardarGasto(){
       medio: d.medio
     });
     localStorage.setItem('demo_gastos', JSON.stringify(gastos));
+    cerrarModalConfirmarCarga();
     renderResumen(getDemoResumen(mesActualSeleccionado, anioActualSeleccionado));
     mensaje('Gasto guardado (Modo Demo)');
     $('g_importe').value = '';
     $('g_desc').value = '';      
-    $('g_categoria').value=localStorage.getItem('ultimaCategoria') || '';
-    $('g_entidad').value=localStorage.getItem('ultimaEntidad') || '';
-    $('g_medio').value=localStorage.getItem('ultimoMedio') || '';
+    $('g_categoria').value = localStorage.getItem('ultimaCategoria') || '';
+    $('g_entidad').value = localStorage.getItem('ultimaEntidad') || '';
+    $('g_medio').value = localStorage.getItem('ultimoMedio') || '';
     $('g_importe').focus();
     return;
   }
 
-// --- NUEVO: si no hay conexión, guardar localmente y salir ---
   if(!navigator.onLine){
     encolarPendiente('gasto', d);
+    cerrarModalConfirmarCarga();
     mensaje('Sin conexión: el gasto quedó guardado en el celular y se va a enviar solo cuando vuelva la señal.');
-    $('g_importe').value='';
-    $('g_desc').value='';    
-    $('g_categoria').value=localStorage.getItem('ultimaCategoria') || '';
-    $('g_entidad').value=localStorage.getItem('ultimaEntidad') || '';
-    $('g_medio').value=localStorage.getItem('ultimoMedio') || '';
+    $('g_importe').value = '';
+    $('g_desc').value = '';    
+    $('g_categoria').value = localStorage.getItem('ultimaCategoria') || '';
+    $('g_entidad').value = localStorage.getItem('ultimaEntidad') || '';
+    $('g_medio').value = localStorage.getItem('ultimoMedio') || '';
     $('g_importe').focus();
     return;
   }
-  // --- fin del bloque nuevo ---
 
   google.script.run
     .withSuccessHandler(r => {
-
+      cerrarModalConfirmarCarga();
       renderResumen(r);
       mensaje('Gasto guardado.');
-
       $('g_importe').value = '';
       $('g_desc').value = '';      
-      $('g_categoria').value=localStorage.getItem('ultimaCategoria') || '';
-      $('g_entidad').value=localStorage.getItem('ultimaEntidad') || '';
-      $('g_medio').value=localStorage.getItem('ultimoMedio') || '';
+      $('g_categoria').value = localStorage.getItem('ultimaCategoria') || '';
+      $('g_entidad').value = localStorage.getItem('ultimaEntidad') || '';
+      $('g_medio').value = localStorage.getItem('ultimoMedio') || '';
       $('g_importe').focus();
-
-      
     })
-    .withFailureHandler(e=>{
-      // Si falla el envío (por ejemplo, se cortó justo en ese momento), lo encolamos también
+    .withFailureHandler(e => {
+      cerrarModalConfirmarCarga();
       encolarPendiente('gasto', d);
       mensaje('No se pudo enviar ahora, quedó guardado para reintentar.', true);
     })
@@ -2948,31 +3642,49 @@ function guardarGasto(){
 }
 
 function guardarGastoRapido(){
-
   const d = {
-    fecha:today(),
-    importe:$('r_importe').value,
-    descripcion:'',
-    categoria:$('r_categoria').value,
-    entidad:$('r_entidad').value,
-    medio:$('r_medio').value,
-    observaciones:'',
+    fecha: today(),
+    importe: $('r_importe').value,
+    descripcion: '',
+    categoria: $('r_categoria').value,
+    entidad: $('r_entidad').value,
+    medio: $('r_medio').value,
+    observaciones: '',
     mesSeleccionado: mesActualSeleccionado,
     anioSeleccionado: anioActualSeleccionado
   };
 
   if(!d.importe || !d.categoria || !d.medio){
-    mensaje('Completá importe, categoría y medio de pago.',true);
+    mensaje('Completá importe, categoría y medio de pago.', true);
     return;
   }
 
-  localStorage.setItem('ultimaCategoria',d.categoria);
-  localStorage.setItem('ultimaEntidad',d.entidad);
-  localStorage.setItem('ultimoMedio',d.medio);
+  abrirModalConfirmarCarga({
+    tipo: 'rapido',
+    titulo: '¿Registrar Gasto Rápido?',
+    subtitulo: 'Revisá los datos antes de guardar',
+    icono: '⚡',
+    colorTema: '',
+    monto: Number(d.importe),
+    filas: [
+      { label: 'Fecha', valor: 'Hoy (' + formatFechaVisual(d.fecha) + ')' },
+      { label: 'Categoría', valor: d.categoria },
+      { label: 'Medio de pago', valor: d.medio },
+      { label: 'Entidad', valor: d.entidad }
+    ],
+    onConfirm: () => ejecutarGuardarGastoRapido(d)
+  });
+}
+
+function ejecutarGuardarGastoRapido(d){
+  localStorage.setItem('ultimaCategoria', d.categoria);
+  localStorage.setItem('ultimaEntidad', d.entidad);
+  localStorage.setItem('ultimoMedio', d.medio);
 
   if (isDemoMode) {
     const gastos = JSON.parse(localStorage.getItem('demo_gastos') || '[]');
     gastos.push({
+      id: 'gas_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9),
       fecha: d.fecha,
       importe: Number(d.importe),
       descripcion: '',
@@ -2981,6 +3693,7 @@ function guardarGastoRapido(){
       medio: d.medio
     });
     localStorage.setItem('demo_gastos', JSON.stringify(gastos));
+    cerrarModalConfirmarCarga();
     renderResumen(getDemoResumen(mesActualSeleccionado, anioActualSeleccionado));
     mensaje('Gasto rápido guardado (Modo Demo)');
     $('r_importe').value = '';
@@ -2991,42 +3704,58 @@ function guardarGastoRapido(){
 
   google.script.run
     .withSuccessHandler(r => {
-
+      cerrarModalConfirmarCarga();
       renderResumen(r);
       mensaje('Gasto rápido guardado.');
-
       $('r_importe').value = '';
-
       aplicarUltimasSelecciones();
-
       $('r_importe').focus();
     })
     .withFailureHandler(e => {
-      mensaje(e.message,true);
+      cerrarModalConfirmarCarga();
+      mensaje(e.message, true);
     })
     .addGasto(d);
 }
 
 function guardarIngreso(){
-
   const d = {
-    fecha:$('i_fecha').value,
-    importe:$('i_importe').value,
-    descripcion:$('i_desc').value,
-    tipo:$('i_tipo').value,
-    observaciones:$('i_obs').value,
+    fecha: $('i_fecha').value,
+    importe: $('i_importe').value,
+    descripcion: $('i_desc').value,
+    tipo: $('i_tipo').value,
+    observaciones: $('i_obs').value,
     mesSeleccionado: mesActualSeleccionado,
     anioSeleccionado: anioActualSeleccionado
   };
 
   if(!d.fecha || !d.importe){
-    mensaje('Completá fecha e importe.',true);
+    mensaje('Completá fecha e importe.', true);
     return;
   }
 
+  abrirModalConfirmarCarga({
+    tipo: 'ingreso',
+    titulo: '¿Registrar Ingreso?',
+    subtitulo: 'Revisá los datos antes de guardar',
+    icono: '📥',
+    colorTema: 'green',
+    monto: Number(d.importe),
+    filas: [
+      { label: 'Fecha', valor: formatFechaVisual(d.fecha) },
+      { label: 'Descripción', valor: d.descripcion || 'Ingreso' },
+      { label: 'Tipo', valor: d.tipo || 'Ingreso' },
+      { label: 'Observaciones', valor: d.observaciones }
+    ],
+    onConfirm: () => ejecutarGuardarIngreso(d)
+  });
+}
+
+function ejecutarGuardarIngreso(d){
   if (isDemoMode) {
     const ingresos = JSON.parse(localStorage.getItem('demo_ingresos') || '[]');
     ingresos.push({
+      id: 'ing_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9),
       fecha: d.fecha,
       importe: Number(d.importe),
       descripcion: d.descripcion,
@@ -3034,51 +3763,76 @@ function guardarIngreso(){
       observaciones: d.observaciones
     });
     localStorage.setItem('demo_ingresos', JSON.stringify(ingresos));
+    cerrarModalConfirmarCarga();
     renderResumen(getDemoResumen(mesActualSeleccionado, anioActualSeleccionado));
     mensaje('Ingreso guardado (Modo Demo)');
     $('i_importe').value = '';
     $('i_desc').value = '';
+    $('i_obs').value = '';
     return;
   }
 
   google.script.run
     .withSuccessHandler(r => {
-
+      cerrarModalConfirmarCarga();
       renderResumen(r);
       mensaje('Ingreso guardado.');
-
       $('i_importe').value = '';
       $('i_desc').value = '';
-
+      $('i_obs').value = '';
     })
     .withFailureHandler(e => {
-      mensaje(e.message,true);
+      cerrarModalConfirmarCarga();
+      mensaje(e.message, true);
     })
     .addIngreso(d);
 }
 
 function guardarTarjeta(){
-
   const d = {
-    fecha:$('t_fecha').value,
-    importe:$('t_importe').value,
-    descripcion:$('t_desc').value,
-    entidad:$('t_entidad').value,
-    categoria:$('t_categoria').value,
-    cuotas:$('t_cuotas').value,
-    primeraCuota:$('t_primera').value,
+    fecha: $('t_fecha').value,
+    importe: $('t_importe').value,
+    descripcion: $('t_desc').value,
+    entidad: $('t_entidad').value,
+    categoria: $('t_categoria').value,
+    cuotas: $('t_cuotas').value,
+    primeraCuota: $('t_primera').value,
     mesSeleccionado: mesActualSeleccionado,
     anioSeleccionado: anioActualSeleccionado
   };
 
   if(!d.fecha || !d.importe || !d.entidad || !d.categoria){
-    mensaje('Completá fecha, importe, entidad y categoría.',true);
+    mensaje('Completá fecha, importe, entidad y categoría.', true);
     return;
   }
 
+  const numCuotas = Number(d.cuotas) || 1;
+  const textoCuotas = numCuotas > 1 ? (numCuotas + ' cuotas de ' + money(Number(d.importe) / numCuotas)) : '1 cuota';
+
+  abrirModalConfirmarCarga({
+    tipo: 'tarjeta',
+    titulo: '¿Registrar Compra con Tarjeta?',
+    subtitulo: 'Revisá los datos antes de guardar',
+    icono: '💳',
+    colorTema: 'purple',
+    monto: Number(d.importe),
+    filas: [
+      { label: 'Fecha de compra', valor: formatFechaVisual(d.fecha) },
+      { label: 'Entidad', valor: d.entidad },
+      { label: 'Categoría', valor: d.categoria },
+      { label: 'Cuotas', valor: textoCuotas },
+      { label: 'Descripción', valor: d.descripcion || 'Sin descripción' },
+      { label: 'Primera cuota', valor: d.primeraCuota }
+    ],
+    onConfirm: () => ejecutarGuardarTarjeta(d)
+  });
+}
+
+function ejecutarGuardarTarjeta(d){
   if (isDemoMode) {
     const tarjetas = JSON.parse(localStorage.getItem('demo_tarjetas') || '[]');
     tarjetas.push({
+      id: 'tar_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9),
       fecha: d.fecha,
       importe: Number(d.importe),
       descripcion: d.descripcion,
@@ -3088,6 +3842,7 @@ function guardarTarjeta(){
       primeraCuota: d.primeraCuota
     });
     localStorage.setItem('demo_tarjetas', JSON.stringify(tarjetas));
+    cerrarModalConfirmarCarga();
     renderResumen(getDemoResumen(mesActualSeleccionado, anioActualSeleccionado));
     mensaje('Compra con tarjeta guardada (Modo Demo)');
     $('t_importe').value = '';
@@ -3097,16 +3852,15 @@ function guardarTarjeta(){
 
   google.script.run
     .withSuccessHandler(r => {
-
+      cerrarModalConfirmarCarga();
       renderResumen(r);
       mensaje('Compra con tarjeta guardada.');
-
       $('t_importe').value = '';
       $('t_desc').value = '';
-
     })
     .withFailureHandler(e => {
-      mensaje(e.message,true);
+      cerrarModalConfirmarCarga();
+      mensaje(e.message, true);
     })
     .addTarjeta(d);
 }

@@ -482,6 +482,7 @@ function getHistorial(filtros) {
     if (tipo === 'gasto') {
       if (filtros.categoria && filtros.categoria !== String(data[i][2])) continue;
       filas.push({
+        fila: i + 1,
         fechaObj: fecha,
         descripcion: String(data[i][1] || ''),
         categoria: String(data[i][2] || ''),
@@ -491,6 +492,7 @@ function getHistorial(filtros) {
       });
     } else {
       filas.push({
+        fila: i + 1,
         fechaObj: fecha,
         descripcion: String(data[i][1] || ''),
         tipo: String(data[i][2] || ''),
@@ -503,6 +505,7 @@ function getHistorial(filtros) {
   const tz = Session.getScriptTimeZone();
   const resultado = filas.map(f => {
     const base = {
+      fila: f.fila,
       fecha: Utilities.formatDate(f.fechaObj, tz, 'dd/MM/yyyy'),
       descripcion: f.descripcion,
       importe: f.importe
@@ -533,19 +536,23 @@ function obtenerDetalleV2(tipo, mes, anio) {
 
   if (tipo === 'ingresos') {
     const ingresos = getSheet_('Ingresos').getDataRange().getValues();
-    return ingresos.slice(1)
-      .filter(r => {
-        const f = r[0];
-        if (!(f instanceof Date)) return false;
-        return (f.getFullYear() === anio && f.getMonth() + 1 === mes) && (r[1] || r[3]);
-      })
-      .map(r => ({
-        fecha: formatF(r[0]),
-        descripcion: r[1],
-        tipoIngreso: r[2],
-        monto: Number(r[3]) || 0,
-        observaciones: r[4]
-      }));
+    const resultado = [];
+    for (let i = 1; i < ingresos.length; i++) {
+      const r = ingresos[i];
+      const f = r[0];
+      if (!(f instanceof Date)) continue;
+      if (f.getFullYear() === anio && f.getMonth() + 1 === mes && (r[1] || r[3])) {
+        resultado.push({
+          fila: i + 1,
+          fecha: formatF(r[0]),
+          descripcion: r[1],
+          tipoIngreso: r[2],
+          monto: Number(r[3]) || 0,
+          observaciones: r[4]
+        });
+      }
+    }
+    return resultado;
   }
 
   if (tipo === 'tarjetas' || tipo === 'tarjetas_a_pagar') {
@@ -595,6 +602,7 @@ function obtenerDetalleV2(tipo, mes, anio) {
 
       if (caeEnEsteMes) {
         resultado.push({
+          fila: i + 1,
           fecha: formatF(f),
           descripcion: r[1],
           entidad: r[2],
@@ -609,55 +617,67 @@ function obtenerDetalleV2(tipo, mes, anio) {
 
   if (tipo === 'tarjetas_consumo') {
     const tarjetas = getSheet_('Tarjetas').getDataRange().getValues();
-    return tarjetas.slice(1)
-      .filter(r => {
-        const f = r[0];
-        if (!(f instanceof Date)) return false;
-        return (f.getFullYear() === anio && f.getMonth() + 1 === mes) && (r[1] || r[4]);
-      })
-      .map(r => ({
-        fecha: formatF(r[0]),
-        descripcion: r[1],
-        entidad: r[2],
-        categoria: r[3],
-        monto: Number(r[4]) || 0,
-        cuotas: (r[5] || 1) + ' cuota(s)'
-      }));
+    const resultado = [];
+    for (let i = 1; i < tarjetas.length; i++) {
+      const r = tarjetas[i];
+      const f = r[0];
+      if (!(f instanceof Date)) continue;
+      if (f.getFullYear() === anio && f.getMonth() + 1 === mes && (r[1] || r[4])) {
+        resultado.push({
+          fila: i + 1,
+          fecha: formatF(r[0]),
+          descripcion: r[1],
+          entidad: r[2],
+          categoria: r[3],
+          monto: Number(r[4]) || 0,
+          cuotas: (r[5] || 1) + ' cuota(s)'
+        });
+      }
+    }
+    return resultado;
   }
 
   if (tipo === 'transferencia' || tipo === 'debito') {
     const medioBuscado = tipo === 'transferencia' ? 'Transferencia' : 'Débito';
     const gastos = getSheet_('Gastos').getDataRange().getValues();
-    return gastos.slice(1)
-      .filter(r => {
-        const f = r[0];
-        if (!(f instanceof Date)) return false;
-        return (f.getFullYear() === anio && f.getMonth() + 1 === mes) && String(r[4] || '') === medioBuscado;
-      })
-      .map(r => ({
-        fecha: formatF(r[0]),
-        categoria: r[2],
-        entidad: r[3],
-        descripcion: r[1],
-        monto: Number(r[5]) || 0
-      }));
+    const resultado = [];
+    for (let i = 1; i < gastos.length; i++) {
+      const r = gastos[i];
+      const f = r[0];
+      if (!(f instanceof Date)) continue;
+      if (f.getFullYear() === anio && f.getMonth() + 1 === mes && String(r[4] || '') === medioBuscado) {
+        resultado.push({
+          fila: i + 1,
+          fecha: formatF(r[0]),
+          categoria: r[2],
+          entidad: r[3],
+          descripcion: r[1],
+          monto: Number(r[5]) || 0
+        });
+      }
+    }
+    return resultado;
   }
 
   if (tipo === 'gastos') {
     const gastos = getSheet_('Gastos').getDataRange().getValues();
-    return gastos.slice(1)
-      .filter(r => {
-        const f = r[0];
-        if (!(f instanceof Date)) return false;
-        return (f.getFullYear() === anio && f.getMonth() + 1 === mes) && (r[1] || r[5]);
-      })
-      .map(r => ({
-        fecha: formatF(r[0]),
-        categoria: r[2],
-        entidad: r[3],
-        descripcion: r[1],
-        monto: Number(r[5]) || 0
-      }));
+    const resultado = [];
+    for (let i = 1; i < gastos.length; i++) {
+      const r = gastos[i];
+      const f = r[0];
+      if (!(f instanceof Date)) continue;
+      if (f.getFullYear() === anio && f.getMonth() + 1 === mes && (r[1] || r[5])) {
+        resultado.push({
+          fila: i + 1,
+          fecha: formatF(r[0]),
+          categoria: r[2],
+          entidad: r[3],
+          descripcion: r[1],
+          monto: Number(r[5]) || 0
+        });
+      }
+    }
+    return resultado;
   }
 
   return [];
@@ -790,5 +810,77 @@ function getEvolucionMensual() {
     meses: resultadoMeses,
     top3Nombres: top3Nombres
   };
+}
+
+function eliminarMovimiento(tipo, fila, datosVerificacion) {
+  tipo = String(tipo || '').toLowerCase();
+  let sheetName = 'Gastos';
+  if (tipo.indexOf('ingreso') !== -1) {
+    sheetName = 'Ingresos';
+  } else if (tipo.indexOf('tarjeta') !== -1) {
+    sheetName = 'Tarjetas';
+  }
+
+  const sh = getSheet_(sheetName);
+  const data = sh.getDataRange().getValues();
+  let filaABorrar = -1;
+
+  // 1. Intentar por fila sugerida si coincide
+  if (fila && Number(fila) >= 2 && Number(fila) <= data.length) {
+    const idx = Number(fila) - 1;
+    const row = data[idx];
+    let coincide = true;
+    if (datosVerificacion) {
+      if (datosVerificacion.monto !== undefined && datosVerificacion.monto !== null && datosVerificacion.monto !== '') {
+        const importeHoja = sheetName === 'Ingresos' ? Number(row[3]) : (sheetName === 'Gastos' ? Number(row[5]) : Number(row[4]));
+        if (Math.abs(importeHoja - Number(datosVerificacion.monto)) > 0.02) {
+          coincide = false;
+        }
+      }
+    }
+    if (coincide) {
+      filaABorrar = Number(fila);
+    }
+  }
+
+  // 2. Si no coincidió o la fila cambió, buscar fila por datos de verificación
+  if (filaABorrar === -1 && datosVerificacion) {
+    const tz = Session.getScriptTimeZone();
+    for (let i = data.length - 1; i >= 1; i--) {
+      const row = data[i];
+      const f = row[0];
+      const fStr = f instanceof Date ? Utilities.formatDate(f, tz, 'dd/MM/yyyy') : String(f || '');
+      const descHoja = String(row[1] || '').trim();
+      const importeHoja = sheetName === 'Ingresos' ? Number(row[3]) : (sheetName === 'Gastos' ? Number(row[5]) : Number(row[4]));
+
+      const coincideImporte = (datosVerificacion.monto !== undefined && datosVerificacion.monto !== null && datosVerificacion.monto !== '')
+        ? Math.abs(importeHoja - Number(datosVerificacion.monto)) < 0.02
+        : true;
+
+      const coincideDesc = datosVerificacion.descripcion
+        ? descHoja.toLowerCase() === String(datosVerificacion.descripcion).trim().toLowerCase()
+        : true;
+
+      const coincideFecha = datosVerificacion.fecha
+        ? (fStr === datosVerificacion.fecha || String(datosVerificacion.fecha).indexOf(fStr) !== -1 || fStr.indexOf(String(datosVerificacion.fecha)) !== -1)
+        : true;
+
+      if (coincideImporte && (coincideDesc || coincideFecha)) {
+        filaABorrar = i + 1;
+        break;
+      }
+    }
+  }
+
+  if (filaABorrar < 2) {
+    throw new Error('No se pudo encontrar el movimiento a eliminar en la hoja ' + sheetName + '.');
+  }
+
+  sh.deleteRow(filaABorrar);
+
+  const hoy = new Date();
+  const mes = (datosVerificacion && datosVerificacion.mes) ? Number(datosVerificacion.mes) : (hoy.getMonth() + 1);
+  const anio = (datosVerificacion && datosVerificacion.anio) ? Number(datosVerificacion.anio) : hoy.getFullYear();
+  return getResumen(mes, anio);
 }
 
