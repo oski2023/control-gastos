@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#101c36"/>
+      <stop offset="100%" stop-color="#0b0f19"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="chipGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#bg)"/>
+  <rect x="76" y="146" width="360" height="220" rx="24" fill="url(#cardGrad)" filter="drop-shadow(0 12px 24px rgba(37,99,235,0.45))"/>
+  <rect x="116" y="196" width="60" height="44" rx="8" fill="url(#chipGrad)"/>
+  <rect x="76" y="270" width="360" height="32" fill="#0f172a" opacity="0.25"/>
+  <circle cx="370" cy="316" r="22" fill="#ffffff" opacity="0.8"/>
+  <circle cx="340" cy="316" r="22" fill="#ffffff" opacity="0.5"/>
+</svg>
