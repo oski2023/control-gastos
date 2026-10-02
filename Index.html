@@ -1033,7 +1033,7 @@ tbody tr:hover td {
 
       <div id="resumenContenido">
         <div id="alertaFijos" class="alert-box alert-warning hidden">
-          <strong>⚠ Gastos fijos pendientes este mes:</strong>
+          <strong>⚠️ Gastos fijos pendientes:</strong>
           <ul id="listaFijosPendientes" style="margin:8px 0 0;padding-left:20px"></ul>
         </div> 
 
@@ -1655,6 +1655,7 @@ function renderGastosFijosPendientes(){
   google.script.run.withSuccessHandler(pendientes=>{
     const cont = $('alertaFijos');
     const lista = $('listaFijosPendientes');
+    if(!cont || !lista) return;
     if(!pendientes || !pendientes.length){
       cont.classList.add('hidden');
       return;
@@ -1662,7 +1663,24 @@ function renderGastosFijosPendientes(){
     lista.innerHTML = '';
     pendientes.forEach(p=>{
       const li = document.createElement('li');
-      li.textContent = p.categoria + ' — vencía el día ' + p.diaVencimiento + ' (' + p.diasVencido + ' día(s) sin cargar)';
+      li.style.marginBottom = '8px';
+      li.style.cursor = 'pointer';
+      li.title = 'Toca para cargar este gasto';
+      li.onclick = () => {
+        if ($('g_categoria')) $('g_categoria').value = p.categoria;
+        showTab('gasto');
+      };
+
+      const badgeMes = p.esMesAnterior 
+        ? '<span style="background:rgba(239,68,68,0.22);color:#fca5a5;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;margin-left:6px;border:1px solid rgba(239,68,68,0.4)">Mes anterior (' + p.mesNombre + ')</span>'
+        : '<span style="background:rgba(245,158,11,0.22);color:#fde047;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;margin-left:6px;border:1px solid rgba(245,158,11,0.4)">Este mes (' + p.mesNombre + ')</span>';
+
+      const textoDetalle = p.diasVencido > 0 
+        ? ' — venció el día ' + p.diaVencimiento + ' (' + p.diasVencido + ' día(s) sin abonar)'
+        : ' — vence hoy día ' + p.diaVencimiento;
+
+      li.innerHTML = '<strong style="color:#fff;font-size:14px">' + p.categoria + '</strong>' + badgeMes + 
+                     '<span style="color:var(--text-muted);font-size:12px;display:block;margin-top:2px;">' + textoDetalle + ' <span style="color:var(--primary);text-decoration:underline;margin-left:4px;">(Cargar ahora ⚡)</span></span>';
       lista.appendChild(li);
     });
     cont.classList.remove('hidden');

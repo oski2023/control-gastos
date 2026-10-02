@@ -128,36 +128,127 @@ function getGastosFijosPendientes(mes, anio) {
   const esMesActual = (anioActual === hoy.getFullYear() && mesActual === hoy.getMonth() + 1);
   const diaActual = esMesActual ? hoy.getDate() : 31;
 
-  const cargadosEsteMes = new Set();
-  for (let i = 1; i < gastos.length; i++) {
-    const f = gastos[i][0];
-    if (!(f instanceof Date)) continue;
-    if (f.getFullYear() === anioActual && f.getMonth() + 1 === mesActual) {
-      cargadosEsteMes.add(String(gastos[i][2] || ''));
-    }
+  let mesAnt = mesActual - 1;
+  let anioAnt = anioActual;
+  if (mesAnt === 0) {
+    mesAnt = 12;
+    anioAnt = anioActual - 1;
   }
 
-  // también revisamos las compras o pagos con tarjeta
-  for (let i = 1; i < tarjetas.length; i++) {
-    const f = tarjetas[i][0];
-    if (!(f instanceof Date)) continue;
-    if (f.getFullYear() === anioActual && f.getMonth() + 1 === mesActual) {
-      cargadosEsteMes.add(String(tarjetas[i][3] || ''));
+  const nombresMeses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const getNombreMes = m => nombresMeses[(Number(m) - 1 + 12) % 12];
+  const normCat = s => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+
+  const parseFechaFila = val => {
+    if (val instanceof Date) return val;
+    if (!val) return null;
+    if (typeof val === 'string') {
+      if (/^\d{4}-\d{2}-\d{2}/.test(val)) {
+        const p = val.split('-');
+        return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2].substring(0, 2)));
+      }
+      if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(val)) {
+        const p = val.split('/');
+        return new Date(Number(p[2]), Number(p[1]) - 1, Number(p[0]));
+      }
+      const d = new Date(val);
+      return isNaN(d.getTime()) ? null : d;
     }
+    return null;
+  };
+
+  // Contamos la cantidad de pagos registrados por categoría para el mes anterior y el mes actual
+  const pagosMesAnt = {};
+  const pagosMesActual = {};
+
+  const registrarPago = (fRaw, catRaw) => {
+    if (!catRaw) return;
+    const f = parseFechaFila(fRaw);
+    if (!f) return;
+    const cat = normCat(catRaw);
+    const a = f.getFullYear();
+    const m = f.getMonth() + 1;
+
+    if (a === anioAnt && m === mesAnt) {
+      pagosMesAnt[cat] = (pagosMesAnt[cat] || 0) + 1;
+    } else if (a === anioActual && m === mesActual) {
+      pagosMesActual[cat] = (pagosMesActual[cat] || 0) + 1;
+    }
+  };
+
+  // Revisar pagos en Gastos (columna 0: fecha, columna 2: categoría)
+  for (let i = 1; i < gastos.length; i++) {
+    registrarPago(gastos[i][0], gastos[i][2]);
+  }
+
+  // Revisar pagos en Tarjetas (columna 0: fecha, columna 3: categoría)
+  for (let i = 1; i < tarjetas.length; i++) {
+    registrarPago(tarjetas[i][0], tarjetas[i][3]);
   }
 
   const pendientes = [];
+
   for (let i = 1; i < fijos.length; i++) {
     const categoria = String(fijos[i][0] || '').trim();
     const diaVencimiento = Number(fijos[i][1]) || 0;
     if (!categoria) continue;
 
-    if (!cargadosEsteMes.has(categoria) && diaActual >= diaVencimiento) {
-      pendientes.push({ categoria, diaVencimiento, diasVencido: diaActual - diaVencimiento });
+    const catKey = normCat(categoria);
+    let pagosAnt = pagosMesAnt[catKey] || 0;
+    let pagosAct = pagosMesActual[catKey] || 0;
+
+    // 1. ¿El mes anterior quedó pendiente?
+    if (pagosAnt === 0) {
+      // Si en este mes se realizó un pago, cubre el mes anterior pendiente
+      if (pagosAct > 0) {
+        pagosAct--; // Se consumió para saldar el mes anterior
+      } else {
+        // Sigue pendiente del mes anterior!
+        const fechaVtoAnt = new Date(anioAnt, mesAnt - 1, diaVencimiento || 1);
+        const diffMs = hoy.getTime() - fechaVtoAnt.getTime();
+        const diasVencidoAnt = Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+
+        pendientes.push({
+          categoria,
+          diaVencimiento,
+          mesNombre: getNombreMes(mesAnt),
+          mesNum: mesAnt,
+          anio: anioAnt,
+          periodo: 'anterior',
+          esMesAnterior: true,
+          diasVencido: diasVencidoAnt
+        });
+      }
+    }
+
+    // 2. ¿El mes actual ya venció y está pendiente?
+    if (diaActual >= diaVencimiento) {
+      if (pagosAct > 0) {
+        pagosAct--; // Ya fue pagado este mes
+      } else {
+        // Vencido este mes y no se ha pagado aún
+        pendientes.push({
+          categoria,
+          diaVencimiento,
+          mesNombre: getNombreMes(mesActual),
+          mesNum: mesActual,
+          anio: anioActual,
+          periodo: 'actual',
+          esMesAnterior: false,
+          diasVencido: diaActual - diaVencimiento
+        });
+      }
     }
   }
 
-  pendientes.sort((a, b) => b.diasVencido - a.diasVencido);
+  // Ordenar: primero los más atrasados (mes anterior primero, luego por días vencidos descendente)
+  pendientes.sort((a, b) => {
+    if (a.esMesAnterior !== b.esMesAnterior) {
+      return a.esMesAnterior ? -1 : 1;
+    }
+    return b.diasVencido - a.diasVencido;
+  });
+
   return pendientes;
 }
 
