@@ -94,21 +94,31 @@
 
   <iframe 
     id="appFrame"
-    src="https://script.google.com/macros/s/AKfycbwJWqgtCPiPIYE78OxkXPwIiUn3eZhci-IF2NVTA5WuXwDXkedsZReVr_mfhi1E5_is/exec" 
     allow="fullscreen; clipboard-read; clipboard-write"
     sandbox="allow-top-navigation allow-scripts allow-forms allow-same-origin allow-popups allow-modals"
-    onload="hideLoader()">
+    onload="onFrameLoad()">
   </iframe>
 
   <script>
-    // Si la URL principal contiene ?demo=1 o ?modo=demo, pasárselo al iframe
     const searchParams = new URLSearchParams(window.location.search);
-    if (searchParams.get('demo') === '1' || searchParams.get('demo') === 'true' || searchParams.get('modo') === 'demo') {
-      const frame = document.getElementById('appFrame');
-      if (frame) {
-        frame.src = "https://script.google.com/macros/s/AKfycbwJWqgtCPiPIYE78OxkXPwIiUn3eZhci-IF2NVTA5WuXwDXkedsZReVr_mfhi1E5_is/exec?demo=1";
+    const isDemo = searchParams.get('demo') === '1' || searchParams.get('demo') === 'true' || searchParams.get('modo') === 'demo' || window.location.hash.includes('demo=1');
+    const baseExecUrl = "https://script.google.com/macros/s/AKfycbwJWqgtCPiPIYE78OxkXPwIiUn3eZhci-IF2NVTA5WuXwDXkedsZReVr_mfhi1E5_is/exec";
+    const frameUrl = isDemo ? (baseExecUrl + "?demo=1#demo=1") : baseExecUrl;
+
+    const frame = document.getElementById('appFrame');
+    if (frame) {
+      frame.src = frameUrl;
+    }
+
+    function onFrameLoad() {
+      hideLoader();
+      if (isDemo && frame && frame.contentWindow) {
+        try {
+          frame.contentWindow.postMessage({ type: 'SET_DEMO_MODE', isDemo: true }, '*');
+        } catch(e) {}
       }
     }
+
     function hideLoader() {
       const loader = document.getElementById('loader');
       if (loader) {

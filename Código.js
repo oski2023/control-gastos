@@ -1,7 +1,10 @@
 const SS = SpreadsheetApp.getActiveSpreadsheet();
 
-function doGet() {
-  return HtmlService.createHtmlOutputFromFile('Index')
+function doGet(e) {
+  const isDemo = (e && e.parameter && (e.parameter.demo === '1' || e.parameter.demo === 'true' || e.parameter.modo === 'demo')) ? true : false;
+  const template = HtmlService.createTemplateFromFile('Index');
+  template.isDemoParam = isDemo;
+  return template.evaluate()
     .setTitle('Control de Gastos')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
