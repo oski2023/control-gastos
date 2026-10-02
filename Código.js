@@ -122,6 +122,7 @@ function getGastosFijosPendientes(mes, anio) {
   const fijos = getSheet_('GastosFijos').getDataRange().getValues();
   const gastos = getSheet_('Gastos').getDataRange().getValues();
   const tarjetas = getSheet_('Tarjetas').getDataRange().getValues();
+  const tz = Session.getScriptTimeZone();
   const hoy = new Date();
   const mesActual = mes ? Number(mes) : (hoy.getMonth() + 1);
   const anioActual = anio ? Number(anio) : hoy.getFullYear();
@@ -157,11 +158,12 @@ function getGastosFijosPendientes(mes, anio) {
     return null;
   };
 
-  // Contamos la cantidad de pagos registrados por categoría para el mes anterior y el mes actual
+  // Contamos la cantidad y detalle de pagos por categoría para mes anterior y actual
   const pagosMesAnt = {};
   const pagosMesActual = {};
+  const pagosInfoMesActual = {};
 
-  const registrarPago = (fRaw, catRaw) => {
+  const registrarPago = (fRaw, catRaw, importe, medio, desc) => {
     if (!catRaw) return;
     const f = parseFechaFila(fRaw);
     if (!f) return;
@@ -173,20 +175,29 @@ function getGastosFijosPendientes(mes, anio) {
       pagosMesAnt[cat] = (pagosMesAnt[cat] || 0) + 1;
     } else if (a === anioActual && m === mesActual) {
       pagosMesActual[cat] = (pagosMesActual[cat] || 0) + 1;
+      if (!pagosInfoMesActual[cat]) pagosInfoMesActual[cat] = [];
+      pagosInfoMesActual[cat].push({
+        fecha: f,
+        importe: Number(importe) || 0,
+        medio: String(medio || ''),
+        descripcion: String(desc || '')
+      });
     }
   };
 
-  // Revisar pagos en Gastos (columna 0: fecha, columna 2: categoría)
+  // Revisar pagos en Gastos (columna 0: fecha, 1: desc, 2: categoría, 4: medio, 5: importe)
   for (let i = 1; i < gastos.length; i++) {
-    registrarPago(gastos[i][0], gastos[i][2]);
+    registrarPago(gastos[i][0], gastos[i][2], gastos[i][5], gastos[i][4], gastos[i][1]);
   }
 
-  // Revisar pagos en Tarjetas (columna 0: fecha, columna 3: categoría)
+  // Revisar pagos en Tarjetas (columna 0: fecha, 1: desc, 3: categoría, 4: importe)
   for (let i = 1; i < tarjetas.length; i++) {
-    registrarPago(tarjetas[i][0], tarjetas[i][3]);
+    registrarPago(tarjetas[i][0], tarjetas[i][3], tarjetas[i][4], 'Tarjeta', tarjetas[i][1]);
   }
 
   const pendientes = [];
+  const alDia = [];
+  const proximos = [];
 
   for (let i = 1; i < fijos.length; i++) {
     const categoria = String(fijos[i][0] || '').trim();
@@ -196,6 +207,7 @@ function getGastosFijosPendientes(mes, anio) {
     const catKey = normCat(categoria);
     let pagosAnt = pagosMesAnt[catKey] || 0;
     let pagosAct = pagosMesActual[catKey] || 0;
+    const listaPagosEsteMes = pagosInfoMesActual[catKey] || [];
 
     // 1. ¿El mes anterior quedó pendiente?
     if (pagosAnt === 0) {
@@ -221,12 +233,21 @@ function getGastosFijosPendientes(mes, anio) {
       }
     }
 
-    // 2. ¿El mes actual ya venció y está pendiente?
-    if (diaActual >= diaVencimiento) {
-      if (pagosAct > 0) {
-        pagosAct--; // Ya fue pagado este mes
-      } else {
-        // Vencido este mes y no se ha pagado aún
+    // 2. ¿El mes actual?
+    if (pagosAct > 0) {
+      // Ya fue pagado este mes (está al día)
+      const pInfo = listaPagosEsteMes[listaPagosEsteMes.length - 1] || {};
+      alDia.push({
+        categoria,
+        diaVencimiento,
+        monto: pInfo.importe || 0,
+        fechaPago: pInfo.fecha ? Utilities.formatDate(pInfo.fecha, tz, 'dd/MM/yyyy') : '',
+        medio: pInfo.medio || ''
+      });
+    } else {
+      // No se ha pagado aún este mes
+      if (diaActual >= diaVencimiento) {
+        // Vencido este mes
         pendientes.push({
           categoria,
           diaVencimiento,
@@ -237,11 +258,18 @@ function getGastosFijosPendientes(mes, anio) {
           esMesAnterior: false,
           diasVencido: diaActual - diaVencimiento
         });
+      } else {
+        // Vence más adelante en el mes
+        proximos.push({
+          categoria,
+          diaVencimiento,
+          diasFaltan: diaVencimiento - diaActual
+        });
       }
     }
   }
 
-  // Ordenar: primero los más atrasados (mes anterior primero, luego por días vencidos descendente)
+  // Ordenar pendientes: mes anterior primero, luego por días vencidos descendente
   pendientes.sort((a, b) => {
     if (a.esMesAnterior !== b.esMesAnterior) {
       return a.esMesAnterior ? -1 : 1;
@@ -249,7 +277,18 @@ function getGastosFijosPendientes(mes, anio) {
     return b.diasVencido - a.diasVencido;
   });
 
-  return pendientes;
+  // Ordenar al día por categoría
+  alDia.sort((a, b) => a.categoria.localeCompare(b.categoria));
+
+  // Ordenar próximos por día de vencimiento ascendente
+  proximos.sort((a, b) => a.diaVencimiento - b.diaVencimiento);
+
+  return {
+    pendientes,
+    alDia,
+    proximos,
+    totalFijos: fijos.length - 1
+  };
 }
 
 function addTarjeta(data) {

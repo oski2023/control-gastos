@@ -1031,11 +1031,36 @@ tbody tr:hover td {
         <button type="button" class="btn-mes-nav" onclick="cambiarMesRelativo(1)" title="Mes siguiente" aria-label="Mes siguiente">▶</button>
       </div>
 
-      <div id="resumenContenido">
-        <div id="alertaFijos" class="alert-box alert-warning hidden">
-          <strong>⚠️ Gastos fijos pendientes:</strong>
-          <ul id="listaFijosPendientes" style="margin:8px 0 0;padding-left:20px"></ul>
-        </div> 
+        <!-- CONTROL DE GASTOS FIJOS (PENDIENTES Y AL DIA) -->
+        <div id="alertaFijos" class="alert-box alert-warning hidden" style="transition: all 0.3s ease;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+            <div id="fijosTitulo" style="font-weight:700;display:flex;align-items:center;gap:6px;">
+              <span>⚠️ Gastos fijos pendientes:</span>
+            </div>
+            <button type="button" id="btnToggleAlDia" onclick="toggleFijosAlDia()" 
+                    style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);color:#fff;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;">
+              👁️ Ver al día ✅
+            </button>
+          </div>
+
+          <!-- LISTA DE PENDIENTES -->
+          <ul id="listaFijosPendientes" style="margin:10px 0 0;padding-left:18px;"></ul>
+
+          <!-- SECCION DESPLEGABLE: AL DIA Y PROXIMOS -->
+          <div id="wrapFijosAlDia" class="hidden" style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.1);">
+            <div id="subFijosAlDiaTitulo" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#34d399;margin-bottom:6px;">
+              ✅ Gastos fijos al día este mes:
+            </div>
+            <ul id="listaFijosAlDia" style="margin:0 0 10px;padding-left:18px;"></ul>
+
+            <div id="wrapFijosProximos" class="hidden">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);margin-bottom:6px;">
+                ⏳ Próximos a vencer este mes:
+              </div>
+              <ul id="listaFijosProximos" style="margin:0;padding-left:18px;"></ul>
+            </div>
+          </div>
+        </div>
 
         <div id="alertaDisponible" class="alert-box alert-danger hidden">
           ⚠ Tu dinero disponible es negativo para este mes.
@@ -1651,16 +1676,70 @@ function cargarHistorial(){
 
 // fin de nuevas funciones pra historial -------------------------
 
+let fijosAlDiaAbierto = false;
+let estadoFijosData = { pendientes: [], alDia: [], proximos: [] };
+
+function toggleFijosAlDia() {
+  fijosAlDiaAbierto = !fijosAlDiaAbierto;
+  const wrap = $('wrapFijosAlDia');
+  const btn = $('btnToggleAlDia');
+  if (!wrap) return;
+  if (fijosAlDiaAbierto) {
+    wrap.classList.remove('hidden');
+    if (btn) btn.innerHTML = '▲ Ocultar';
+  } else {
+    wrap.classList.add('hidden');
+    actualizarTextoBtnFijos();
+  }
+}
+
+function actualizarTextoBtnFijos() {
+  const btn = $('btnToggleAlDia');
+  if (!btn) return;
+  const countAlDia = estadoFijosData.alDia ? estadoFijosData.alDia.length : 0;
+  if (estadoFijosData.pendientes && estadoFijosData.pendientes.length > 0) {
+    btn.innerHTML = '👁️ Ver al día (' + countAlDia + ') ✅';
+  } else {
+    btn.innerHTML = '👁️ Ver detalle (' + countAlDia + ') ✅';
+  }
+}
+
 function renderGastosFijosPendientes(){
-  google.script.run.withSuccessHandler(pendientes=>{
+  google.script.run.withSuccessHandler(res=>{
     const cont = $('alertaFijos');
-    const lista = $('listaFijosPendientes');
-    if(!cont || !lista) return;
-    if(!pendientes || !pendientes.length){
+    const listaPendientes = $('listaFijosPendientes');
+    const listaAlDia = $('listaFijosAlDia');
+    const listaProximos = $('listaFijosProximos');
+    const wrapProximos = $('wrapFijosProximos');
+    const wrapAlDia = $('wrapFijosAlDia');
+    const titulo = $('fijosTitulo');
+    const btn = $('btnToggleAlDia');
+
+    if(!cont || !listaPendientes) return;
+
+    // Normalizar datos
+    let pendientes = [];
+    let alDia = [];
+    let proximos = [];
+
+    if (Array.isArray(res)) {
+      pendientes = res;
+    } else if (res && typeof res === 'object') {
+      pendientes = res.pendientes || [];
+      alDia = res.alDia || [];
+      proximos = res.proximos || [];
+    }
+
+    estadoFijosData = { pendientes, alDia, proximos };
+
+    // Si no hay ningún gasto fijo configurado ni registrado, ocultamos
+    if (!pendientes.length && !alDia.length && !proximos.length) {
       cont.classList.add('hidden');
       return;
     }
-    lista.innerHTML = '';
+
+    // 1. POBLAR LISTA DE PENDIENTES
+    listaPendientes.innerHTML = '';
     pendientes.forEach(p=>{
       const li = document.createElement('li');
       li.style.marginBottom = '8px';
@@ -1681,8 +1760,83 @@ function renderGastosFijosPendientes(){
 
       li.innerHTML = '<strong style="color:#fff;font-size:14px">' + p.categoria + '</strong>' + badgeMes + 
                      '<span style="color:var(--text-muted);font-size:12px;display:block;margin-top:2px;">' + textoDetalle + ' <span style="color:var(--primary);text-decoration:underline;margin-left:4px;">(Cargar ahora ⚡)</span></span>';
-      lista.appendChild(li);
+      listaPendientes.appendChild(li);
     });
+
+    // 2. POBLAR LISTA DE AL DIA
+    if (listaAlDia) {
+      listaAlDia.innerHTML = '';
+      if (!alDia.length) {
+        listaAlDia.innerHTML = '<li style="color:var(--text-dim);font-size:13px;list-style:none;">Aún no se registraron pagos de gastos fijos este mes.</li>';
+      } else {
+        alDia.forEach(p => {
+          const li = document.createElement('li');
+          li.style.marginBottom = '6px';
+          li.style.color = '#e2e8f0';
+          li.style.fontSize = '13px';
+          const detallePago = (p.fechaPago ? ' el ' + p.fechaPago : '') + 
+                              (p.monto ? ' · <strong style="color:#34d399">' + money(p.monto) + '</strong>' : '') + 
+                              (p.medio ? ' <span style="color:var(--text-dim);font-size:11px">[' + p.medio + ']</span>' : '');
+          li.innerHTML = '<span style="color:#34d399;font-weight:700;">✅ ' + p.categoria + '</span> — <span style="color:#cbd5e1">Pagado' + detallePago + '</span>';
+          listaAlDia.appendChild(li);
+        });
+      }
+    }
+
+    // 3. POBLAR PROXIMOS
+    if (listaProximos && wrapProximos) {
+      listaProximos.innerHTML = '';
+      if (proximos.length > 0) {
+        wrapProximos.classList.remove('hidden');
+        proximos.forEach(p => {
+          const li = document.createElement('li');
+          li.style.marginBottom = '5px';
+          li.style.color = 'var(--text-muted)';
+          li.style.fontSize = '13px';
+          li.innerHTML = '⏳ <strong style="color:#cbd5e1">' + p.categoria + '</strong> — vence el día ' + p.diaVencimiento + ' (en ' + p.diasFaltan + ' día(s))';
+          listaProximos.appendChild(li);
+        });
+      } else {
+        wrapProximos.classList.add('hidden');
+      }
+    }
+
+    // 4. CONFIGURAR ESTILO SEGUN PENDIENTES VS AL DIA
+    if (pendientes.length > 0) {
+      cont.className = 'alert-box alert-warning';
+      cont.style.background = 'rgba(245, 158, 11, 0.12)';
+      cont.style.borderColor = 'rgba(245, 158, 11, 0.35)';
+      if (titulo) {
+        titulo.innerHTML = '<span style="color:#fbbf24;font-size:14px;">⚠️ Gastos fijos pendientes (' + pendientes.length + '):</span>';
+      }
+      listaPendientes.style.display = 'block';
+    } else {
+      // ¡TODO AL DIA! TRANQUILIDAD VISUAL
+      cont.className = 'alert-box alert-success';
+      cont.style.background = 'rgba(16, 185, 129, 0.12)';
+      cont.style.borderColor = 'rgba(16, 185, 129, 0.35)';
+      if (titulo) {
+        titulo.innerHTML = '<span style="color:#34d399;font-size:14px;">🎉 ¡Todos tus gastos fijos están al día este mes!</span>';
+      }
+      listaPendientes.style.display = 'none';
+    }
+
+    // Estado del botón toggle
+    if (btn) {
+      if (alDia.length > 0 || proximos.length > 0) {
+        btn.style.display = 'inline-flex';
+        if (fijosAlDiaAbierto) {
+          btn.innerHTML = '▲ Ocultar';
+          if (wrapAlDia) wrapAlDia.classList.remove('hidden');
+        } else {
+          actualizarTextoBtnFijos();
+          if (wrapAlDia) wrapAlDia.classList.add('hidden');
+        }
+      } else {
+        btn.style.display = 'none';
+      }
+    }
+
     cont.classList.remove('hidden');
   }).getGastosFijosPendientes(mesActualSeleccionado, anioActualSeleccionado);
 }
