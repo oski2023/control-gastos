@@ -3,8 +3,30 @@ const SS = SpreadsheetApp.getActiveSpreadsheet();
 function doGet() {
   return HtmlService.createHtmlOutputFromFile('Index')
     .setTitle('Control de Gastos')
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function verificarEstadoDemo() {
+  try {
+    const sh = getSheet_('Configuración');
+    const celdaTitulo = String(sh.getRange('E1').getValue() || '').trim();
+    const celdaValor = String(sh.getRange('E2').getValue() || '').trim().toUpperCase();
+
+    if (!celdaTitulo) {
+      sh.getRange('E1').setValue('Acceso Demo');
+      sh.getRange('E2').setValue('ACTIVO');
+      return { activo: true };
+    }
+
+    if (celdaValor === 'BLOQUEADO' || celdaValor === 'NO' || celdaValor === 'PAUSADO' || celdaValor === 'INACTIVO') {
+      return { activo: false };
+    }
+
+    return { activo: true };
+  } catch(e) {
+    return { activo: true };
+  }
 }
 
 function getSheet_(name) {

@@ -1045,6 +1045,20 @@ body.is-landscape .hamburger-btn {
 
 <body>
 
+<!-- PANTALLA DE BLOQUEO DEMO (SI EL DUEÑO LO PAUSA EN GOOGLE SHEETS) -->
+<div id="pantallaBloqueoDemo" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(11,15,25,0.98);z-index:99999;backdrop-filter:blur(15px);align-items:center;justify-content:center;padding:24px;box-sizing:border-box;">
+  <div style="background:#131c2e;border:1px solid rgba(239,68,68,0.35);border-radius:24px;padding:32px 24px;max-width:380px;width:100%;text-align:center;box-shadow:0 12px 36px rgba(0,0,0,0.6);">
+    <div style="font-size:48px;margin-bottom:14px;">🔒</div>
+    <h2 style="color:#fff;font-size:20px;font-weight:800;margin:0 0 10px;">Acceso Demo Pausado</h2>
+    <p style="color:#94a3b8;font-size:14px;line-height:1.5;margin:0 0 20px;">
+      El período de prueba para esta versión ha sido pausado por el administrador.
+    </p>
+    <div style="background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.3);border-radius:12px;padding:12px;color:#38bdf8;font-size:13px;font-weight:600;">
+      💬 Contacta al propietario para habilitar tu acceso o solicitar una cuenta completa.
+    </div>
+  </div>
+</div>
+
 <!-- OVERLAY PARA CERRAR SIDEBAR AL TOCAR AFUERA -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar(true)"></div>
 
@@ -1076,6 +1090,18 @@ body.is-landscape .hamburger-btn {
   </nav>
 
   <main class="content">
+    <!-- BANNER INDICADOR MODO DEMO -->
+    <div id="bannerDemo" style="display:none;background:linear-gradient(135deg,rgba(56,189,248,0.15) 0%,rgba(37,99,235,0.15) 100%);border:1px solid rgba(56,189,248,0.35);border-radius:12px;padding:10px 14px;margin-bottom:14px;align-items:center;justify-content:space-between;gap:8px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:18px;">🧪</span>
+        <div>
+          <div style="color:#38bdf8;font-size:13px;font-weight:700;">Modo Demostración / Invitado</div>
+          <div style="color:#94a3b8;font-size:11px;">Tus datos son privados y se guardan solo en este celular.</div>
+        </div>
+      </div>
+      <button type="button" onclick="reiniciarDemo()" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;" title="Borrar datos de prueba">Reiniciar</button>
+    </div>
+
     <div id="msg"></div>
 
     <!-- GASTO RAPIDO -->
@@ -1504,6 +1530,154 @@ let config = {
   entidades:[]
 };
 
+let isDemoMode = false;
+
+function checkModoDemo() {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('real') === '1' || urlParams.get('demo') === '0') {
+    localStorage.removeItem('control_gastos_demo');
+    isDemoMode = false;
+  } else if (urlParams.get('demo') === '1' || urlParams.get('demo') === 'true' || urlParams.get('modo') === 'demo' || localStorage.getItem('control_gastos_demo') === '1') {
+    isDemoMode = true;
+    localStorage.setItem('control_gastos_demo', '1');
+  }
+
+  if (isDemoMode) {
+    const banner = $('bannerDemo');
+    if (banner) banner.style.display = 'flex';
+
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(res => {
+          if (res && res.activo === false) {
+            activarBloqueoDemo();
+          }
+        })
+        .withFailureHandler(() => {})
+        .verificarEstadoDemo();
+    }
+  }
+}
+
+function activarBloqueoDemo() {
+  const bloqueo = $('pantallaBloqueoDemo');
+  if (bloqueo) bloqueo.style.display = 'flex';
+  const bottomNav = document.querySelector('.bottom-nav');
+  if (bottomNav) bottomNav.style.display = 'none';
+  const sidebar = $('sidebar');
+  if (sidebar) sidebar.style.display = 'none';
+}
+
+function reiniciarDemo() {
+  if (confirm('¿Querés reiniciar la demo y borrar todos los movimientos de prueba de este celular?')) {
+    localStorage.removeItem('demo_gastos');
+    localStorage.removeItem('demo_ingresos');
+    localStorage.removeItem('demo_tarjetas');
+    renderResumen(getDemoResumen(mesActualSeleccionado, anioActualSeleccionado));
+    mensaje('Demo reiniciada: datos en $ 0.');
+  }
+}
+
+function getDemoResumen(mes, anio) {
+  mes = Number(mes);
+  anio = Number(anio);
+  let mesAnt = mes - 1;
+  let anioAnt = anio;
+  if (mesAnt === 0) { mesAnt = 12; anioAnt--; }
+
+  const gastos = JSON.parse(localStorage.getItem('demo_gastos') || '[]');
+  const ingresos = JSON.parse(localStorage.getItem('demo_ingresos') || '[]');
+  const tarjetas = JSON.parse(localStorage.getItem('demo_tarjetas') || '[]');
+
+  let ingresoBruto = 0;
+  ingresos.forEach(item => {
+    if (!item.fecha) return;
+    const p = String(item.fecha).split('-');
+    if (Number(p[0]) === anio && Number(p[1]) === mes) {
+      ingresoBruto += Number(item.importe) || 0;
+    }
+  });
+
+  let gastoTotal = 0, transferencia = 0, debito = 0;
+  const porCategoria = {};
+
+  gastos.forEach(item => {
+    if (!item.fecha) return;
+    const p = String(item.fecha).split('-');
+    if (Number(p[0]) === anio && Number(p[1]) === mes) {
+      const importe = Number(item.importe) || 0;
+      gastoTotal += importe;
+      if (item.medio === 'Transferencia') transferencia += importe;
+      if (item.medio === 'Débito') debito += importe;
+      if (item.categoria) porCategoria[item.categoria] = (porCategoria[item.categoria] || 0) + importe;
+    }
+  });
+
+  let tarjetaMesAnterior = 0;
+  let tarjetaConsumoMes = 0;
+
+  tarjetas.forEach(item => {
+    if (!item.fecha) return;
+    const p = String(item.fecha).split('-');
+    const iAnio = Number(p[0]);
+    const iMes = Number(p[1]);
+    const importe = Number(item.importe) || 0;
+    const cuotas = Number(item.cuotas) || 1;
+    const cuotaMensual = cuotas > 1 ? (importe / cuotas) : importe;
+
+    if (iAnio === anio && iMes === mes) {
+      tarjetaConsumoMes += importe;
+    }
+
+    let caeEnEsteMes = false;
+    if (cuotas > 1) {
+      let pAnio, pMes;
+      if (item.primeraCuota) {
+        const prim = String(item.primeraCuota).split('-');
+        pAnio = Number(prim[0]);
+        pMes = Number(prim[1]);
+      } else {
+        pMes = iMes + 1;
+        pAnio = iAnio;
+        if (pMes > 12) { pMes -= 12; pAnio += 1; }
+      }
+      const diff = (anio - pAnio) * 12 + (mes - pMes);
+      if (diff >= 0 && diff < cuotas) {
+        caeEnEsteMes = true;
+      }
+    } else {
+      if (iAnio === anioAnt && iMes === mesAnt) {
+        caeEnEsteMes = true;
+      }
+    }
+
+    if (caeEnEsteMes) {
+      tarjetaMesAnterior += (cuotas > 1 ? cuotaMensual : importe);
+    }
+  });
+
+  const ingresoNeto = ingresoBruto - tarjetaMesAnterior;
+  const disponible = ingresoNeto - gastoTotal;
+
+  return {
+    mes,
+    anio,
+    mesAnt,
+    anioAnt,
+    ingresoBruto,
+    ingresoNeto,
+    ingresoTotal: ingresoNeto,
+    tarjetaMesAnterior,
+    tarjetaConsumoMes,
+    tarjetaTotal: tarjetaConsumoMes,
+    gastoTotal,
+    transferencia,
+    debito,
+    disponible,
+    porCategoria
+  };
+}
+
 function nombreMes(m) {
   const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   return meses[(Number(m) - 1 + 12) % 12];
@@ -1543,6 +1717,10 @@ function cambiarMesRelativo(delta) {
 }
 
 function cargarResumenMes() {
+  if (isDemoMode) {
+    renderResumen(getDemoResumen(mesActualSeleccionado, anioActualSeleccionado));
+    return;
+  }
   mensaje('Cargando ' + nombreMes(mesActualSeleccionado) + '...');
   google.script.run
     .withSuccessHandler(r => {
@@ -1640,6 +1818,57 @@ function verDetalle(tipo, titulo) {
   document.getElementById('tituloDetalle').innerText = titulo + ' (' + nombreMes(mesActualSeleccionado) + ' ' + anioActualSeleccionado + ')';
   document.getElementById('cabeceraDetalle').innerHTML = '';
   document.getElementById('filasDetalle').innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text-muted)">Cargando detalle...</td></tr>';
+
+  if (isDemoMode) {
+    let datos = [];
+    if (tipo === 'ingresos') {
+      const ing = JSON.parse(localStorage.getItem('demo_ingresos') || '[]');
+      datos = ing.filter(x => {
+        const p = String(x.fecha || '').split('-');
+        return Number(p[0]) === anioActualSeleccionado && Number(p[1]) === mesActualSeleccionado;
+      }).map(x => ({
+        fecha: x.fecha,
+        descripcion: x.descripcion || 'Ingreso',
+        tipo: x.tipo || 'General',
+        monto: Number(x.importe) || 0
+      }));
+    } else if (tipo === 'tarjetas_a_pagar' || tipo === 'tarjetas') {
+      const tar = JSON.parse(localStorage.getItem('demo_tarjetas') || '[]');
+      datos = tar.map(x => ({
+        fecha: x.fecha,
+        descripcion: x.descripcion || 'Tarjeta',
+        entidad: x.entidad || 'Tarjeta',
+        cuota: (x.cuotas || 1) + ' cuota(s)',
+        monto: Number(x.importe) || 0
+      }));
+    } else if (tipo === 'tarjetas_consumo') {
+      const tar = JSON.parse(localStorage.getItem('demo_tarjetas') || '[]');
+      datos = tar.filter(x => {
+        const p = String(x.fecha || '').split('-');
+        return Number(p[0]) === anioActualSeleccionado && Number(p[1]) === mesActualSeleccionado;
+      }).map(x => ({
+        fecha: x.fecha,
+        descripcion: x.descripcion || 'Tarjeta',
+        entidad: x.entidad || 'Tarjeta',
+        cuotas: x.cuotas || 1,
+        monto: Number(x.importe) || 0
+      }));
+    } else {
+      const gas = JSON.parse(localStorage.getItem('demo_gastos') || '[]');
+      datos = gas.filter(x => {
+        const p = String(x.fecha || '').split('-');
+        return Number(p[0]) === anioActualSeleccionado && Number(p[1]) === mesActualSeleccionado;
+      }).map(x => ({
+        fecha: x.fecha,
+        categoria: x.categoria || '',
+        entidad: x.entidad || '',
+        descripcion: x.descripcion || '',
+        monto: Number(x.importe) || 0
+      }));
+    }
+    renderizarDetalle(tipo, datos);
+    return;
+  }
 
   google.script.run
     .withSuccessHandler(function(datos) {
@@ -1778,6 +2007,43 @@ function cargarHistorial(){
     ? '<tr><th>Fecha</th><th>Descripción</th><th>Categoría</th><th>Medio</th><th>Importe</th></tr>'
     : '<tr><th>Fecha</th><th>Descripción</th><th>Importe</th></tr>';
 
+  if (isDemoMode) {
+    let items = [];
+    if (tipoSolicitado === 'gasto') {
+      items = JSON.parse(localStorage.getItem('demo_gastos') || '[]');
+    } else {
+      items = JSON.parse(localStorage.getItem('demo_ingresos') || '[]');
+    }
+    const mesFiltro = filtros.mes ? Number(filtros.mes) : null;
+    const anioFiltro = filtros.anio ? Number(filtros.anio) : null;
+    const catFiltro = filtros.categoria || '';
+
+    const filtrados = items.filter(it => {
+      if (!it.fecha) return false;
+      const [a, m] = String(it.fecha).split('-').map(Number);
+      if (mesFiltro && m !== mesFiltro) return false;
+      if (anioFiltro && a !== anioFiltro) return false;
+      if (catFiltro && it.categoria !== catFiltro) return false;
+      return true;
+    });
+
+    const tbody = $('h_tabla');
+    tbody.innerHTML = '';
+    let total = 0;
+    filtrados.forEach(f => {
+      const imp = Number(f.importe) || 0;
+      total += imp;
+      const tr = document.createElement('tr');
+      tr.innerHTML = tipoSolicitado === 'gasto'
+        ? '<td>'+f.fecha+'</td><td>'+(f.descripcion||'')+'</td><td>'+(f.categoria||'')+'</td><td>'+(f.medio||'')+'</td><td>'+money(imp)+'</td>'
+        : '<td>'+f.fecha+'</td><td>'+(f.descripcion||'')+'</td><td>'+money(imp)+'</td>';
+      tbody.appendChild(tr);
+    });
+    const etiqueta = tipoSolicitado === 'gasto' ? 'gastos' : 'ingresos';
+    $('h_total').textContent = 'Total: ' + money(total) + ' (' + filtrados.length + ' ' + etiqueta + ')';
+    return;
+  }
+
   google.script.run
     .withSuccessHandler(filas=>{
       if(tipoSolicitado !== h_tipo) return; // llegó tarde, ya cambiaste de tab: ignorar
@@ -1835,6 +2101,11 @@ function actualizarTextoBtnFijos() {
 }
 
 function renderGastosFijosPendientes(){
+  if (isDemoMode) {
+    const cont = $('alertaFijos');
+    if (cont) cont.classList.add('hidden');
+    return;
+  }
   google.script.run.withSuccessHandler(res=>{
     const cont = $('alertaFijos');
     const listaPendientes = $('listaFijosPendientes');
@@ -1998,6 +2269,37 @@ function agregar(tipo){
   );
 
   if(!nombre || !nombre.trim()){
+    return;
+  }
+
+  const valor = nombre.trim();
+
+  if (isDemoMode) {
+    if (!config.categorias) config.categorias = [];
+    if (!config.entidades) config.entidades = [];
+    if (!config.medios) config.medios = [];
+
+    if (tipo === 'categoria' && !config.categorias.includes(valor)) config.categorias.push(valor);
+    if (tipo === 'entidad' && !config.entidades.includes(valor)) config.entidades.push(valor);
+    if (tipo === 'medio' && !config.medios.includes(valor)) config.medios.push(valor);
+
+    fillSelect('g_categoria', config.categorias);
+    fillSelect('g_entidad', config.entidades);
+    fillSelect('g_medio', config.medios);
+
+    fillSelect('r_categoria', config.categorias);
+    fillSelect('r_entidad', config.entidades);
+    fillSelect('r_medio', config.medios);
+
+    fillSelect('t_categoria', config.categorias);
+    fillSelect('t_entidad', config.entidades);
+
+    if (tipo === 'categoria') localStorage.setItem('ultimaCategoria', valor);
+    if (tipo === 'entidad') localStorage.setItem('ultimaEntidad', valor);
+    if (tipo === 'medio') localStorage.setItem('ultimoMedio', valor);
+
+    aplicarUltimasSelecciones();
+    mensaje('Se agregó (Demo): ' + valor);
     return;
   }
 
@@ -2184,10 +2486,100 @@ function renderGraficoCategorias(porCategoria){
 }
 
 function renderGraficoEvolucion(){
+  const canvas = $('graficoEvolucion');
+  if(!canvas) return;
+
+  if (isDemoMode) {
+    const mesesDemo = [];
+    const gastosDemo = JSON.parse(localStorage.getItem('demo_gastos') || '[]');
+    const ingresosDemo = JSON.parse(localStorage.getItem('demo_ingresos') || '[]');
+
+    for (let i = 5; i >= 0; i--) {
+      let m = mesActualSeleccionado - i;
+      let a = anioActualSeleccionado;
+      while (m <= 0) { m += 12; a--; }
+
+      let totGastos = 0;
+      let totIngresos = 0;
+      gastosDemo.forEach(g => {
+        const p = String(g.fecha || '').split('-');
+        if (Number(p[0]) === a && Number(p[1]) === m) {
+          totGastos += Number(g.importe) || 0;
+        }
+      });
+      ingresosDemo.forEach(ing => {
+        const p = String(ing.fecha || '').split('-');
+        if (Number(p[0]) === a && Number(p[1]) === m) {
+          totIngresos += Number(ing.importe) || 0;
+        }
+      });
+
+      mesesDemo.push({
+        label: nombreMes(m).substring(0, 3) + ' ' + String(a).substring(2),
+        gastos: totGastos,
+        ingresos: totIngresos
+      });
+    }
+
+    const labels = mesesDemo.map(m => m.label);
+    const datasets = [
+      {
+        label: 'Ingresos',
+        data: mesesDemo.map(m => m.ingresos),
+        backgroundColor: '#10b981',
+        borderRadius: 6
+      },
+      {
+        label: 'Gastos',
+        data: mesesDemo.map(m => m.gastos),
+        backgroundColor: '#ef4444',
+        borderRadius: 6
+      }
+    ];
+
+    if(chartEvolucion) chartEvolucion.destroy();
+    chartEvolucion = new Chart(canvas, {
+      type: 'bar',
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { boxWidth: 12, color: '#e2e8f0', font: { family: 'Plus Jakarta Sans', size: 11, weight: '700' } }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                return ' ' + ctx.dataset.label + ': ' + money(ctx.parsed.y);
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#94a3b8', font: { family: 'Plus Jakarta Sans', size: 11 } },
+            grid: { color: 'rgba(255,255,255,0.06)' }
+          },
+          y: {
+            ticks: {
+              color: '#94a3b8',
+              font: { family: 'Plus Jakarta Sans', size: 11 },
+              callback: function(v) {
+                return '$ ' + Number(v).toLocaleString('es-AR');
+              }
+            },
+            grid: { color: 'rgba(255,255,255,0.06)' }
+          }
+        }
+      }
+    });
+    return;
+  }
+
   google.script.run
     .withSuccessHandler(data => {
-      const canvas = $('graficoEvolucion');
-      if(!canvas) return;
 
       const meses = Array.isArray(data) ? data : ((data && data.meses) || []);
       const top3Nombres = (data && data.top3Nombres) ? data.top3Nombres : [];
@@ -2361,6 +2753,30 @@ function renderResumen(r){
 }
 
 function refresh(){
+  if (isDemoMode) {
+    if (!config.categorias || !config.categorias.length) {
+      config = {
+        categorias: ['Supermercado', 'Servicios', 'Comida / Delivery', 'Transporte', 'Salud', 'Educación', 'Entretenimiento', 'Hogar', 'Varios'],
+        entidades: ['Efectivo', 'Banco Galicia', 'Mercado Pago', 'Santander', 'BBVA'],
+        medios: ['Débito', 'Transferencia', 'Efectivo', 'Tarjeta de Crédito']
+      };
+    }
+    fillSelect('g_categoria', config.categorias);
+    fillSelect('g_entidad', config.entidades);
+    fillSelect('g_medio', config.medios);
+
+    fillSelect('t_categoria', config.categorias);
+    fillSelect('t_entidad', config.entidades);
+
+    fillSelect('r_categoria', config.categorias);
+    fillSelect('r_medio', config.medios);
+    fillSelect('r_entidad', config.entidades);
+
+    aplicarUltimasSelecciones();
+    renderResumen(getDemoResumen(mesActualSeleccionado, anioActualSeleccionado));
+    return;
+  }
+
   google.script.run
     .withSuccessHandler(data => {
       config = data.config;
@@ -2441,6 +2857,28 @@ function guardarGasto(){
   localStorage.setItem('ultimaEntidad',d.entidad);
   localStorage.setItem('ultimoMedio',d.medio);
 
+  if (isDemoMode) {
+    const gastos = JSON.parse(localStorage.getItem('demo_gastos') || '[]');
+    gastos.push({
+      fecha: d.fecha,
+      importe: Number(d.importe),
+      descripcion: d.descripcion,
+      categoria: d.categoria,
+      entidad: d.entidad,
+      medio: d.medio
+    });
+    localStorage.setItem('demo_gastos', JSON.stringify(gastos));
+    renderResumen(getDemoResumen(mesActualSeleccionado, anioActualSeleccionado));
+    mensaje('Gasto guardado (Modo Demo)');
+    $('g_importe').value = '';
+    $('g_desc').value = '';      
+    $('g_categoria').value=localStorage.getItem('ultimaCategoria') || '';
+    $('g_entidad').value=localStorage.getItem('ultimaEntidad') || '';
+    $('g_medio').value=localStorage.getItem('ultimoMedio') || '';
+    $('g_importe').focus();
+    return;
+  }
+
 // --- NUEVO: si no hay conexión, guardar localmente y salir ---
   if(!navigator.onLine){
     encolarPendiente('gasto', d);
@@ -2501,6 +2939,25 @@ function guardarGastoRapido(){
   localStorage.setItem('ultimaEntidad',d.entidad);
   localStorage.setItem('ultimoMedio',d.medio);
 
+  if (isDemoMode) {
+    const gastos = JSON.parse(localStorage.getItem('demo_gastos') || '[]');
+    gastos.push({
+      fecha: d.fecha,
+      importe: Number(d.importe),
+      descripcion: '',
+      categoria: d.categoria,
+      entidad: d.entidad,
+      medio: d.medio
+    });
+    localStorage.setItem('demo_gastos', JSON.stringify(gastos));
+    renderResumen(getDemoResumen(mesActualSeleccionado, anioActualSeleccionado));
+    mensaje('Gasto rápido guardado (Modo Demo)');
+    $('r_importe').value = '';
+    aplicarUltimasSelecciones();
+    $('r_importe').focus();
+    return;
+  }
+
   google.script.run
     .withSuccessHandler(r => {
 
@@ -2533,6 +2990,23 @@ function guardarIngreso(){
 
   if(!d.fecha || !d.importe){
     mensaje('Completá fecha e importe.',true);
+    return;
+  }
+
+  if (isDemoMode) {
+    const ingresos = JSON.parse(localStorage.getItem('demo_ingresos') || '[]');
+    ingresos.push({
+      fecha: d.fecha,
+      importe: Number(d.importe),
+      descripcion: d.descripcion,
+      tipo: d.tipo,
+      observaciones: d.observaciones
+    });
+    localStorage.setItem('demo_ingresos', JSON.stringify(ingresos));
+    renderResumen(getDemoResumen(mesActualSeleccionado, anioActualSeleccionado));
+    mensaje('Ingreso guardado (Modo Demo)');
+    $('i_importe').value = '';
+    $('i_desc').value = '';
     return;
   }
 
@@ -2571,6 +3045,25 @@ function guardarTarjeta(){
     return;
   }
 
+  if (isDemoMode) {
+    const tarjetas = JSON.parse(localStorage.getItem('demo_tarjetas') || '[]');
+    tarjetas.push({
+      fecha: d.fecha,
+      importe: Number(d.importe),
+      descripcion: d.descripcion,
+      entidad: d.entidad,
+      categoria: d.categoria,
+      cuotas: Number(d.cuotas) || 1,
+      primeraCuota: d.primeraCuota
+    });
+    localStorage.setItem('demo_tarjetas', JSON.stringify(tarjetas));
+    renderResumen(getDemoResumen(mesActualSeleccionado, anioActualSeleccionado));
+    mensaje('Compra con tarjeta guardada (Modo Demo)');
+    $('t_importe').value = '';
+    $('t_desc').value = '';
+    return;
+  }
+
   google.script.run
     .withSuccessHandler(r => {
 
@@ -2588,6 +3081,7 @@ function guardarTarjeta(){
 }
 
 window.onload = () => {
+  checkModoDemo();
 
   const d = today();
 
@@ -2597,7 +3091,9 @@ window.onload = () => {
 
   initSelectorMes();
   refresh();
-  sincronizarPendientes(); // por si quedó algo pendiente de la última vez
+  if (!isDemoMode) {
+    sincronizarPendientes(); // por si quedó algo pendiente de la última vez
+  }
 };
 </script>
 

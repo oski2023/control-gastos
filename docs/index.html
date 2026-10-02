@@ -101,6 +101,14 @@
   </iframe>
 
   <script>
+    // Si la URL principal contiene ?demo=1 o ?modo=demo, pasárselo al iframe
+    const searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.get('demo') === '1' || searchParams.get('demo') === 'true' || searchParams.get('modo') === 'demo') {
+      const frame = document.getElementById('appFrame');
+      if (frame) {
+        frame.src = "https://script.google.com/macros/s/AKfycbwJWqgtCPiPIYE78OxkXPwIiUn3eZhci-IF2NVTA5WuXwDXkedsZReVr_mfhi1E5_is/exec?demo=1";
+      }
+    }
     function hideLoader() {
       const loader = document.getElementById('loader');
       if (loader) {
