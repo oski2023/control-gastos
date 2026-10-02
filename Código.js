@@ -2,7 +2,7 @@ const SS = SpreadsheetApp.getActiveSpreadsheet();
 
 function doGet() {
   return HtmlService.createHtmlOutputFromFile('Index')
-    .setTitle('Control de Gastos Prueba')
+    .setTitle('Control de Gastos')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }

@@ -1,0 +1,5 @@
+# Ignorar carpeta docs (solo para GitHub Pages)
+docs/**
+.git/**
+node_modules/**
+.gitignore
