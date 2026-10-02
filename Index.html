@@ -91,6 +91,14 @@ html, body {
   display: flex;
   align-items: center;
   gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.top-brand:active {
+  opacity: 0.82;
+  transform: scale(0.98);
 }
 
 .brand-avatar {
@@ -777,17 +785,17 @@ tbody tr:hover td {
 }
 
 .fab-circle {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 24px;
   color: #fff;
-  box-shadow: 0 4px 16px var(--primary-glow);
-  margin-top: -18px;
+  box-shadow: 0 4px 18px var(--primary-glow);
+  margin-top: -20px;
   border: 3px solid #0b0f19;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -878,6 +886,24 @@ tbody tr:hover td {
     padding: 14px;
     padding-bottom: 85px;
   }
+  .sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1050;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+  }
+  .sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
 }
 
 @media (min-width: 901px) {
@@ -890,15 +916,31 @@ tbody tr:hover td {
   .hamburger-btn {
     display: none;
   }
+  .sidebar-overlay {
+    display: none !important;
+  }
+}
+
+.top-brand {
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.2s ease;
+}
+
+.top-brand:active {
+  opacity: 0.8;
 }
 </style>
 </head>
 
 <body>
 
+<!-- OVERLAY PARA CERRAR SIDEBAR AL TOCAR AFUERA -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar(true)"></div>
+
 <!-- TOP APP BAR -->
 <header class="top-app-bar">
-  <div class="top-brand">
+  <div class="top-brand" onclick="showTab('resumen', this)" title="Ir a la pantalla de Inicio">
     <div class="brand-avatar">💳</div>
     <div class="brand-info">
       <span class="brand-title">Control Gastos</span>
@@ -1291,13 +1333,13 @@ tbody tr:hover td {
     <span class="nav-icon">📊</span>
     <span class="nav-label">Inicio</span>
   </button>
-  <button type="button" class="nav-item" data-tab="gasto" onclick="showTab('gasto',this)">
-    <div class="icon-bolt-blue">⚡</div>
-    <span class="nav-label">Gasto</span>
-  </button>
   <button type="button" class="nav-item" data-tab="detalle" onclick="showTab('detalle',this)">
     <span class="nav-icon">📋</span>
     <span class="nav-label">Detalle</span>
+  </button>
+  <button type="button" class="nav-item nav-fab" data-tab="gasto" onclick="showTab('gasto',this)">
+    <div class="fab-circle">⚡</div>
+    <span class="nav-label">Gasto</span>
   </button>
   <button type="button" class="nav-item" data-tab="ingreso" onclick="showTab('ingreso',this)">
     <span class="nav-icon">📥</span>
@@ -1695,9 +1737,32 @@ function agregar(tipo){
     .addConfigItem(tipo,nombre.trim());
 }
 
-function toggleSidebar(){
-  $('sidebar').classList.toggle('open');
+function toggleSidebar(forceClose = false){
+  const sb = $('sidebar');
+  const ov = $('sidebarOverlay');
+  if(!sb) return;
+  if(forceClose){
+    sb.classList.remove('open');
+    if(ov) ov.classList.remove('active');
+  } else {
+    const willOpen = !sb.classList.contains('open');
+    sb.classList.toggle('open');
+    if(ov){
+      if(willOpen) ov.classList.add('active');
+      else ov.classList.remove('active');
+    }
+  }
 }
+
+document.addEventListener('click', function(e) {
+  const sb = $('sidebar');
+  const ov = $('sidebarOverlay');
+  if (!sb || !sb.classList.contains('open')) return;
+  if (!sb.contains(e.target) && !e.target.closest('.hamburger-btn')) {
+    sb.classList.remove('open');
+    if (ov) ov.classList.remove('active');
+  }
+});
 
 function showTab(id, btn){
 
@@ -1738,6 +1803,8 @@ function showTab(id, btn){
   }
   const sb = $('sidebar');
   if(sb) sb.classList.remove('open');
+  const ov = $('sidebarOverlay');
+  if(ov) ov.classList.remove('active');
   window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
