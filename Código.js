@@ -112,6 +112,106 @@ function addConfigItem(tipo, nombre) {
   return getConfig();
 }
 
+function removeConfigItem(tipo, nombre) {
+  nombre = String(nombre || '').trim().toLowerCase();
+  const columnas = { categoria: 1, medio: 2, entidad: 3 };
+  const col = columnas[tipo];
+  if (!col) throw new Error('Tipo de configuración no válido.');
+
+  const sh = getSheet_('Configuración');
+  const last = Math.max(sh.getLastRow(), 2);
+  const vals = sh.getRange(2, col, Math.max(last - 1, 1), 1).getValues();
+
+  const filtrados = vals
+    .map(r => String(r[0] || '').trim())
+    .filter(v => v && v.toLowerCase() !== nombre && !/agreg[aá].*(debajo|lista|aquí)/i.test(v));
+
+  // Limpiar columna desde la fila 2
+  sh.getRange(2, col, Math.max(last - 1, 1), 1).clearContent();
+
+  if (filtrados.length > 0) {
+    const nuevosVals = filtrados.map(v => [v]);
+    sh.getRange(2, col, nuevosVals.length, 1).setValues(nuevosVals);
+  }
+
+  return getConfig();
+}
+
+function getGastosFijosConfig() {
+  const sh = getSheet_('GastosFijos');
+  const last = sh.getLastRow();
+  if (last < 2) return [];
+  const vals = sh.getRange(2, 1, last - 1, 3).getValues();
+  const lista = [];
+  for (let i = 0; i < vals.length; i++) {
+    const cat = String(vals[i][0] || '').trim();
+    if (!cat) continue;
+    const dia = Number(vals[i][1]) || 1;
+    const activoVal = String(vals[i][2] || 'SI').trim().toUpperCase();
+    const activo = (activoVal !== 'NO' && activoVal !== 'PAUSADO' && activoVal !== 'INACTIVO');
+    lista.push({
+      fila: i + 2,
+      categoria: cat,
+      diaVencimiento: dia,
+      activo: activo
+    });
+  }
+  return lista.sort((a, b) => a.categoria.localeCompare(b.categoria, 'es', { sensitivity: 'base' }));
+}
+
+function addGastoFijo(categoria, diaVencimiento) {
+  categoria = String(categoria || '').trim();
+  diaVencimiento = Math.max(1, Math.min(31, Number(diaVencimiento) || 1));
+  if (!categoria) throw new Error('Ingresá el nombre o categoría del gasto fijo.');
+
+  const sh = getSheet_('GastosFijos');
+  sh.appendRow([ categoria, diaVencimiento, 'SI' ]);
+  return getGastosFijosConfig();
+}
+
+function toggleGastoFijo(fila, activo) {
+  const sh = getSheet_('GastosFijos');
+  fila = Number(fila);
+  if (fila >= 2 && fila <= sh.getLastRow()) {
+    sh.getRange(fila, 3).setValue(activo ? 'SI' : 'NO');
+  }
+  return getGastosFijosConfig();
+}
+
+function eliminarGastoFijo(fila, categoriaVerif) {
+  const sh = getSheet_('GastosFijos');
+  fila = Number(fila);
+  let filaBorrada = false;
+
+  if (fila >= 2 && fila <= sh.getLastRow()) {
+    if (categoriaVerif) {
+      const catHoja = String(sh.getRange(fila, 1).getValue() || '').trim().toLowerCase();
+      if (catHoja === String(categoriaVerif).trim().toLowerCase()) {
+        sh.deleteRow(fila);
+        filaBorrada = true;
+      }
+    } else {
+      sh.deleteRow(fila);
+      filaBorrada = true;
+    }
+  }
+
+  if (!filaBorrada && categoriaVerif) {
+    const last = sh.getLastRow();
+    if (last >= 2) {
+      const vals = sh.getRange(2, 1, last - 1, 1).getValues();
+      for (let i = 0; i < vals.length; i++) {
+        if (String(vals[i][0] || '').trim().toLowerCase() === String(categoriaVerif).trim().toLowerCase()) {
+          sh.deleteRow(i + 2);
+          break;
+        }
+      }
+    }
+  }
+
+  return getGastosFijosConfig();
+}
+
 function addIngreso(data) {
   const sh = getSheet_('Ingresos');
   const f = parseFechaLocal_(data.fecha);
@@ -229,7 +329,9 @@ function getGastosFijosPendientes(mes, anio) {
   for (let i = 1; i < fijos.length; i++) {
     const categoria = String(fijos[i][0] || '').trim();
     const diaVencimiento = Number(fijos[i][1]) || 0;
-    if (!categoria) continue;
+    const activoVal = String(fijos[i][2] || 'SI').trim().toUpperCase();
+    const activo = (activoVal !== 'NO' && activoVal !== 'PAUSADO' && activoVal !== 'INACTIVO');
+    if (!categoria || !activo) continue;
 
     const catKey = normCat(categoria);
     let pagosAnt = pagosMesAnt[catKey] || 0;
@@ -463,7 +565,11 @@ function getInitialData(mes, anio) {
   const hoy = new Date();
   mes = mes ? Number(mes) : (hoy.getMonth() + 1);
   anio = anio ? Number(anio) : hoy.getFullYear();
-  return { config: getConfig(), resumen: getResumen(mes, anio) };
+  return {
+    config: getConfig(),
+    resumen: getResumen(mes, anio),
+    gastosFijosConfig: getGastosFijosConfig()
+  };
 }
 
 function getHistorial(filtros) {

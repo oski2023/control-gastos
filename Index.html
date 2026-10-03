@@ -984,6 +984,182 @@ tbody tr:hover td {
   transform: scale(0.95);
 }
 
+/* CONFIGURACIÓN Y PERSONALIZACIÓN */
+.cfg-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.cfg-tab-btn {
+  flex: 1;
+  min-width: fit-content;
+  white-space: nowrap;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.cfg-tab-btn.active {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+  box-shadow: 0 2px 10px rgba(56, 189, 248, 0.15);
+}
+
+.cfg-card-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.cfg-chips-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.cfg-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 7px 10px 7px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #f1f5f9;
+  transition: all 0.15s ease;
+}
+
+.cfg-chip:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.cfg-chip-del {
+  background: rgba(239, 68, 68, 0.15);
+  border: none;
+  color: #fca5a5;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+
+.cfg-chip-del:hover, .cfg-chip-del:active {
+  background: #ef4444;
+  color: #fff;
+  transform: scale(1.1);
+}
+
+/* CARDS DE GASTOS FIJOS EN CONFIGURACIÓN */
+.fijo-cfg-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: border-color 0.2s;
+}
+
+.fijo-cfg-card.pausado {
+  opacity: 0.65;
+  border-style: dashed;
+}
+
+.fijo-cfg-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.fijo-cfg-title {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.fijo-cfg-vto {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.fijo-cfg-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* SWITCH TOGGLE */
+.switch-wrap {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.switch-wrap input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  transition: 0.25s;
+}
+
+.switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.25s;
+}
+
+input:checked + .switch-slider {
+  background-color: #10b981;
+}
+
+input:checked + .switch-slider:before {
+  transform: translateX(20px);
+}
+
 /* BOTTOM NAVIGATION BAR (FinTech Native) */
 .bottom-nav {
   position: fixed;
@@ -1338,6 +1514,7 @@ body.is-landscape .hamburger-btn {
   <div class="top-actions">
     <button type="button" class="icon-btn" onclick="toggleMontos()" id="btnOjoTop" title="Mostrar/Ocultar montos">👁️</button>
     <button type="button" class="icon-btn tab" data-tab="historial" onclick="showTab('historial',this)" title="Historial">📜</button>
+    <button type="button" class="icon-btn tab" data-tab="configuracion" onclick="showTab('configuracion',this)" title="Configuración y Ajustes">⚙️</button>
     <button type="button" class="icon-btn hamburger-btn" onclick="toggleSidebar()" title="Menú">☰</button>
   </div>
 </header>
@@ -1351,6 +1528,7 @@ body.is-landscape .hamburger-btn {
     <button type="button" class="tab" data-tab="ingreso" onclick="showTab('ingreso',this)">📥 + Ingreso</button>
     <button type="button" class="tab" data-tab="tarjeta" onclick="showTab('tarjeta',this)">💳 + Tarjeta</button>
     <button type="button" class="tab" data-tab="historial" onclick="showTab('historial',this)">📜 Historial</button>
+    <button type="button" class="tab" data-tab="configuracion" onclick="showTab('configuracion',this)">⚙️ Configuración</button>
   </nav>
 
   <main class="content">
@@ -1749,6 +1927,139 @@ body.is-landscape .hamburger-btn {
           <tbody id="h_tabla"></tbody>
         </table>
       </div>
+    </section>
+
+    <!-- CONFIGURACION Y PERSONALIZACION -->
+    <section id="configuracion" class="card hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;">
+        <h2 style="margin:0;">⚙️ Configuración y Ajustes</h2>
+      </div>
+      <p style="color:var(--text-muted);font-size:13px;margin:0 0 16px;line-height:1.4;">
+        Personalizá las listas desplegables, tus alertas de gastos fijos y la privacidad de la app.
+      </p>
+
+      <!-- SUB-PESTAÑAS INTERNAS -->
+      <div class="cfg-tabs">
+        <button type="button" id="btn_cfg_cat" class="cfg-tab-btn active" onclick="cambiarTabConfig('cat')">
+          🏷️ Categorías
+        </button>
+        <button type="button" id="btn_cfg_fijos" class="cfg-tab-btn" onclick="cambiarTabConfig('fijos')">
+          ⏰ Gastos Fijos
+        </button>
+        <button type="button" id="btn_cfg_entidades" class="cfg-tab-btn" onclick="cambiarTabConfig('entidades')">
+          🏦 Bancos y Medios
+        </button>
+        <button type="button" id="btn_cfg_pref" class="cfg-tab-btn" onclick="cambiarTabConfig('pref')">
+          🛡️ Preferencias
+        </button>
+      </div>
+
+      <!-- PANEL CATEGORÍAS -->
+      <div id="panel_cfg_cat">
+        <div class="cfg-card-box">
+          <label style="font-size:13px;font-weight:700;color:#fff;">+ Agregar nueva categoría</label>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <input type="text" id="cfg_nueva_cat" placeholder="Ej.: Supermercado, Farmacia..." style="flex:1;">
+            <button type="button" class="addbtn" onclick="agregarCategoriaDesdeConfig()" style="padding:10px 16px;font-size:13px;font-weight:700;">+ Agregar</button>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;">
+          <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-dim);" id="cfg_cat_count">Categorías activas</span>
+          <span style="font-size:11px;color:var(--text-muted);">Tocá 🗑️ para quitar de la lista</span>
+        </div>
+
+        <div class="cfg-chips-grid" id="cfg_lista_categorias"></div>
+      </div>
+
+      <!-- PANEL GASTOS FIJOS -->
+      <div id="panel_cfg_fijos" style="display:none;">
+        <div class="cfg-card-box">
+          <label style="font-size:13px;font-weight:700;color:#fff;">+ Configurar nuevo gasto fijo</label>
+          <p style="color:var(--text-muted);font-size:12px;margin:4px 0 10px;">
+            La app te avisará en el Inicio los meses que esté próximo a vencer o si se venció y aún no lo registraste.
+          </p>
+          <div class="grid" style="margin-top:8px;">
+            <div>
+              <label>Categoría / Concepto</label>
+              <select id="cfg_fijo_categoria"></select>
+            </div>
+            <div>
+              <label>Día de vencimiento (1 al 31)</label>
+              <input type="number" id="cfg_fijo_dia" min="1" max="31" value="10" placeholder="Ej: 10">
+            </div>
+            <div class="full">
+              <button type="button" class="save full" onclick="guardarNuevoGastoFijoDesdeConfig()" style="margin-top:4px;">
+                + Agregar gasto fijo
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;margin-bottom:8px;">
+          <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-dim);" id="cfg_fijos_count">Gastos Fijos Programados</span>
+        </div>
+
+        <div id="cfg_lista_fijos"></div>
+      </div>
+
+      <!-- PANEL BANCOS Y MEDIOS -->
+      <div id="panel_cfg_entidades" style="display:none;">
+        <!-- Bloque Entidades -->
+        <div class="cfg-card-box">
+          <label style="font-size:13px;font-weight:700;color:#fff;">+ Agregar banco o billetera</label>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <input type="text" id="cfg_nueva_entidad" placeholder="Ej.: Mercado Pago, Galicia, Ualá..." style="flex:1;">
+            <button type="button" class="addbtn" onclick="agregarEntidadDesdeConfig()" style="padding:10px 16px;font-size:13px;font-weight:700;">+ Agregar</button>
+          </div>
+          <div class="cfg-chips-grid" id="cfg_lista_entidades" style="margin-top:14px;"></div>
+        </div>
+
+        <!-- Bloque Medios -->
+        <div class="cfg-card-box">
+          <label style="font-size:13px;font-weight:700;color:#fff;">+ Agregar medio de pago</label>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <input type="text" id="cfg_nuevo_medio" placeholder="Ej.: Efectivo, Débito, Transferencia..." style="flex:1;">
+            <button type="button" class="addbtn" onclick="agregarMedioDesdeConfig()" style="padding:10px 16px;font-size:13px;font-weight:700;">+ Agregar</button>
+          </div>
+          <div class="cfg-chips-grid" id="cfg_lista_medios" style="margin-top:14px;"></div>
+        </div>
+      </div>
+
+      <!-- PANEL PREFERENCIAS -->
+      <div id="panel_cfg_pref" style="display:none;">
+        <div class="fijo-cfg-card" style="margin-bottom:14px;">
+          <div class="fijo-cfg-info">
+            <span class="fijo-cfg-title">Modo Privacidad al Iniciar</span>
+            <span class="fijo-cfg-vto">Abrir la app con los montos en $ •••• por defecto (modo espía).</span>
+          </div>
+          <label class="switch-wrap">
+            <input type="checkbox" id="cfg_chk_privacidad" onchange="cambiarPrivacidadInicio(this.checked)">
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+
+        <div class="cfg-card-box">
+          <label style="font-size:14px;font-weight:700;color:#fff;">📥 Copia de seguridad y Respaldo</label>
+          <p style="color:var(--text-muted);font-size:12px;margin:4px 0 14px;">
+            Descargá una planilla de cálculo con todos los movimientos para abrir en Excel o Google Sheets.
+          </p>
+          <button type="button" onclick="exportarMovimientosCSV()" style="width:100%;padding:12px;background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.3);color:var(--primary);font-weight:700;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <span>📊</span> Descargar movimientos a Excel (CSV)
+          </button>
+        </div>
+
+        <div id="cfg_seccion_demo" style="display:none;" class="cfg-card-box">
+          <label style="font-size:14px;font-weight:700;color:#fca5a5;">🧪 Opciones Modo Invitado</label>
+          <p style="color:var(--text-muted);font-size:12px;margin:4px 0 14px;">
+            Reiniciá todos los movimientos de prueba guardados en este dispositivo.
+          </p>
+          <button type="button" onclick="reiniciarDemo()" style="width:100%;padding:12px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.35);color:#fca5a5;font-weight:700;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <span>🔄</span> Reiniciar todos los datos de prueba
+          </button>
+        </div>
+      </div>
+
     </section>
   </main>
 </div>
@@ -2823,146 +3134,187 @@ function actualizarTextoBtnFijos() {
   }
 }
 
-function renderGastosFijosPendientes(){
-  if (isDemoMode) {
-    const cont = $('alertaFijos');
-    if (cont) cont.classList.add('hidden');
+function aplicarDatosGastosFijosUI(res){
+  const cont = $('alertaFijos');
+  const listaPendientes = $('listaFijosPendientes');
+  const listaAlDia = $('listaFijosAlDia');
+  const listaProximos = $('listaFijosProximos');
+  const wrapProximos = $('wrapFijosProximos');
+  const wrapAlDia = $('wrapFijosAlDia');
+  const titulo = $('fijosTitulo');
+  const btn = $('btnToggleAlDia');
+
+  if(!cont || !listaPendientes) return;
+
+  // Normalizar datos
+  let pendientes = [];
+  let alDia = [];
+  let proximos = [];
+
+  if (Array.isArray(res)) {
+    pendientes = res;
+  } else if (res && typeof res === 'object') {
+    pendientes = res.pendientes || [];
+    alDia = res.alDia || [];
+    proximos = res.proximos || [];
+  }
+
+  estadoFijosData = { pendientes, alDia, proximos };
+
+  // Si no hay ningún gasto fijo configurado ni registrado, ocultamos
+  if (!pendientes.length && !alDia.length && !proximos.length) {
+    cont.classList.add('hidden');
     return;
   }
-  google.script.run.withSuccessHandler(res=>{
-    const cont = $('alertaFijos');
-    const listaPendientes = $('listaFijosPendientes');
-    const listaAlDia = $('listaFijosAlDia');
-    const listaProximos = $('listaFijosProximos');
-    const wrapProximos = $('wrapFijosProximos');
-    const wrapAlDia = $('wrapFijosAlDia');
-    const titulo = $('fijosTitulo');
-    const btn = $('btnToggleAlDia');
 
-    if(!cont || !listaPendientes) return;
+  // 1. POBLAR LISTA DE PENDIENTES
+  listaPendientes.innerHTML = '';
+  pendientes.forEach(p=>{
+    const li = document.createElement('li');
+    li.style.marginBottom = '8px';
+    li.style.cursor = 'pointer';
+    li.title = 'Toca para cargar este gasto';
+    li.onclick = () => {
+      if ($('g_categoria')) $('g_categoria').value = p.categoria;
+      showTab('gasto');
+    };
 
-    // Normalizar datos
-    let pendientes = [];
-    let alDia = [];
-    let proximos = [];
+    const badgeMes = p.esMesAnterior 
+      ? '<span style="background:rgba(239,68,68,0.22);color:#fca5a5;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;margin-left:6px;border:1px solid rgba(239,68,68,0.4)">Mes anterior (' + p.mesNombre + ')</span>'
+      : '<span style="background:rgba(245,158,11,0.22);color:#fde047;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;margin-left:6px;border:1px solid rgba(245,158,11,0.4)">Este mes (' + p.mesNombre + ')</span>';
 
-    if (Array.isArray(res)) {
-      pendientes = res;
-    } else if (res && typeof res === 'object') {
-      pendientes = res.pendientes || [];
-      alDia = res.alDia || [];
-      proximos = res.proximos || [];
+    const textoDetalle = p.diasVencido > 0 
+      ? ' — venció el día ' + p.diaVencimiento + ' (' + p.diasVencido + ' día(s) sin abonar)'
+      : ' — vence hoy día ' + p.diaVencimiento;
+
+    li.innerHTML = '<strong style="color:#fff;font-size:14px">' + p.categoria + '</strong>' + badgeMes + 
+                   '<span style="color:var(--text-muted);font-size:12px;display:block;margin-top:2px;">' + textoDetalle + ' <span style="color:var(--primary);text-decoration:underline;margin-left:4px;">(Cargar ahora ⚡)</span></span>';
+    listaPendientes.appendChild(li);
+  });
+
+  // 2. POBLAR LISTA DE AL DIA
+  if (listaAlDia) {
+    listaAlDia.innerHTML = '';
+    if (!alDia.length) {
+      listaAlDia.innerHTML = '<li style="color:var(--text-dim);font-size:13px;list-style:none;">Aún no se registraron pagos de gastos fijos este mes.</li>';
+    } else {
+      alDia.forEach(p => {
+        const li = document.createElement('li');
+        li.style.marginBottom = '6px';
+        li.style.color = '#e2e8f0';
+        li.style.fontSize = '13px';
+        const detallePago = (p.fechaPago ? ' el ' + p.fechaPago : '') + 
+                            (p.monto ? ' · <strong style="color:#34d399">' + money(p.monto) + '</strong>' : '') + 
+                            (p.medio ? ' <span style="color:var(--text-dim);font-size:11px">[' + p.medio + ']</span>' : '');
+        li.innerHTML = '<span style="color:#34d399;font-weight:700;">✅ ' + p.categoria + '</span> — <span style="color:#cbd5e1">Pagado' + detallePago + '</span>';
+        listaAlDia.appendChild(li);
+      });
     }
+  }
 
-    estadoFijosData = { pendientes, alDia, proximos };
-
-    // Si no hay ningún gasto fijo configurado ni registrado, ocultamos
-    if (!pendientes.length && !alDia.length && !proximos.length) {
-      cont.classList.add('hidden');
-      return;
+  // 3. POBLAR PROXIMOS
+  if (listaProximos && wrapProximos) {
+    listaProximos.innerHTML = '';
+    if (proximos.length > 0) {
+      wrapProximos.classList.remove('hidden');
+      proximos.forEach(p => {
+        const li = document.createElement('li');
+        li.style.marginBottom = '5px';
+        li.style.color = 'var(--text-muted)';
+        li.style.fontSize = '13px';
+        li.innerHTML = '⏳ <strong style="color:#cbd5e1">' + p.categoria + '</strong> — vence el día ' + p.diaVencimiento + ' (en ' + p.diasFaltan + ' día(s))';
+        listaProximos.appendChild(li);
+      });
+    } else {
+      wrapProximos.classList.add('hidden');
     }
+  }
 
-    // 1. POBLAR LISTA DE PENDIENTES
-    listaPendientes.innerHTML = '';
-    pendientes.forEach(p=>{
-      const li = document.createElement('li');
-      li.style.marginBottom = '8px';
-      li.style.cursor = 'pointer';
-      li.title = 'Toca para cargar este gasto';
-      li.onclick = () => {
-        if ($('g_categoria')) $('g_categoria').value = p.categoria;
-        showTab('gasto');
-      };
+  // 4. CONFIGURAR ESTILO SEGUN PENDIENTES VS AL DIA
+  if (pendientes.length > 0) {
+    cont.className = 'alert-box alert-warning';
+    cont.style.background = 'rgba(245, 158, 11, 0.12)';
+    cont.style.borderColor = 'rgba(245, 158, 11, 0.35)';
+    if (titulo) {
+      titulo.innerHTML = '<span style="color:#fbbf24;font-size:14px;">⚠️ Gastos fijos pendientes (' + pendientes.length + '):</span>';
+    }
+    listaPendientes.style.display = 'block';
+  } else {
+    // ¡TODO AL DIA! TRANQUILIDAD VISUAL
+    cont.className = 'alert-box alert-success';
+    cont.style.background = 'rgba(16, 185, 129, 0.12)';
+    cont.style.borderColor = 'rgba(16, 185, 129, 0.35)';
+    if (titulo) {
+      titulo.innerHTML = '<span style="color:#34d399;font-size:14px;">🎉 ¡Todos tus gastos fijos están al día este mes!</span>';
+    }
+    listaPendientes.style.display = 'none';
+  }
 
-      const badgeMes = p.esMesAnterior 
-        ? '<span style="background:rgba(239,68,68,0.22);color:#fca5a5;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;margin-left:6px;border:1px solid rgba(239,68,68,0.4)">Mes anterior (' + p.mesNombre + ')</span>'
-        : '<span style="background:rgba(245,158,11,0.22);color:#fde047;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;margin-left:6px;border:1px solid rgba(245,158,11,0.4)">Este mes (' + p.mesNombre + ')</span>';
+  // Estado del botón toggle
+  if (btn) {
+    if (alDia.length > 0 || proximos.length > 0) {
+      btn.style.display = 'inline-flex';
+      if (fijosAlDiaAbierto) {
+        btn.innerHTML = '▲ Ocultar';
+        if (wrapAlDia) wrapAlDia.classList.remove('hidden');
+      } else {
+        actualizarTextoBtnFijos();
+        if (wrapAlDia) wrapAlDia.classList.add('hidden');
+      }
+    } else {
+      btn.style.display = 'none';
+    }
+  }
 
-      const textoDetalle = p.diasVencido > 0 
-        ? ' — venció el día ' + p.diaVencimiento + ' (' + p.diasVencido + ' día(s) sin abonar)'
-        : ' — vence hoy día ' + p.diaVencimiento;
+  cont.classList.remove('hidden');
+}
 
-      li.innerHTML = '<strong style="color:#fff;font-size:14px">' + p.categoria + '</strong>' + badgeMes + 
-                     '<span style="color:var(--text-muted);font-size:12px;display:block;margin-top:2px;">' + textoDetalle + ' <span style="color:var(--primary);text-decoration:underline;margin-left:4px;">(Cargar ahora ⚡)</span></span>';
-      listaPendientes.appendChild(li);
+function renderGastosFijosPendientes(){
+  if (isDemoMode) {
+    let fijos = JSON.parse(localStorage.getItem('demo_gastos_fijos') || 'null');
+    if (!fijos) {
+      fijos = [
+        { id: 'fijo_1', categoria: 'Alquiler', diaVencimiento: 10, activo: true },
+        { id: 'fijo_2', categoria: 'Internet / Wifi', diaVencimiento: 15, activo: true },
+        { id: 'fijo_3', categoria: 'Luz / Servicios', diaVencimiento: 20, activo: true }
+      ];
+      localStorage.setItem('demo_gastos_fijos', JSON.stringify(fijos));
+    }
+    const hoy = new Date();
+    const diaHoy = hoy.getDate();
+    const demoGastos = JSON.parse(localStorage.getItem('demo_gastos') || '[]');
+    const mesActual = hoy.getMonth() + 1;
+    const anioActual = hoy.getFullYear();
+
+    const pendientes = [];
+    const alDia = [];
+    const proximos = [];
+
+    fijos.forEach(f => {
+      if (f.activo === false) return;
+      const catNorm = (f.categoria || '').trim().toLowerCase();
+      const pago = demoGastos.find(g => {
+        if (!g.fecha) return false;
+        const [y, m] = g.fecha.split('-').map(Number);
+        return y === anioActual && m === mesActual && (g.categoria || '').trim().toLowerCase() === catNorm;
+      });
+      if (pago) {
+        alDia.push({ categoria: f.categoria, diaVencimiento: f.diaVencimiento, fechaPago: pago.fecha, monto: pago.monto, medio: pago.medio });
+      } else if (diaHoy >= f.diaVencimiento) {
+        pendientes.push({ categoria: f.categoria, diaVencimiento: f.diaVencimiento, diasVencido: diaHoy - f.diaVencimiento, mesNombre: 'actual' });
+      } else {
+        proximos.push({ categoria: f.categoria, diaVencimiento: f.diaVencimiento, diasFaltan: f.diaVencimiento - diaHoy });
+      }
     });
 
-    // 2. POBLAR LISTA DE AL DIA
-    if (listaAlDia) {
-      listaAlDia.innerHTML = '';
-      if (!alDia.length) {
-        listaAlDia.innerHTML = '<li style="color:var(--text-dim);font-size:13px;list-style:none;">Aún no se registraron pagos de gastos fijos este mes.</li>';
-      } else {
-        alDia.forEach(p => {
-          const li = document.createElement('li');
-          li.style.marginBottom = '6px';
-          li.style.color = '#e2e8f0';
-          li.style.fontSize = '13px';
-          const detallePago = (p.fechaPago ? ' el ' + p.fechaPago : '') + 
-                              (p.monto ? ' · <strong style="color:#34d399">' + money(p.monto) + '</strong>' : '') + 
-                              (p.medio ? ' <span style="color:var(--text-dim);font-size:11px">[' + p.medio + ']</span>' : '');
-          li.innerHTML = '<span style="color:#34d399;font-weight:700;">✅ ' + p.categoria + '</span> — <span style="color:#cbd5e1">Pagado' + detallePago + '</span>';
-          listaAlDia.appendChild(li);
-        });
-      }
-    }
+    aplicarDatosGastosFijosUI({ pendientes, alDia, proximos });
+    return;
+  }
 
-    // 3. POBLAR PROXIMOS
-    if (listaProximos && wrapProximos) {
-      listaProximos.innerHTML = '';
-      if (proximos.length > 0) {
-        wrapProximos.classList.remove('hidden');
-        proximos.forEach(p => {
-          const li = document.createElement('li');
-          li.style.marginBottom = '5px';
-          li.style.color = 'var(--text-muted)';
-          li.style.fontSize = '13px';
-          li.innerHTML = '⏳ <strong style="color:#cbd5e1">' + p.categoria + '</strong> — vence el día ' + p.diaVencimiento + ' (en ' + p.diasFaltan + ' día(s))';
-          listaProximos.appendChild(li);
-        });
-      } else {
-        wrapProximos.classList.add('hidden');
-      }
-    }
-
-    // 4. CONFIGURAR ESTILO SEGUN PENDIENTES VS AL DIA
-    if (pendientes.length > 0) {
-      cont.className = 'alert-box alert-warning';
-      cont.style.background = 'rgba(245, 158, 11, 0.12)';
-      cont.style.borderColor = 'rgba(245, 158, 11, 0.35)';
-      if (titulo) {
-        titulo.innerHTML = '<span style="color:#fbbf24;font-size:14px;">⚠️ Gastos fijos pendientes (' + pendientes.length + '):</span>';
-      }
-      listaPendientes.style.display = 'block';
-    } else {
-      // ¡TODO AL DIA! TRANQUILIDAD VISUAL
-      cont.className = 'alert-box alert-success';
-      cont.style.background = 'rgba(16, 185, 129, 0.12)';
-      cont.style.borderColor = 'rgba(16, 185, 129, 0.35)';
-      if (titulo) {
-        titulo.innerHTML = '<span style="color:#34d399;font-size:14px;">🎉 ¡Todos tus gastos fijos están al día este mes!</span>';
-      }
-      listaPendientes.style.display = 'none';
-    }
-
-    // Estado del botón toggle
-    if (btn) {
-      if (alDia.length > 0 || proximos.length > 0) {
-        btn.style.display = 'inline-flex';
-        if (fijosAlDiaAbierto) {
-          btn.innerHTML = '▲ Ocultar';
-          if (wrapAlDia) wrapAlDia.classList.remove('hidden');
-        } else {
-          actualizarTextoBtnFijos();
-          if (wrapAlDia) wrapAlDia.classList.add('hidden');
-        }
-      } else {
-        btn.style.display = 'none';
-      }
-    }
-
-    cont.classList.remove('hidden');
-  }).getGastosFijosPendientes(mesActualSeleccionado, anioActualSeleccionado);
+  google.script.run
+    .withSuccessHandler(res => aplicarDatosGastosFijosUI(res))
+    .withFailureHandler(e => console.error('Error al obtener gastos fijos:', e))
+    .getGastosFijosPendientes(mesActualSeleccionado, anioActualSeleccionado);
 }
 
 function aplicarUltimasSelecciones(){
@@ -3093,7 +3445,7 @@ document.addEventListener('click', function(e) {
 
 function showTab(id, btn){
 
-  ['resumen','detalle','gasto','rapido','ingreso', 'historial', 'tarjeta'].forEach(x => {
+  ['resumen','detalle','gasto','rapido','ingreso', 'historial', 'tarjeta', 'configuracion'].forEach(x => {
     const seccion = $(x);
     if(seccion) seccion.classList.add('hidden');
   });
@@ -3128,11 +3480,455 @@ function showTab(id, btn){
     poblarFiltrosHistorial();
     cargarHistorial();
   }
+
+  if(id === 'configuracion'){
+    renderConfiguracionUI();
+  }
+
   const sb = $('sidebar');
   if(sb) sb.classList.remove('open');
   const ov = $('sidebarOverlay');
   if(ov) ov.classList.remove('active');
   window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// ==========================================
+// SECCIÓN CONFIGURACIÓN Y PERSONALIZACIÓN
+// ==========================================
+let gastosFijosConfigLista = [];
+let tabConfigActiva = 'cat';
+
+function cambiarTabConfig(tab) {
+  tabConfigActiva = tab;
+  ['cat', 'fijos', 'entidades', 'pref'].forEach(t => {
+    const btn = $('btn_cfg_' + t);
+    const panel = $('panel_cfg_' + t);
+    if (btn) btn.classList.toggle('active', t === tab);
+    if (panel) panel.style.display = (t === tab ? 'block' : 'none');
+  });
+
+  if (tab === 'fijos') {
+    cargarGastosFijosConfig();
+  }
+}
+
+function renderConfiguracionUI() {
+  const secDemo = $('cfg_seccion_demo');
+  if (secDemo) secDemo.style.display = isDemoMode ? 'block' : 'none';
+
+  const chkPriv = $('cfg_chk_privacidad');
+  if (chkPriv) {
+    chkPriv.checked = (localStorage.getItem('cfg_privacidad_inicio') === '1');
+  }
+
+  renderListaConfigChips('categoria', config.categorias || [], 'cfg_lista_categorias', 'cfg_cat_count');
+  renderListaConfigChips('entidad', config.entidades || [], 'cfg_lista_entidades');
+  renderListaConfigChips('medio', config.medios || [], 'cfg_lista_medios');
+
+  const selFijoCat = $('cfg_fijo_categoria');
+  if (selFijoCat) {
+    selFijoCat.innerHTML = '<option value="">Seleccionar categoría...</option>';
+    ordenarAZ(config.categorias || []).forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c;
+      opt.textContent = c;
+      selFijoCat.appendChild(opt);
+    });
+  }
+
+  cargarGastosFijosConfig();
+}
+
+function renderListaConfigChips(tipo, items, contenedorId, contadorId) {
+  const cont = $(contenedorId);
+  if (!cont) return;
+  cont.innerHTML = '';
+
+  const lista = ordenarAZ(items);
+  if (contadorId && $(contadorId)) {
+    $(contadorId).textContent = lista.length + ' ' + (tipo === 'categoria' ? 'categorías activas' : 'elementos');
+  }
+
+  if (lista.length === 0) {
+    cont.innerHTML = '<span style="color:var(--text-dim);font-size:13px;">No hay elementos configurados.</span>';
+    return;
+  }
+
+  lista.forEach(nombre => {
+    const chip = document.createElement('div');
+    chip.className = 'cfg-chip';
+    chip.innerHTML = `<span>${escapeHtml(nombre)}</span>`;
+
+    const btnDel = document.createElement('button');
+    btnDel.type = 'button';
+    btnDel.className = 'cfg-chip-del';
+    btnDel.title = 'Quitar de la lista';
+    btnDel.innerHTML = '🗑️';
+    btnDel.onclick = () => pedirConfirmarEliminarConfigItem(tipo, nombre);
+
+    chip.appendChild(btnDel);
+    cont.appendChild(chip);
+  });
+}
+
+function pedirConfirmarEliminarConfigItem(tipo, nombre) {
+  const nombresTipo = { categoria: 'la categoría', entidad: 'el banco / entidad', medio: 'el medio de pago' };
+  const etiqueta = nombresTipo[tipo] || 'este elemento';
+
+  if (!confirm(`¿Querés eliminar ${etiqueta} "${nombre}" de la lista?\n\nLos gastos que ya la tengan registrada no se borrarán, pero dejará de aparecer en los desplegables.`)) {
+    return;
+  }
+
+  if (isDemoMode) {
+    let clave = 'categorias';
+    if (tipo === 'entidad') clave = 'entidades';
+    else if (tipo === 'medio') clave = 'medios';
+
+    config[clave] = (config[clave] || []).filter(x => x.toLowerCase() !== nombre.toLowerCase());
+    localStorage.setItem('demo_' + clave, JSON.stringify(config[clave]));
+
+    fillSelect('g_' + tipo, config[clave]);
+    if ($('r_' + tipo)) fillSelect('r_' + tipo, config[clave]);
+    if ($('t_' + tipo)) fillSelect('t_' + tipo, config[clave]);
+
+    renderConfiguracionUI();
+    mensaje('Se eliminó ' + nombre + ' de la lista (Modo Demo)');
+    return;
+  }
+
+  google.script.run
+    .withSuccessHandler(nuevaConfig => {
+      config = nuevaConfig;
+      fillSelect('g_categoria', config.categorias);
+      fillSelect('g_entidad', config.entidades);
+      fillSelect('g_medio', config.medios);
+      fillSelect('t_categoria', config.categorias);
+      fillSelect('t_entidad', config.entidades);
+      fillSelect('r_categoria', config.categorias);
+      fillSelect('r_medio', config.medios);
+      fillSelect('r_entidad', config.entidades);
+
+      renderConfiguracionUI();
+      mensaje('Se eliminó ' + nombre + ' de la lista.');
+    })
+    .withFailureHandler(e => mensaje(e.message, true))
+    .removeConfigItem(tipo, nombre);
+}
+
+function agregarCategoriaDesdeConfig() {
+  const inp = $('cfg_nueva_cat');
+  const val = (inp ? inp.value : '').trim();
+  if (!val) { mensaje('Escribí el nombre de la categoría.', true); return; }
+  agregarItemGenericoConfig('categoria', val, () => { if (inp) inp.value = ''; });
+}
+
+function agregarEntidadDesdeConfig() {
+  const inp = $('cfg_nueva_entidad');
+  const val = (inp ? inp.value : '').trim();
+  if (!val) { mensaje('Escribí el nombre del banco o entidad.', true); return; }
+  agregarItemGenericoConfig('entidad', val, () => { if (inp) inp.value = ''; });
+}
+
+function agregarMedioDesdeConfig() {
+  const inp = $('cfg_nuevo_medio');
+  const val = (inp ? inp.value : '').trim();
+  if (!val) { mensaje('Escribí el nombre del medio de pago.', true); return; }
+  agregarItemGenericoConfig('medio', val, () => { if (inp) inp.value = ''; });
+}
+
+function agregarItemGenericoConfig(tipo, valor, callbackExito) {
+  if (isDemoMode) {
+    let clave = 'categorias';
+    if (tipo === 'entidad') clave = 'entidades';
+    else if (tipo === 'medio') clave = 'medios';
+
+    if (!config[clave]) config[clave] = [];
+    if (!config[clave].some(x => x.toLowerCase() === valor.toLowerCase())) {
+      config[clave].push(valor);
+      localStorage.setItem('demo_' + clave, JSON.stringify(config[clave]));
+    }
+    fillSelect('g_' + tipo, config[clave]);
+    if ($('r_' + tipo)) fillSelect('r_' + tipo, config[clave]);
+    if ($('t_' + tipo)) fillSelect('t_' + tipo, config[clave]);
+
+    renderConfiguracionUI();
+    if (callbackExito) callbackExito();
+    mensaje('Se agregó (Demo): ' + valor);
+    return;
+  }
+
+  google.script.run
+    .withSuccessHandler(nuevaConfig => {
+      config = nuevaConfig;
+      fillSelect('g_categoria', config.categorias);
+      fillSelect('g_entidad', config.entidades);
+      fillSelect('g_medio', config.medios);
+      fillSelect('t_categoria', config.categorias);
+      fillSelect('t_entidad', config.entidades);
+      fillSelect('r_categoria', config.categorias);
+      fillSelect('r_medio', config.medios);
+      fillSelect('r_entidad', config.entidades);
+
+      renderConfiguracionUI();
+      if (callbackExito) callbackExito();
+      mensaje('Se agregó: ' + valor);
+    })
+    .withFailureHandler(e => mensaje(e.message, true))
+    .addConfigItem(tipo, valor);
+}
+
+// ---------------- GASTOS FIJOS EN CONFIGURACIÓN ----------------
+function cargarGastosFijosConfig() {
+  if (isDemoMode) {
+    let fijos = JSON.parse(localStorage.getItem('demo_gastos_fijos') || 'null');
+    if (!fijos) {
+      fijos = [
+        { id: 'fijo_1', categoria: 'Alquiler', diaVencimiento: 10, activo: true },
+        { id: 'fijo_2', categoria: 'Internet / Wifi', diaVencimiento: 15, activo: true },
+        { id: 'fijo_3', categoria: 'Luz / Servicios', diaVencimiento: 20, activo: true }
+      ];
+      localStorage.setItem('demo_gastos_fijos', JSON.stringify(fijos));
+    }
+    gastosFijosConfigLista = fijos;
+    renderGastosFijosConfigUI();
+    return;
+  }
+
+  google.script.run
+    .withSuccessHandler(lista => {
+      gastosFijosConfigLista = lista || [];
+      renderGastosFijosConfigUI();
+    })
+    .withFailureHandler(e => {
+      console.error('Error cargando gastos fijos config:', e);
+    })
+    .getGastosFijosConfig();
+}
+
+function renderGastosFijosConfigUI() {
+  const cont = $('cfg_lista_fijos');
+  if (!cont) return;
+  cont.innerHTML = '';
+
+  const lista = gastosFijosConfigLista || [];
+  if ($('cfg_fijos_count')) {
+    $('cfg_fijos_count').textContent = 'Gastos Fijos Programados (' + lista.length + ')';
+  }
+
+  if (lista.length === 0) {
+    cont.innerHTML = '<div style="color:var(--text-dim);font-size:13px;padding:12px;background:rgba(255,255,255,0.02);border-radius:10px;text-align:center;">No tenés ningún gasto fijo configurado aún. Agregá uno arriba para que la app te avise de sus vencimientos.</div>';
+    return;
+  }
+
+  lista.forEach(f => {
+    const card = document.createElement('div');
+    card.className = 'fijo-cfg-card' + (f.activo ? '' : ' pausado');
+
+    const info = document.createElement('div');
+    info.className = 'fijo-cfg-info';
+    info.innerHTML = `
+      <span class="fijo-cfg-title">${escapeHtml(f.categoria)}</span>
+      <span class="fijo-cfg-vto">Vence los días <strong>${f.diaVencimiento || 1}</strong> de cada mes ${f.activo ? '<span style="color:#34d399;">• Alerta activa</span>' : '<span style="color:#94a3b8;">• Alerta pausada</span>'}</span>
+    `;
+
+    const actions = document.createElement('div');
+    actions.className = 'fijo-cfg-actions';
+
+    const labelSwitch = document.createElement('label');
+    labelSwitch.className = 'switch-wrap';
+    labelSwitch.title = f.activo ? 'Pausar alerta de este gasto fijo' : 'Activar alerta de este gasto fijo';
+
+    const chk = document.createElement('input');
+    chk.type = 'checkbox';
+    chk.checked = !!f.activo;
+    chk.onchange = () => toggleAlertaGastoFijo(f.fila, f.id, chk.checked);
+
+    const slider = document.createElement('span');
+    slider.className = 'switch-slider';
+
+    labelSwitch.appendChild(chk);
+    labelSwitch.appendChild(slider);
+
+    const btnDel = document.createElement('button');
+    btnDel.type = 'button';
+    btnDel.className = 'btn-del-action';
+    btnDel.title = 'Eliminar gasto fijo';
+    btnDel.innerHTML = '🗑️';
+    btnDel.onclick = () => pedirConfirmarEliminarGastoFijo(f.fila, f.id, f.categoria);
+
+    actions.appendChild(labelSwitch);
+    actions.appendChild(btnDel);
+
+    card.appendChild(info);
+    card.appendChild(actions);
+    cont.appendChild(card);
+  });
+}
+
+function guardarNuevoGastoFijoDesdeConfig() {
+  const cat = ($('cfg_fijo_categoria') ? $('cfg_fijo_categoria').value : '').trim();
+  const dia = Number($('cfg_fijo_dia') ? $('cfg_fijo_dia').value : 1) || 1;
+
+  if (!cat) {
+    mensaje('Elegí o ingresá la categoría del gasto fijo.', true);
+    return;
+  }
+  if (dia < 1 || dia > 31) {
+    mensaje('El día de vencimiento debe estar entre 1 y 31.', true);
+    return;
+  }
+
+  if (isDemoMode) {
+    let fijos = JSON.parse(localStorage.getItem('demo_gastos_fijos') || '[]');
+    fijos.push({
+      id: 'fijo_' + Date.now(),
+      categoria: cat,
+      diaVencimiento: dia,
+      activo: true
+    });
+    localStorage.setItem('demo_gastos_fijos', JSON.stringify(fijos));
+    gastosFijosConfigLista = fijos;
+    renderGastosFijosConfigUI();
+    renderGastosFijosPendientes();
+    mensaje('Gasto fijo agregado (Modo Demo)');
+    if ($('cfg_fijo_categoria')) $('cfg_fijo_categoria').value = '';
+    return;
+  }
+
+  google.script.run
+    .withSuccessHandler(lista => {
+      gastosFijosConfigLista = lista;
+      renderGastosFijosConfigUI();
+      renderGastosFijosPendientes();
+      mensaje('Gasto fijo agregado.');
+      if ($('cfg_fijo_categoria')) $('cfg_fijo_categoria').value = '';
+    })
+    .withFailureHandler(e => mensaje(e.message, true))
+    .addGastoFijo(cat, dia);
+}
+
+function toggleAlertaGastoFijo(fila, idDemo, nuevoEstado) {
+  if (isDemoMode) {
+    let fijos = JSON.parse(localStorage.getItem('demo_gastos_fijos') || '[]');
+    const target = fijos.find(x => x.id === idDemo);
+    if (target) {
+      target.activo = nuevoEstado;
+      localStorage.setItem('demo_gastos_fijos', JSON.stringify(fijos));
+      gastosFijosConfigLista = fijos;
+      renderGastosFijosConfigUI();
+      renderGastosFijosPendientes();
+      mensaje(nuevoEstado ? 'Alerta activada' : 'Alerta pausada');
+    }
+    return;
+  }
+
+  google.script.run
+    .withSuccessHandler(lista => {
+      gastosFijosConfigLista = lista;
+      renderGastosFijosConfigUI();
+      renderGastosFijosPendientes();
+      mensaje(nuevoEstado ? 'Alerta activada' : 'Alerta pausada');
+    })
+    .withFailureHandler(e => mensaje(e.message, true))
+    .toggleGastoFijo(fila, nuevoEstado);
+}
+
+function pedirConfirmarEliminarGastoFijo(fila, idDemo, categoria) {
+  if (!confirm(`¿Estás seguro de que querés eliminar el gasto fijo "${categoria}"?\n\nYa no se controlarán sus vencimientos ni se mostrarán avisos en el Inicio.`)) {
+    return;
+  }
+
+  if (isDemoMode) {
+    let fijos = JSON.parse(localStorage.getItem('demo_gastos_fijos') || '[]');
+    fijos = fijos.filter(x => x.id !== idDemo);
+    localStorage.setItem('demo_gastos_fijos', JSON.stringify(fijos));
+    gastosFijosConfigLista = fijos;
+    renderGastosFijosConfigUI();
+    renderGastosFijosPendientes();
+    mensaje('Gasto fijo eliminado (Modo Demo)');
+    return;
+  }
+
+  google.script.run
+    .withSuccessHandler(lista => {
+      gastosFijosConfigLista = lista;
+      renderGastosFijosConfigUI();
+      renderGastosFijosPendientes();
+      mensaje('Gasto fijo eliminado.');
+    })
+    .withFailureHandler(e => mensaje(e.message, true))
+    .eliminarGastoFijo(fila, categoria);
+}
+
+function cambiarPrivacidadInicio(checked) {
+  localStorage.setItem('cfg_privacidad_inicio', checked ? '1' : '0');
+  mensaje(checked ? 'Al abrir la app los números estarán ocultos' : 'Al abrir la app los números estarán visibles');
+}
+
+function exportarMovimientosCSV() {
+  mensaje('Preparando archivo para descargar...');
+
+  if (isDemoMode) {
+    const gastos = JSON.parse(localStorage.getItem('demo_gastos') || '[]');
+    const ingresos = JSON.parse(localStorage.getItem('demo_ingresos') || '[]');
+    const tarjetas = JSON.parse(localStorage.getItem('demo_tarjetas') || '[]');
+
+    let filas = [ ['Tipo', 'Fecha', 'Descripción', 'Categoría', 'Entidad / Medio', 'Monto'] ];
+
+    ingresos.forEach(x => {
+      filas.push(['Ingreso', x.fecha || '', x.descripcion || '', x.tipo || 'Ingreso', '', x.importe || 0]);
+    });
+    gastos.forEach(x => {
+      filas.push(['Gasto', x.fecha || '', x.descripcion || '', x.categoria || '', (x.entidad || '') + ' (' + (x.medio || '') + ')', x.importe || 0]);
+    });
+    tarjetas.forEach(x => {
+      filas.push(['Tarjeta', x.fecha || '', x.descripcion || '', x.categoria || '', x.entidad || 'Tarjeta', x.importe || 0]);
+    });
+
+    descargarCSV(filas, 'ControlGastos_Movimientos_Demo.csv');
+    return;
+  }
+
+  google.script.run
+    .withSuccessHandler(filasGastos => {
+      google.script.run
+        .withSuccessHandler(filasIngresos => {
+          let csvFilas = [ ['Tipo', 'Fecha', 'Descripción', 'Categoría', 'Entidad / Medio', 'Monto'] ];
+          (filasIngresos || []).forEach(x => {
+            csvFilas.push(['Ingreso', x.fecha || '', x.descripcion || '', x.tipo || 'Ingreso', '', x.importe || 0]);
+          });
+          (filasGastos || []).forEach(x => {
+            csvFilas.push(['Gasto', x.fecha || '', x.descripcion || '', x.categoria || '', (x.entidad || '') + ' (' + (x.medio || '') + ')', x.importe || 0]);
+          });
+          descargarCSV(csvFilas, 'ControlGastos_Movimientos.csv');
+        })
+        .withFailureHandler(e => mensaje(e.message, true))
+        .getHistorial({ tipo: 'ingreso' });
+    })
+    .withFailureHandler(e => mensaje(e.message, true))
+    .getHistorial({ tipo: 'gasto' });
+}
+
+function descargarCSV(filas, nombreArchivo) {
+  const escapeCSV = val => {
+    let s = String(val === undefined || val === null ? '' : val).replace(/"/g, '""');
+    if (s.includes(';') || s.includes('\n') || s.includes('"')) {
+      s = `"${s}"`;
+    }
+    return s;
+  };
+
+  const contenido = '\uFEFF' + filas.map(f => f.map(escapeCSV).join(';')).join('\r\n');
+  const blob = new Blob([contenido], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = nombreArchivo;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  mensaje('Archivo descargado con éxito.');
 }
 
 function mensaje(txt,error=false){
@@ -3495,6 +4291,9 @@ function refresh(){
     fillSelect('r_medio', config.medios);
     fillSelect('r_entidad', config.entidades);
 
+    if (!gastosFijosConfigLista || !gastosFijosConfigLista.length) {
+      cargarGastosFijosConfig();
+    }
     aplicarUltimasSelecciones();
     renderResumen(getDemoResumen(mesActualSeleccionado, anioActualSeleccionado));
     return;
@@ -3503,6 +4302,9 @@ function refresh(){
   google.script.run
     .withSuccessHandler(data => {
       config = data.config;
+      if (data.gastosFijosConfig) {
+        gastosFijosConfigLista = data.gastosFijosConfig;
+      }
       renderResumen(data.resumen);
 
       fillSelect('g_categoria',config.categorias);
@@ -3881,6 +4683,14 @@ function ejecutarGuardarTarjeta(d){
 
 window.onload = () => {
   checkModoDemo();
+
+  if (localStorage.getItem('cfg_privacidad_inicio') === '1') {
+    montosOcultos = true;
+    const icon = '🙈';
+    if ($('btnOjo')) $('btnOjo').textContent = icon;
+    if ($('btnOjoTop')) $('btnOjoTop').textContent = icon;
+    actualizarVisibilidadMontos();
+  }
 
   const d = today();
 
