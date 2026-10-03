@@ -1,4 +1,4 @@
-// Service Worker mínimo para habilitar instalación PWA
+// Service Worker v70 para PWA Control de Gastos
 self.addEventListener('install', event => {
   self.skipWaiting();
 });
