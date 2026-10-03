@@ -11,6 +11,10 @@
   <meta name="apple-mobile-web-app-title" content="Control Gastos">
   <meta name="mobile-web-app-capable" content="yes">
   
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="icon" type="image/png" href="icon-192.png">
@@ -103,7 +107,7 @@
     const searchParams = new URLSearchParams(window.location.search);
     const isDemo = searchParams.get('demo') === '1' || searchParams.get('demo') === 'true' || searchParams.get('modo') === 'demo' || window.location.hash.includes('demo=1');
     const baseExecUrl = "https://script.google.com/macros/s/AKfycbwJWqgtCPiPIYE78OxkXPwIiUn3eZhci-IF2NVTA5WuXwDXkedsZReVr_mfhi1E5_is/exec";
-    const cacheBust = 'v=72_' + Date.now();
+    const cacheBust = 'v=73_' + Date.now();
     const frameUrl = isDemo ? (baseExecUrl + "?demo=1&" + cacheBust + "#demo=1") : (baseExecUrl + "?" + cacheBust);
 
     const frame = document.getElementById('appFrame');
@@ -145,9 +149,28 @@
       setTimeout(handleResize, 300);
     });
 
-    // Registrar Service Worker para PWA
+    // Escuchar forzado de recarga desde el iframe
+    window.addEventListener('message', function(e) {
+      if (e && e.data && e.data.type === 'FORCE_RELOAD') {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(regs => {
+            regs.forEach(r => r.unregister());
+          });
+        }
+        if ('caches' in window) {
+          caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
+        }
+        setTimeout(() => {
+          window.location.reload(true);
+        }, 200);
+      }
+    });
+
+    // Registrar Service Worker para PWA sin caché de sw.js
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(err => {
+      navigator.serviceWorker.register('sw.js?v=73', { updateViaCache: 'none' }).then(reg => {
+        reg.update();
+      }).catch(err => {
         console.log('SW registration error:', err);
       });
     }

@@ -1537,11 +1537,17 @@ body.is-landscape .hamburger-btn {
       <div style="display:flex;align-items:center;gap:8px;">
         <span style="font-size:18px;">🧪</span>
         <div>
-          <div style="color:#38bdf8;font-size:13px;font-weight:700;">Modo Demostración / Invitado</div>
+          <div style="color:#38bdf8;font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;">
+            <span>Modo Demostración / Invitado</span>
+            <span style="font-size:10px;background:rgba(56,189,248,0.25);border:1px solid rgba(56,189,248,0.5);padding:1px 6px;border-radius:6px;color:#fff;font-weight:800;">v72</span>
+          </div>
           <div style="color:#94a3b8;font-size:11px;">Tus datos son privados y se guardan solo en este celular.</div>
         </div>
       </div>
-      <button type="button" onclick="reiniciarDemo()" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;" title="Borrar datos de prueba">Reiniciar</button>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <button type="button" onclick="forzarActualizacionApp()" style="background:rgba(56,189,248,0.18);border:1px solid rgba(56,189,248,0.4);color:#38bdf8;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;" title="Recargar última versión">↻ Actualizar</button>
+        <button type="button" onclick="reiniciarDemo()" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;" title="Borrar datos de prueba">Reiniciar</button>
+      </div>
     </div>
 
     <div id="msg"></div>
@@ -2398,8 +2404,6 @@ function checkModoDemo() {
 function activarModoDemoUI() {
   const banner = $('bannerDemo');
   if (banner) banner.style.display = 'flex';
-  const fijos = $('alertaFijos');
-  if (fijos) fijos.classList.add('hidden');
 
   if (typeof google !== 'undefined' && google.script && google.script.run) {
     google.script.run
@@ -2433,11 +2437,33 @@ function activarBloqueoDemo() {
   if (sidebar) sidebar.style.display = 'none';
 }
 
+function forzarActualizacionApp() {
+  mensaje('Actualizando a la última versión...');
+  try {
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'FORCE_RELOAD' }, '*');
+    }
+  } catch(e) {}
+  try {
+    if ('caches' in window) {
+      caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
+    }
+  } catch(e) {}
+  setTimeout(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('_v', Date.now());
+    window.location.href = url.toString();
+  }, 350);
+}
+
 function reiniciarDemo() {
   if (confirm('¿Querés reiniciar la demo y borrar todos los movimientos de prueba de este celular?')) {
     localStorage.removeItem('demo_gastos');
     localStorage.removeItem('demo_ingresos');
     localStorage.removeItem('demo_tarjetas');
+    localStorage.removeItem('demo_gastos_fijos');
+    gastosFijosConfigLista = [];
+    cargarGastosFijosConfig();
     renderResumen(getDemoResumen(mesActualSeleccionado, anioActualSeleccionado));
     mensaje('Demo reiniciada: datos en $ 0.');
   }
