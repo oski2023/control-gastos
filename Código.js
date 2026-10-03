@@ -51,14 +51,16 @@ function getConfig() {
   const last = Math.max(sh.getLastRow(), 2);
   const values = sh.getRange(2, 1, last - 1, 3).getValues();
   const limpiar = columna => columna
-  .map(v => String(v || '').trim())
-  .filter(v => v && !/agreg[aá].*(debajo|lista|aquí)/i.test(v));
+    .map(v => String(v || '').trim())
+    .filter(v => v && !/agreg[aá].*(debajo|lista|aquí)/i.test(v));
 
-return {
-  categorias: limpiar(values.map(r => r[0])),
-  medios: limpiar(values.map(r => r[1])),
-  entidades: limpiar(values.map(r => r[2]))
-};
+  const ordenarAZ = lista => lista.sort((a, b) => String(a).localeCompare(String(b), 'es', { sensitivity: 'base', numeric: true }));
+
+  return {
+    categorias: ordenarAZ(limpiar(values.map(r => r[0]))),
+    medios: ordenarAZ(limpiar(values.map(r => r[1]))),
+    entidades: ordenarAZ(limpiar(values.map(r => r[2])))
+  };
 }
 
 function addConfigItem(tipo, nombre) {

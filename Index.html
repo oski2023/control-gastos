@@ -2586,19 +2586,31 @@ function colorPorMonto(monto){
   return '#38bdf8'; // electric cyan
 }
 
+function ordenarAZ(arr) {
+  if (!Array.isArray(arr)) return [];
+  return arr.slice().sort((a, b) => String(a || '').localeCompare(String(b || ''), 'es', { sensitivity: 'base', numeric: true }));
+}
+
 function fillSelect(id, arr){
   const s = $(id);
 
   if(!s) return;
 
+  const actual = s.value;
   s.innerHTML = '<option value="">Seleccionar...</option>';
 
-  arr.forEach(x => {
+  const lista = ordenarAZ(arr);
+
+  lista.forEach(x => {
     const o = document.createElement('option');
     o.value = x;
     o.textContent = x;
     s.appendChild(o);
   });
+
+  if (actual && lista.includes(actual)) {
+    s.value = actual;
+  }
 }
 
 // nuevas funciones para historial ---------------------------------
@@ -2614,12 +2626,14 @@ function poblarFiltrosHistorial(){
   }
 
   const selCat = $('h_categoria');
+  const actualCat = selCat ? selCat.value : '';
   selCat.innerHTML = '<option value="">Todas</option>';
-  config.categorias.forEach(c=>{
+  ordenarAZ(config.categorias).forEach(c=>{
     const o = document.createElement('option');
     o.value = c; o.textContent = c;
     selCat.appendChild(o);
   });
+  if (actualCat) selCat.value = actualCat;
 }
 
 let h_tipo = 'gasto';

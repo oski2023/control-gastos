@@ -103,7 +103,7 @@
     const searchParams = new URLSearchParams(window.location.search);
     const isDemo = searchParams.get('demo') === '1' || searchParams.get('demo') === 'true' || searchParams.get('modo') === 'demo' || window.location.hash.includes('demo=1');
     const baseExecUrl = "https://script.google.com/macros/s/AKfycbwJWqgtCPiPIYE78OxkXPwIiUn3eZhci-IF2NVTA5WuXwDXkedsZReVr_mfhi1E5_is/exec";
-    const cacheBust = 'v=70_' + Date.now();
+    const cacheBust = 'v=71_' + Date.now();
     const frameUrl = isDemo ? (baseExecUrl + "?demo=1&" + cacheBust + "#demo=1") : (baseExecUrl + "?" + cacheBust);
 
     const frame = document.getElementById('appFrame');
