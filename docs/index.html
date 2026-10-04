@@ -107,7 +107,7 @@
     const searchParams = new URLSearchParams(window.location.search);
     const isDemo = searchParams.get('demo') === '1' || searchParams.get('demo') === 'true' || searchParams.get('modo') === 'demo' || window.location.hash.includes('demo=1');
     const baseExecUrl = "https://script.google.com/macros/s/AKfycbwJWqgtCPiPIYE78OxkXPwIiUn3eZhci-IF2NVTA5WuXwDXkedsZReVr_mfhi1E5_is/exec";
-    const cacheBust = 'v=73_' + Date.now();
+    const cacheBust = 'v=74_' + Date.now();
     const frameUrl = isDemo ? (baseExecUrl + "?demo=1&" + cacheBust + "#demo=1") : (baseExecUrl + "?" + cacheBust);
 
     const frame = document.getElementById('appFrame');
@@ -168,7 +168,7 @@
 
     // Registrar Service Worker para PWA sin caché de sw.js
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js?v=73', { updateViaCache: 'none' }).then(reg => {
+      navigator.serviceWorker.register('sw.js?v=74', { updateViaCache: 'none' }).then(reg => {
         reg.update();
       }).catch(err => {
         console.log('SW registration error:', err);

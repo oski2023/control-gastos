@@ -33,8 +33,24 @@ function verificarEstadoDemo() {
 }
 
 function getSheet_(name) {
-  const sh = SS.getSheetByName(name);
-  if (!sh) throw new Error('No existe la hoja: ' + name);
+  let sh = SS.getSheetByName(name);
+  if (!sh) {
+    const allSheets = SS.getSheets();
+    const target = name.toLowerCase().trim();
+    for (let i = 0; i < allSheets.length; i++) {
+      const s = allSheets[i];
+      const sName = s.getName().toLowerCase().trim();
+      if (sName === target || sName === target.replace(/s$/, '') || (sName + 's') === target) {
+        return s;
+      }
+    }
+    if (target === 'tarjetas' || target === 'tarjeta') {
+      sh = SS.insertSheet('Tarjetas');
+      sh.appendRow(['Fecha', 'Descripción', 'Entidad', 'Categoría', 'Importe Total', 'Cuotas', 'Cuota Mensual', 'Primera Cuota', 'Fecha de Registro']);
+      return sh;
+    }
+    throw new Error('No existe la hoja: ' + name);
+  }
   return sh;
 }
 

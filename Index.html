@@ -240,19 +240,42 @@ html, body {
 }
 
 #msg.ok {
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  padding: 10px 16px;
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  width: calc(100% - 32px);
+  max-width: 440px;
+  background: rgba(16, 185, 129, 0.95);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 12px 18px;
   border-radius: var(--radius-md);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
 }
 
 #msg.warn {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  padding: 10px 16px;
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  width: calc(100% - 32px);
+  max-width: 440px;
+  background: rgba(220, 38, 38, 0.95);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 12px 18px;
   border-radius: var(--radius-md);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+}
+
+.input-field-error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.35) !important;
 }
 
 /* CARDS MODERNAS */
@@ -1863,18 +1886,24 @@ body.is-landscape .hamburger-btn {
         </div>
 
         <div>
-          <label>Entidad</label>
-          <select id="t_entidad"></select>
+          <label>Entidad <span class="opcional">(opcional)</span></label>
+          <div class="addline">
+            <select id="t_entidad"></select>
+            <button type="button" class="addbtn" onclick="agregar('entidad')">+ Nuevo</button>
+          </div>
         </div>
 
         <div class="full">
-          <label>Descripción</label>
+          <label>Descripción <span class="opcional">(opcional)</span></label>
           <input id="t_desc" type="text" placeholder="Ej.: electrodoméstico, pasajes">
         </div>
 
         <div>
           <label>Categoría</label>
-          <select id="t_categoria"></select>
+          <div class="addline">
+            <select id="t_categoria"></select>
+            <button type="button" class="addbtn" onclick="agregar('categoria')">+ Nuevo</button>
+          </div>
         </div>
 
         <div>
@@ -1883,7 +1912,7 @@ body.is-landscape .hamburger-btn {
         </div>
 
         <div class="full">
-          <label>Primera cuota</label>
+          <label>Primera cuota <span class="opcional">(opcional - por defecto mes siguiente)</span></label>
           <input id="t_primera" type="month">
         </div>      
 
@@ -2144,6 +2173,23 @@ body.is-landscape .hamburger-btn {
   </div>
 </div>
 
+<!-- MODAL DE ALERTA / VALIDACION CENTRADO -->
+<div id="modalAlerta" class="modal-overlay" onclick="if(event.target===this) cerrarModalAlerta()">
+  <div class="modal-card">
+    <div id="modalAlertaIconBadge" class="modal-icon-badge" style="background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); box-shadow: 0 4px 16px rgba(239, 68, 68, 0.25);">⚠️</div>
+    <h3 id="modalAlertaTitulo" class="modal-title">Faltan datos obligatorios</h3>
+    <p id="modalAlertaSubtitulo" class="modal-subtitle" style="margin-bottom: 14px;">Por favor completá los siguientes campos para continuar:</p>
+
+    <div id="modalAlertaDetalles" class="modal-details-box" style="text-align: left; margin-bottom: 18px; padding: 12px 16px;"></div>
+
+    <div class="modal-actions">
+      <button type="button" id="modalAlertaBtnOk" class="modal-btn-confirm" style="width: 100%;" onclick="cerrarModalAlerta()">
+        ✓ Entendido
+      </button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 
@@ -2292,6 +2338,57 @@ function cerrarModalConfirmarEliminar() {
   const modal = $('modalConfirmarEliminar');
   if (modal) modal.classList.remove('active');
   itemAEliminarPendiente = null;
+}
+
+// GESTIÓN DE MODAL DE ALERTA / VALIDACIÓN CENTRADO
+let campoAFocarAlCerrarAlerta = null;
+
+function mostrarModalAlerta(config) {
+  const modal = $('modalAlerta');
+  const badge = $('modalAlertaIconBadge');
+  const titulo = $('modalAlertaTitulo');
+  const subtitulo = $('modalAlertaSubtitulo');
+  const detalles = $('modalAlertaDetalles');
+
+  if (badge) badge.textContent = config.icono || '⚠️';
+  if (titulo) titulo.textContent = config.titulo || 'Atención';
+  if (subtitulo) subtitulo.textContent = config.subtitulo || '';
+
+  campoAFocarAlCerrarAlerta = config.campoFocus || null;
+
+  if (detalles) {
+    if (config.items && config.items.length) {
+      detalles.style.display = 'block';
+      let html = '<ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;color:#f87171;font-size:14px;font-weight:600;">';
+      config.items.forEach(it => {
+        html += `<li>${escapeHtml(it)}</li>`;
+      });
+      html += '</ul>';
+      detalles.innerHTML = html;
+    } else {
+      detalles.style.display = 'none';
+      detalles.innerHTML = '';
+    }
+  }
+
+  if (modal) modal.classList.add('active');
+}
+
+function cerrarModalAlerta() {
+  const modal = $('modalAlerta');
+  if (modal) modal.classList.remove('active');
+  if (campoAFocarAlCerrarAlerta && $(campoAFocarAlCerrarAlerta)) {
+    setTimeout(() => {
+      try {
+        const el = $(campoAFocarAlCerrarAlerta);
+        el.focus();
+        if (typeof el.scrollIntoView === 'function') {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      } catch(e) {}
+    }, 150);
+  }
+  campoAFocarAlCerrarAlerta = null;
 }
 
 function eliminarMovimientoDemo(tipo, id, itemVerif) {
@@ -3355,6 +3452,9 @@ function aplicarUltimasSelecciones(){
   if($('r_categoria')) $('r_categoria').value = categoria;
   if($('r_entidad')) $('r_entidad').value = entidad;
   if($('r_medio')) $('r_medio').value = medio;
+
+  if($('t_categoria') && !$('t_categoria').value) $('t_categoria').value = categoria;
+  if($('t_entidad') && !$('t_entidad').value) $('t_entidad').value = entidad;
 }
 
 function agregar(tipo){
@@ -4387,19 +4487,50 @@ window.addEventListener('online', sincronizarPendientes);
 // --- Fin Bloque de guardado offline ---
 
 function guardarGasto(){
+  const importeEl = $('g_importe');
+  const fechaEl = $('g_fecha');
+  const catEl = $('g_categoria');
+  const medEl = $('g_medio');
+
   const d = {
-    fecha: $('g_fecha').value,
-    importe: $('g_importe').value,
-    descripcion: $('g_desc').value,
-    categoria: $('g_categoria').value,
-    entidad: $('g_entidad').value,
-    medio: $('g_medio').value,
+    fecha: fechaEl ? fechaEl.value : '',
+    importe: importeEl ? importeEl.value : '',
+    descripcion: $('g_desc') ? $('g_desc').value : '',
+    categoria: catEl ? catEl.value : '',
+    entidad: $('g_entidad') ? $('g_entidad').value : '',
+    medio: medEl ? medEl.value : '',
     mesSeleccionado: mesActualSeleccionado,
     anioSeleccionado: anioActualSeleccionado
   };
 
-  if(!d.fecha || !d.importe || !d.categoria || !d.medio){
-    mensaje('Completá fecha, importe, categoría y medio de pago.', true);
+  const faltantes = [];
+  let primerFoco = null;
+
+  if(!d.importe || Number(d.importe) <= 0){
+    faltantes.push('Importe: ingresá el valor del gasto.');
+    if (!primerFoco) primerFoco = 'g_importe';
+  }
+  if(!d.fecha){
+    faltantes.push('Fecha: indicá el día del gasto.');
+    if (!primerFoco) primerFoco = 'g_fecha';
+  }
+  if(!d.categoria){
+    faltantes.push('Categoría: seleccioná una categoría.');
+    if (!primerFoco) primerFoco = 'g_categoria';
+  }
+  if(!d.medio){
+    faltantes.push('Medio de pago: elegí cómo pagaste.');
+    if (!primerFoco) primerFoco = 'g_medio';
+  }
+
+  if(faltantes.length > 0){
+    mostrarModalAlerta({
+      titulo: 'Datos incompletos',
+      subtitulo: 'Para registrar el gasto completá:',
+      icono: '💸',
+      items: faltantes,
+      campoFocus: primerFoco
+    });
     return;
   }
 
@@ -4496,8 +4627,30 @@ function guardarGastoRapido(){
     anioSeleccionado: anioActualSeleccionado
   };
 
-  if(!d.importe || !d.categoria || !d.medio){
-    mensaje('Completá importe, categoría y medio de pago.', true);
+  const faltantes = [];
+  let primerFoco = null;
+
+  if(!d.importe || Number(d.importe) <= 0){
+    faltantes.push('Importe: ingresá el valor del gasto rápido.');
+    if (!primerFoco) primerFoco = 'r_importe';
+  }
+  if(!d.categoria){
+    faltantes.push('Categoría: seleccioná una categoría.');
+    if (!primerFoco) primerFoco = 'r_categoria';
+  }
+  if(!d.medio){
+    faltantes.push('Medio de pago: elegí cómo pagaste.');
+    if (!primerFoco) primerFoco = 'r_medio';
+  }
+
+  if(faltantes.length > 0){
+    mostrarModalAlerta({
+      titulo: 'Datos incompletos',
+      subtitulo: 'Para registrar el gasto rápido completá:',
+      icono: '⚡',
+      items: faltantes,
+      campoFocus: primerFoco
+    });
     return;
   }
 
@@ -4571,8 +4724,26 @@ function guardarIngreso(){
     anioSeleccionado: anioActualSeleccionado
   };
 
-  if(!d.fecha || !d.importe){
-    mensaje('Completá fecha e importe.', true);
+  const faltantes = [];
+  let primerFoco = null;
+
+  if(!d.importe || Number(d.importe) <= 0){
+    faltantes.push('Importe: ingresá el valor del ingreso.');
+    if (!primerFoco) primerFoco = 'i_importe';
+  }
+  if(!d.fecha){
+    faltantes.push('Fecha: indicá el día del ingreso.');
+    if (!primerFoco) primerFoco = 'i_fecha';
+  }
+
+  if(faltantes.length > 0){
+    mostrarModalAlerta({
+      titulo: 'Datos incompletos',
+      subtitulo: 'Para registrar el ingreso completá:',
+      icono: '📥',
+      items: faltantes,
+      campoFocus: primerFoco
+    });
     return;
   }
 
@@ -4614,6 +4785,16 @@ function ejecutarGuardarIngreso(d){
     return;
   }
 
+  if(!navigator.onLine){
+    encolarPendiente('ingreso', d);
+    cerrarModalConfirmarCarga();
+    mensaje('Sin conexión: el ingreso quedó guardado en el celular y se va a enviar solo cuando vuelva la señal.');
+    $('i_importe').value = '';
+    $('i_desc').value = '';
+    $('i_obs').value = '';
+    return;
+  }
+
   google.script.run
     .withSuccessHandler(r => {
       cerrarModalConfirmarCarga();
@@ -4625,31 +4806,100 @@ function ejecutarGuardarIngreso(d){
     })
     .withFailureHandler(e => {
       cerrarModalConfirmarCarga();
-      mensaje(e.message, true);
+      encolarPendiente('ingreso', d);
+      mensaje('No se pudo enviar ahora, quedó guardado para reintentar cuando haya conexión.', true);
     })
     .addIngreso(d);
 }
 
 function guardarTarjeta(){
+  const importeEl = $('t_importe');
+  const fechaEl = $('t_fecha');
+  const catEl = $('t_categoria');
+  const entEl = $('t_entidad');
+  const descEl = $('t_desc');
+  const cuotasEl = $('t_cuotas');
+  const primEl = $('t_primera');
+
+  if (importeEl) importeEl.classList.remove('input-field-error');
+  if (fechaEl) fechaEl.classList.remove('input-field-error');
+  if (catEl) catEl.classList.remove('input-field-error');
+
+  const fechaVal = (fechaEl && fechaEl.value) ? fechaEl.value : '';
+  const importeVal = importeEl ? importeEl.value.trim().replace(',', '.') : '';
+  const numImporte = parseFloat(importeVal);
+  const catVal = catEl ? catEl.value : '';
+
+  const faltantes = [];
+  let primerFoco = null;
+
+  if(!importeVal || isNaN(numImporte) || numImporte <= 0){
+    faltantes.push('Importe: ingresá el valor total de la compra.');
+    if (importeEl) {
+      importeEl.classList.add('input-field-error');
+      if (!primerFoco) primerFoco = 't_importe';
+    }
+  }
+
+  if(!fechaVal){
+    faltantes.push('Fecha de compra: indicá la fecha de la compra.');
+    if (fechaEl) {
+      fechaEl.classList.add('input-field-error');
+      if (!primerFoco) primerFoco = 't_fecha';
+    }
+  }
+
+  if(!catVal){
+    faltantes.push('Categoría: seleccioná a qué rubro corresponde la compra.');
+    if (catEl) {
+      catEl.classList.add('input-field-error');
+      if (!primerFoco) primerFoco = 't_categoria';
+    }
+  }
+
+  if(faltantes.length > 0){
+    mostrarModalAlerta({
+      titulo: 'Completá los datos obligatorios',
+      subtitulo: 'Para registrar la compra con tarjeta necesitás completar:',
+      icono: '💳',
+      items: faltantes,
+      campoFocus: primerFoco
+    });
+    return;
+  }
+
   const d = {
-    fecha: $('t_fecha').value,
-    importe: $('t_importe').value,
-    descripcion: $('t_desc').value,
-    entidad: $('t_entidad').value,
-    categoria: $('t_categoria').value,
-    cuotas: $('t_cuotas').value,
-    primeraCuota: $('t_primera').value,
+    fecha: fechaVal,
+    importe: numImporte,
+    descripcion: descEl ? descEl.value.trim() : '',
+    entidad: entEl ? entEl.value : '',
+    categoria: catVal,
+    cuotas: cuotasEl ? (parseInt(cuotasEl.value, 10) || 1) : 1,
+    primeraCuota: primEl ? primEl.value : '',
     mesSeleccionado: mesActualSeleccionado,
     anioSeleccionado: anioActualSeleccionado
   };
 
-  if(!d.fecha || !d.importe || !d.entidad || !d.categoria){
-    mensaje('Completá fecha, importe, entidad y categoría.', true);
-    return;
-  }
+  const numCuotas = d.cuotas;
+  const textoCuotas = numCuotas > 1 ? (numCuotas + ' cuotas de ' + money(numImporte / numCuotas)) : '1 cuota';
 
-  const numCuotas = Number(d.cuotas) || 1;
-  const textoCuotas = numCuotas > 1 ? (numCuotas + ' cuotas de ' + money(Number(d.importe) / numCuotas)) : '1 cuota';
+  const filasModal = [
+    { label: 'Fecha de compra', valor: formatFechaVisual(d.fecha) },
+    { label: 'Categoría', valor: d.categoria },
+    { label: 'Cuotas', valor: textoCuotas }
+  ];
+
+  if (d.entidad) {
+    filasModal.push({ label: 'Entidad', valor: d.entidad });
+  }
+  if (d.descripcion) {
+    filasModal.push({ label: 'Descripción', valor: d.descripcion });
+  }
+  if (d.primeraCuota) {
+    filasModal.push({ label: 'Primera cuota', valor: d.primeraCuota });
+  } else {
+    filasModal.push({ label: 'Primera cuota', valor: 'Próximo mes' });
+  }
 
   abrirModalConfirmarCarga({
     tipo: 'tarjeta',
@@ -4657,20 +4907,16 @@ function guardarTarjeta(){
     subtitulo: 'Revisá los datos antes de guardar',
     icono: '💳',
     colorTema: 'purple',
-    monto: Number(d.importe),
-    filas: [
-      { label: 'Fecha de compra', valor: formatFechaVisual(d.fecha) },
-      { label: 'Entidad', valor: d.entidad },
-      { label: 'Categoría', valor: d.categoria },
-      { label: 'Cuotas', valor: textoCuotas },
-      { label: 'Descripción', valor: d.descripcion || 'Sin descripción' },
-      { label: 'Primera cuota', valor: d.primeraCuota }
-    ],
+    monto: numImporte,
+    filas: filasModal,
     onConfirm: () => ejecutarGuardarTarjeta(d)
   });
 }
 
 function ejecutarGuardarTarjeta(d){
+  if (d.categoria) localStorage.setItem('ultimaCategoria', d.categoria);
+  if (d.entidad) localStorage.setItem('ultimaEntidad', d.entidad);
+
   if (isDemoMode) {
     const tarjetas = JSON.parse(localStorage.getItem('demo_tarjetas') || '[]');
     tarjetas.push({
@@ -4687,8 +4933,19 @@ function ejecutarGuardarTarjeta(d){
     cerrarModalConfirmarCarga();
     renderResumen(getDemoResumen(mesActualSeleccionado, anioActualSeleccionado));
     mensaje('Compra con tarjeta guardada (Modo Demo)');
-    $('t_importe').value = '';
-    $('t_desc').value = '';
+    if ($('t_importe')) $('t_importe').value = '';
+    if ($('t_desc')) $('t_desc').value = '';
+    aplicarUltimasSelecciones();
+    return;
+  }
+
+  if (!navigator.onLine) {
+    encolarPendiente('tarjeta', d);
+    cerrarModalConfirmarCarga();
+    mensaje('Sin conexión: la compra con tarjeta quedó guardada en el celular y se va a enviar solo cuando vuelva la señal.');
+    if ($('t_importe')) $('t_importe').value = '';
+    if ($('t_desc')) $('t_desc').value = '';
+    aplicarUltimasSelecciones();
     return;
   }
 
@@ -4697,12 +4954,17 @@ function ejecutarGuardarTarjeta(d){
       cerrarModalConfirmarCarga();
       renderResumen(r);
       mensaje('Compra con tarjeta guardada.');
-      $('t_importe').value = '';
-      $('t_desc').value = '';
+      if ($('t_importe')) $('t_importe').value = '';
+      if ($('t_desc')) $('t_desc').value = '';
+      aplicarUltimasSelecciones();
     })
     .withFailureHandler(e => {
       cerrarModalConfirmarCarga();
-      mensaje(e.message, true);
+      encolarPendiente('tarjeta', d);
+      mensaje('No se pudo enviar ahora, quedó guardada para reintentar cuando haya conexión.', true);
+      if ($('t_importe')) $('t_importe').value = '';
+      if ($('t_desc')) $('t_desc').value = '';
+      aplicarUltimasSelecciones();
     })
     .addTarjeta(d);
 }
@@ -4729,6 +4991,14 @@ window.onload = () => {
   if (!isDemoMode) {
     sincronizarPendientes(); // por si quedó algo pendiente de la última vez
   }
+
+  ['t_importe', 't_fecha', 't_categoria', 't_entidad'].forEach(id => {
+    const el = $(id);
+    if (el) {
+      el.addEventListener('input', () => el.classList.remove('input-field-error'));
+      el.addEventListener('change', () => el.classList.remove('input-field-error'));
+    }
+  });
 };
 </script>
 

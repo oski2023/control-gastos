@@ -1,4 +1,4 @@
-// Service Worker v73 para PWA Control de Gastos
+// Service Worker v74 para PWA Control de Gastos
 self.addEventListener('install', event => {
   self.skipWaiting();
 });
