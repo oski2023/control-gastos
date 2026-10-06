@@ -354,13 +354,23 @@ function getGastosFijosPendientes(mes, anio) {
     let pagosAct = pagosMesActual[catKey] || 0;
     const listaPagosEsteMes = pagosInfoMesActual[catKey] || [];
 
-    // 1. ¿El mes anterior quedó pendiente?
-    if (pagosAnt === 0) {
-      // Si en este mes se realizó un pago, cubre el mes anterior pendiente
-      if (pagosAct > 0) {
-        pagosAct--; // Se consumió para saldar el mes anterior
-      } else {
-        // Sigue pendiente del mes anterior!
+    // 1. ¿El mes actual tiene pagos registrados?
+    if (pagosAct > 0) {
+      // Ya fue pagado este mes (está al día)
+      const totalMonto = listaPagosEsteMes.reduce((acc, p) => acc + (p.importe || 0), 0);
+      const ultPago = listaPagosEsteMes[listaPagosEsteMes.length - 1] || {};
+      alDia.push({
+        categoria,
+        diaVencimiento,
+        monto: totalMonto || ultPago.importe || 0,
+        fechaPago: ultPago.fecha ? Utilities.formatDate(ultPago.fecha, tz, 'dd/MM/yyyy') : '',
+        medio: ultPago.medio || '',
+        cantidadPagos: pagosAct
+      });
+    } else {
+      // No se ha pagado aún este mes
+      // 1.a. Si tampoco se pagó el mes anterior, arrastra la deuda del mes anterior
+      if (pagosAnt === 0) {
         const fechaVtoAnt = new Date(anioAnt, mesAnt - 1, diaVencimiento || 1);
         const diffMs = hoy.getTime() - fechaVtoAnt.getTime();
         const diasVencidoAnt = Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
@@ -376,21 +386,8 @@ function getGastosFijosPendientes(mes, anio) {
           diasVencido: diasVencidoAnt
         });
       }
-    }
 
-    // 2. ¿El mes actual?
-    if (pagosAct > 0) {
-      // Ya fue pagado este mes (está al día)
-      const pInfo = listaPagosEsteMes[listaPagosEsteMes.length - 1] || {};
-      alDia.push({
-        categoria,
-        diaVencimiento,
-        monto: pInfo.importe || 0,
-        fechaPago: pInfo.fecha ? Utilities.formatDate(pInfo.fecha, tz, 'dd/MM/yyyy') : '',
-        medio: pInfo.medio || ''
-      });
-    } else {
-      // No se ha pagado aún este mes
+      // 1.b. Pendiente o próximo en el mes actual
       if (diaActual >= diaVencimiento) {
         // Vencido este mes
         pendientes.push({

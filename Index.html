@@ -3426,13 +3426,15 @@ function renderGastosFijosPendientes(){
     fijos.forEach(f => {
       if (f.activo === false) return;
       const catNorm = (f.categoria || '').trim().toLowerCase();
-      const pago = demoGastos.find(g => {
+      const pagos = demoGastos.filter(g => {
         if (!g.fecha) return false;
         const [y, m] = g.fecha.split('-').map(Number);
         return y === anioActual && m === mesActual && (g.categoria || '').trim().toLowerCase() === catNorm;
       });
-      if (pago) {
-        alDia.push({ categoria: f.categoria, diaVencimiento: f.diaVencimiento, fechaPago: pago.fecha, monto: pago.monto, medio: pago.medio });
+      if (pagos.length > 0) {
+        const totalMonto = pagos.reduce((acc, p) => acc + (Number(p.monto) || 0), 0);
+        const ultPago = pagos[pagos.length - 1];
+        alDia.push({ categoria: f.categoria, diaVencimiento: f.diaVencimiento, fechaPago: ultPago.fecha, monto: totalMonto, medio: ultPago.medio });
       } else if (diaHoy >= f.diaVencimiento) {
         pendientes.push({ categoria: f.categoria, diaVencimiento: f.diaVencimiento, diasVencido: diaHoy - f.diaVencimiento, mesNombre: 'actual' });
       } else {
