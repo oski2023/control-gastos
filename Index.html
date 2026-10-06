@@ -1881,6 +1881,84 @@ body.is-landscape .hamburger-btn {
     <section id="tarjeta" class="card hidden">
       <h2>Registrar compra con tarjeta</h2>
 
+      <!-- ASISTENTE DE PEAJES TELEPASE -->
+      <div style="margin-bottom:16px;">
+        <button type="button" id="btnTogglePeajes" onclick="toggleAsistentePeajes()" 
+                style="width:100%;background:linear-gradient(135deg, rgba(37,99,235,0.18), rgba(99,102,241,0.25));border:1px solid rgba(99,102,241,0.5);border-radius:var(--radius-md);color:#93c5fd;font-weight:700;font-size:14px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all 0.2s ease;">
+          <span style="display:inline-flex;align-items:center;gap:8px;">
+            <span style="font-size:18px;">🚗</span> <span>Calcular Peajes TelePASE (Domingos y viajes)</span>
+          </span>
+          <span id="peajeToggleIcon" style="font-size:12px;color:#cbd5e1;background:rgba(255,255,255,0.08);padding:3px 8px;border-radius:6px;">Abrir ▼</span>
+        </button>
+      </div>
+
+      <div id="panelAsistentePeajes" class="hidden" style="background:rgba(15,23,42,0.75);border:1px solid rgba(99,102,241,0.35);border-radius:var(--radius-md);padding:16px;margin-bottom:18px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <strong style="color:#e0e7ff;font-size:14px;display:inline-flex;align-items:center;gap:6px;">
+            <span>🛣️</span> <span>Calculador de Peajes TelePASE</span>
+          </strong>
+          <span style="font-size:11px;color:#94a3b8;background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:999px;">Autos Cat. 2</span>
+        </div>
+
+        <div class="grid" style="gap:12px;">
+          <!-- 1. AUTOPISTA -->
+          <div class="full">
+            <label style="font-size:12px;color:#cbd5e1;font-weight:600;">Autopista</label>
+            <select id="peaje_autopista" onchange="actualizarCalculoPeaje()" style="width:100%;">
+              <option value="25demayo">AU 25 de Mayo / Perito Moreno (AUSA)</option>
+              <option value="illia">Autopista Illia (AUSA)</option>
+              <option value="oeste">Acceso Oeste (AuOeste)</option>
+              <option value="norte">Acceso Norte / Panamericana (Ausol)</option>
+              <option value="riccheri">Autopista Riccheri</option>
+              <option value="laplata">Autopista Bs. As. - La Plata (AUBASA)</option>
+              <option value="otro">Personalizado / Otra autopista</option>
+            </select>
+          </div>
+
+          <!-- 2. FRANJA HORARIA (ESPECIAL DOMINGOS) -->
+          <div class="full">
+            <label style="font-size:12px;color:#cbd5e1;font-weight:600;">Viaje / Franja Horaria (Domingos)</label>
+            <select id="peaje_franja" onchange="onCambioFranjaPeaje()" style="width:100%;">
+              <option value="dom_maniana_ida">🚗 Domingo Mañana (09:30 a 13:30) · Ida a Capital [No Pico 🟢]</option>
+              <option value="dom_mediodia_vuelta">🚗 Domingo Mediodía (13:30 a 14:30) · Vuelta a Prov. [Pico 🔴]</option>
+              <option value="dom_tarde_ida">🚗 Domingo Tarde (15:30 a 16:30) · Ida a Capital [No Pico 🟢]</option>
+              <option value="dom_tarde_vuelta">🚗 Domingo Tarde (17:30 a 18:30) · Vuelta a Prov. [No Pico 🟢]</option>
+              <option value="pico_manual">🔴 Hora Pico general</option>
+              <option value="nopico_manual">🟢 Hora No Pico general</option>
+            </select>
+          </div>
+
+          <!-- 3. CANTIDAD Y TARIFA BASE -->
+          <div>
+            <label style="font-size:12px;color:#cbd5e1;font-weight:600;">Cantidad de pasadas</label>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <button type="button" class="btn-subtle" onclick="ajustarCantidadPeajes(-1)" style="padding:8px 14px;font-size:16px;font-weight:bold;border-radius:6px;cursor:pointer;">−</button>
+              <input id="peaje_cantidad" type="number" min="1" max="20" value="1" oninput="actualizarCalculoPeaje()" 
+                     style="text-align:center;font-weight:bold;font-size:16px;padding:8px;">
+              <button type="button" class="btn-subtle" onclick="ajustarCantidadPeajes(1)" style="padding:8px 14px;font-size:16px;font-weight:bold;border-radius:6px;cursor:pointer;">+</button>
+            </div>
+          </div>
+
+          <div>
+            <label style="font-size:12px;color:#cbd5e1;font-weight:600;">Tarifa por pasada ($)</label>
+            <input id="peaje_tarifa_unitaria" type="number" step="0.01" oninput="actualizarCalculoPeajeManual()" style="font-weight:bold;">
+          </div>
+
+          <!-- 4. TOTAL CALCULADO Y BOTÓN APLICAR -->
+          <div class="full" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <div>
+              <span style="font-size:11px;color:#94a3b8;display:block;text-transform:uppercase;letter-spacing:0.04em;">Total Peajes calculado</span>
+              <span id="peaje_total_display" style="font-size:20px;font-weight:800;color:#38bdf8;">$ 0,00</span>
+              <span id="peaje_detalle_badge" style="display:block;font-size:11px;color:#a5b4fc;margin-top:2px;"></span>
+            </div>
+            <button type="button" onclick="aplicarPeajeATarjeta()" 
+                    style="background:linear-gradient(135deg, #2563eb, #1d4ed8);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-weight:700;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(37,99,235,0.3);">
+              <span>💳 Aplicar a Tarjeta</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div class="grid">
         <div class="full">
           <label>Importe total</label>
@@ -3623,6 +3701,10 @@ function showTab(id, btn){
     renderConfiguracionUI();
   }
 
+  if(id === 'tarjeta'){
+    if (typeof asegurarCategoriaPeajes === 'function') asegurarCategoriaPeajes();
+  }
+
   const sb = $('sidebar');
   if(sb) sb.classList.remove('open');
   const ov = $('sidebarOverlay');
@@ -4907,6 +4989,260 @@ function ejecutarGuardarIngreso(d){
       mensaje('No se pudo enviar ahora, quedó guardado para reintentar cuando haya conexión.', true);
     })
     .addIngreso(d);
+}
+
+// ==========================================
+// ASISTENTE DE PEAJES TELEPASE
+// ==========================================
+const TARIFAS_PEAJES_DEFAULT = {
+  '25demayo': { nombre: 'AU 25 de Mayo / Perito Moreno', pico: 6534.52, noPico: 4610.98 },
+  'illia': { nombre: 'Autopista Illia', pico: 2716.64, noPico: 1921.05 },
+  'oeste': { nombre: 'Acceso Oeste', pico: 1193.00, noPico: 994.00 },
+  'norte': { nombre: 'Acceso Norte / Panamericana', pico: 1193.00, noPico: 994.00 },
+  'riccheri': { nombre: 'Autopista Riccheri', pico: 1500.00, noPico: 1300.00 },
+  'laplata': { nombre: 'Autopista Bs. As. - La Plata', pico: 2000.00, noPico: 1600.00 },
+  'otro': { nombre: 'Peaje', pico: 1000.00, noPico: 1000.00 }
+};
+
+function getTarifasPeajes() {
+  try {
+    const custom = JSON.parse(localStorage.getItem('tarifas_peajes_custom') || '{}');
+    return Object.assign({}, TARIFAS_PEAJES_DEFAULT, custom);
+  } catch(e) {
+    return TARIFAS_PEAJES_DEFAULT;
+  }
+}
+
+function guardarTarifaPeajeCustom(autoKey, esPico, valor) {
+  try {
+    const custom = JSON.parse(localStorage.getItem('tarifas_peajes_custom') || '{}');
+    if (!custom[autoKey]) {
+      custom[autoKey] = Object.assign({}, TARIFAS_PEAJES_DEFAULT[autoKey] || { nombre: 'Peaje', pico: valor, noPico: valor });
+    }
+    if (esPico) {
+      custom[autoKey].pico = valor;
+    } else {
+      custom[autoKey].noPico = valor;
+    }
+    localStorage.setItem('tarifas_peajes_custom', JSON.stringify(custom));
+  } catch(e) {}
+}
+
+let asistentePeajesAbierto = false;
+
+function toggleAsistentePeajes() {
+  const panel = $('panelAsistentePeajes');
+  const icon = $('peajeToggleIcon');
+  if (!panel) return;
+  asistentePeajesAbierto = !asistentePeajesAbierto;
+  if (asistentePeajesAbierto) {
+    panel.classList.remove('hidden');
+    if (icon) icon.textContent = 'Cerrar ▲';
+    asegurarCategoriaPeajes();
+    actualizarCalculoPeaje();
+  } else {
+    panel.classList.add('hidden');
+    if (icon) icon.textContent = 'Abrir ▼';
+  }
+}
+
+function esFranjaPico(franjaKey) {
+  // Según el reglamento oficial para Domingos y horarios del usuario:
+  // dom_maniana_ida: 09:30 a 13:30 hacia Capital -> No Pico 🟢
+  // dom_mediodia_vuelta: 13:30 a 14:30 hacia Provincia -> Pico 🔴 (rige 11 a 15 a Prov)
+  // dom_tarde_ida: 15:30 a 16:30 hacia Capital -> No Pico 🟢 (el pico arranca a las 17 hs)
+  // dom_tarde_vuelta: 17:30 a 18:30 hacia Provincia -> No Pico 🟢 (el pico a esa hora es hacia Capital)
+  if (franjaKey === 'dom_mediodia_vuelta' || franjaKey === 'pico_manual') {
+    return true;
+  }
+  return false;
+}
+
+function actualizarCalculoPeaje() {
+  const autoSelect = $('peaje_autopista');
+  const franjaSelect = $('peaje_franja');
+  const cantInput = $('peaje_cantidad');
+  const tarifaInput = $('peaje_tarifa_unitaria');
+  const totalDisplay = $('peaje_total_display');
+  const badgeDisplay = $('peaje_detalle_badge');
+
+  if (!autoSelect || !franjaSelect || !cantInput || !tarifaInput) return;
+
+  const autoKey = autoSelect.value || '25demayo';
+  const franjaKey = franjaSelect.value || 'dom_maniana_ida';
+  const esPico = esFranjaPico(franjaKey);
+  const tarifas = getTarifasPeajes();
+  const infoAuto = tarifas[autoKey] || tarifas['25demayo'];
+
+  const tarifaUnit = esPico ? infoAuto.pico : infoAuto.noPico;
+  tarifaInput.value = tarifaUnit.toFixed(2);
+
+  const cant = Math.max(1, parseInt(cantInput.value, 10) || 1);
+  cantInput.value = cant;
+  const total = cant * tarifaUnit;
+
+  if (totalDisplay) {
+    totalDisplay.textContent = money(total);
+  }
+  if (badgeDisplay) {
+    const picoTxt = esPico ? '🔴 Hora Pico' : '🟢 Hora No Pico';
+    badgeDisplay.textContent = cant + ' pasada(s) × ' + money(tarifaUnit) + ' (' + picoTxt + ')';
+  }
+}
+
+function onCambioFranjaPeaje() {
+  actualizarCalculoPeaje();
+}
+
+function ajustarCantidadPeajes(delta) {
+  const cantInput = $('peaje_cantidad');
+  if (!cantInput) return;
+  let val = (parseInt(cantInput.value, 10) || 1) + delta;
+  if (val < 1) val = 1;
+  cantInput.value = val;
+  actualizarCalculoPeaje();
+}
+
+function actualizarCalculoPeajeManual() {
+  const cantInput = $('peaje_cantidad');
+  const tarifaInput = $('peaje_tarifa_unitaria');
+  const autoSelect = $('peaje_autopista');
+  const franjaSelect = $('peaje_franja');
+  const totalDisplay = $('peaje_total_display');
+  const badgeDisplay = $('peaje_detalle_badge');
+
+  if (!cantInput || !tarifaInput) return;
+  const cant = Math.max(1, parseInt(cantInput.value, 10) || 1);
+  const tarifaUnit = parseFloat(tarifaInput.value) || 0;
+  const total = cant * tarifaUnit;
+
+  if (totalDisplay) totalDisplay.textContent = money(total);
+  if (badgeDisplay) {
+    const esPico = franjaSelect ? esFranjaPico(franjaSelect.value) : false;
+    const picoTxt = esPico ? '🔴 Hora Pico' : '🟢 Hora No Pico';
+    badgeDisplay.textContent = cant + ' pasada(s) × ' + money(tarifaUnit) + ' (' + picoTxt + ')';
+  }
+
+  if (autoSelect && franjaSelect && tarifaUnit > 0) {
+    const autoKey = autoSelect.value || '25demayo';
+    const esPico = esFranjaPico(franjaSelect.value);
+    guardarTarifaPeajeCustom(autoKey, esPico, tarifaUnit);
+  }
+}
+
+function asegurarCategoriaPeajes() {
+  if (typeof config !== 'undefined' && config && Array.isArray(config.categorias)) {
+    if (!config.categorias.some(c => c.toLowerCase() === 'peajes' || c.toLowerCase() === 'peaje')) {
+      config.categorias.push('Peajes');
+    }
+  }
+  ['t_categoria', 'g_categoria', 'r_categoria'].forEach(id => {
+    const sel = $(id);
+    if (!sel) return;
+    let found = false;
+    for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value.toLowerCase() === 'peajes' || sel.options[i].value.toLowerCase() === 'peaje') {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      const opt = document.createElement('option');
+      opt.value = 'Peajes';
+      opt.textContent = 'Peajes';
+      sel.appendChild(opt);
+    }
+  });
+}
+
+function seleccionarTarjetaVisaRio() {
+  const sel = $('t_entidad');
+  if (!sel) return;
+  let targetIndex = -1;
+
+  for (let i = 0; i < sel.options.length; i++) {
+    const txt = sel.options[i].text.toLowerCase();
+    if (txt.includes('rio') || txt.includes('visa') || txt.includes('santander')) {
+      targetIndex = i;
+      break;
+    }
+  }
+
+  if (targetIndex >= 0) {
+    sel.selectedIndex = targetIndex;
+  } else {
+    const opt = document.createElement('option');
+    opt.value = 'Visa Banco Rio';
+    opt.textContent = 'Visa Banco Rio';
+    sel.appendChild(opt);
+    sel.value = 'Visa Banco Rio';
+  }
+}
+
+function aplicarPeajeATarjeta() {
+  const cantInput = $('peaje_cantidad');
+  const tarifaInput = $('peaje_tarifa_unitaria');
+  const autoSelect = $('peaje_autopista');
+  const franjaSelect = $('peaje_franja');
+
+  if (!cantInput || !tarifaInput) return;
+
+  const cant = Math.max(1, parseInt(cantInput.value, 10) || 1);
+  const tarifaUnit = parseFloat(tarifaInput.value) || 0;
+  const total = cant * tarifaUnit;
+
+  if (total <= 0) {
+    mensaje('Por favor verificá la tarifa y la cantidad de pasadas.', true);
+    return;
+  }
+
+  // 1. Asignar Importe
+  if ($('t_importe')) {
+    $('t_importe').value = total.toFixed(2);
+  }
+
+  // 2. Asignar Fecha (si está vacía, poner hoy)
+  if ($('t_fecha') && !$('t_fecha').value) {
+    const hoy = new Date();
+    const yyyy = hoy.getFullYear();
+    const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dd = String(hoy.getDate()).padStart(2, '0');
+    $('t_fecha').value = `${yyyy}-${mm}-${dd}`;
+  }
+
+  // 3. Asignar Cuotas a 1
+  if ($('t_cuotas')) {
+    $('t_cuotas').value = 1;
+  }
+
+  // 4. Asignar Categoría "Peajes"
+  asegurarCategoriaPeajes();
+  if ($('t_categoria')) {
+    for (let i = 0; i < $('t_categoria').options.length; i++) {
+      const v = $('t_categoria').options[i].value.toLowerCase();
+      if (v === 'peajes' || v === 'peaje') {
+        $('t_categoria').selectedIndex = i;
+        break;
+      }
+    }
+  }
+
+  // 5. Asignar Entidad "Visa Banco Rio"
+  seleccionarTarjetaVisaRio();
+
+  // 6. Asignar Descripción
+  const autoTxt = autoSelect ? autoSelect.options[autoSelect.selectedIndex].text : 'Peaje';
+  const esPico = franjaSelect ? esFranjaPico(franjaSelect.value) : false;
+  const descTxt = 'Peajes ' + autoTxt.split('(')[0].trim() + ' (' + cant + ' pasadas - ' + (esPico ? 'Pico' : 'No Pico') + ')';
+  if ($('t_desc')) {
+    $('t_desc').value = descTxt;
+  }
+
+  mensaje('✅ Peajes aplicados: ' + money(total) + ' en Visa Banco Rio (Categoría: Peajes).');
+
+  if ($('t_importe')) {
+    $('t_importe').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
 }
 
 function guardarTarjeta(){

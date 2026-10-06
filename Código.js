@@ -72,10 +72,19 @@ function getConfig() {
 
   const ordenarAZ = lista => lista.sort((a, b) => String(a).localeCompare(String(b), 'es', { sensitivity: 'base', numeric: true }));
 
+  const cats = limpiar(values.map(r => r[0]));
+  if (!cats.some(c => c.toLowerCase() === 'peajes' || c.toLowerCase() === 'peaje')) {
+    cats.push('Peajes');
+  }
+  const ents = limpiar(values.map(r => r[2]));
+  if (!ents.some(e => e.toLowerCase().includes('rio') || e.toLowerCase().includes('santander'))) {
+    ents.push('Visa Banco Rio');
+  }
+
   return {
-    categorias: ordenarAZ(limpiar(values.map(r => r[0]))),
+    categorias: ordenarAZ(cats),
     medios: ordenarAZ(limpiar(values.map(r => r[1]))),
-    entidades: ordenarAZ(limpiar(values.map(r => r[2])))
+    entidades: ordenarAZ(ents)
   };
 }
 
