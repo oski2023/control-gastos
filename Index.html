@@ -1246,7 +1246,59 @@ tbody tr:hover td {
 .fijo-cfg-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+}
+
+.btn-edit-action {
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #93c5fd;
+  border-radius: 8px;
+  padding: 5px 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.btn-edit-action:hover, .btn-edit-action:active {
+  background: rgba(59, 130, 246, 0.28);
+  border-color: #3b82f6;
+  color: #fff;
+  transform: scale(0.95);
+}
+
+.badge-cuota-pill {
+  display: inline-block;
+  background: rgba(59, 130, 246, 0.18);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #93c5fd;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 6px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.fijo-progress-wrap {
+  width: 100%;
+  max-width: 220px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 5px;
+}
+
+.fijo-progress-bar {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #3b82f6, #10b981);
+  transition: width 0.3s ease;
 }
 
 /* SWITCH TOGGLE */
@@ -2536,22 +2588,75 @@ body.is-landscape .hamburger-btn {
       <!-- PANEL GASTOS FIJOS -->
       <div id="panel_cfg_fijos" style="display:none;">
         <div class="cfg-card-box">
-          <label style="font-size:13px;font-weight:700;color:#fff;">+ Configurar nuevo gasto fijo</label>
+          <label style="font-size:13px;font-weight:700;color:#fff;">+ Configurar nuevo gasto fijo o préstamo</label>
           <p style="color:var(--text-muted);font-size:12px;margin:4px 0 10px;">
-            La app te avisará en el Inicio los meses que esté próximo a vencer o si se venció y aún no lo registraste.
+            La app te avisará en el Inicio cuando esté próximo a vencer o vencido. Si es un préstamo, la cuota avanzará mes a mes automáticamente.
           </p>
           <div class="grid" style="margin-top:8px;">
             <div>
               <label>Categoría / Concepto</label>
-              <select id="cfg_fijo_categoria"></select>
+              <select id="cfg_fijo_categoria" onchange="verificarCategoriaFijoCustom(this.value)"></select>
+              <input type="text" id="cfg_fijo_categoria_custom" placeholder="Escribí el nombre del préstamo o gasto..." style="display:none;margin-top:6px;">
             </div>
             <div>
               <label>Día de vencimiento (1 al 31)</label>
               <input type="number" id="cfg_fijo_dia" min="1" max="31" value="10" placeholder="Ej: 10">
             </div>
+
+            <div class="full" style="margin-top:4px;">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;color:#e2e8f0;font-size:13px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:10px 12px;border-radius:10px;">
+                <input type="checkbox" id="cfg_fijo_es_prestamo" onchange="toggleCamposPrestamoFijo(this.checked)" style="width:18px;height:18px;accent-color:var(--primary);cursor:pointer;">
+                <span>💳 ¿Es un préstamo o gasto con cuotas fijas?</span>
+              </label>
+            </div>
+
+            <div id="cfg_fijo_prestamo_box" class="full" style="display:none;background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.25);border-radius:12px;padding:12px;margin-top:2px;">
+              <div style="font-size:12px;color:#93c5fd;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+                <span>⚙️ Seguimiento automático de cuotas</span>
+              </div>
+              <div class="grid" style="gap:10px;">
+                <div>
+                  <label>Cuota actual / por pagar</label>
+                  <input type="number" id="cfg_fijo_cuota_actual" min="1" placeholder="Ej: 18" value="1">
+                </div>
+                <div>
+                  <label>Total de cuotas del préstamo</label>
+                  <input type="number" id="cfg_fijo_total_cuotas" min="1" placeholder="Ej: 24" value="24">
+                </div>
+                <div>
+                  <label>Mes de esta cuota</label>
+                  <select id="cfg_fijo_mes_base">
+                    <option value="1">Enero</option>
+                    <option value="2">Febrero</option>
+                    <option value="3">Marzo</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Mayo</option>
+                    <option value="6">Junio</option>
+                    <option value="7">Julio</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Año de esta cuota</label>
+                  <input type="number" id="cfg_fijo_anio_base" min="2020" max="2040" value="2026">
+                </div>
+                <div class="full">
+                  <label>Monto estimado de la cuota ($) <span style="color:var(--text-dim);font-weight:400;">(Opcional)</span></label>
+                  <input type="number" id="cfg_fijo_monto" placeholder="Ej: 45000" step="any">
+                  <span style="font-size:11px;color:var(--text-muted);display:block;margin-top:4px;">
+                    💡 La app incrementará automáticamente el número de cuota mes a mes (ej. 18/24 ➔ 19/24) y te avisará cuando sea la última cuota.
+                  </span>
+                </div>
+              </div>
+            </div>
+
             <div class="full">
-              <button type="button" class="save full" onclick="guardarNuevoGastoFijoDesdeConfig()" style="margin-top:4px;">
-                + Agregar gasto fijo
+              <button type="button" class="save full" onclick="guardarNuevoGastoFijoDesdeConfig()" style="margin-top:6px;">
+                + Agregar gasto fijo / préstamo
               </button>
             </div>
           </div>
@@ -2711,6 +2816,84 @@ body.is-landscape .hamburger-btn {
     <div class="modal-actions">
       <button type="button" id="modalAlertaBtnOk" class="modal-btn-confirm" style="width: 100%;" onclick="cerrarModalAlerta()">
         ✓ Entendido
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR GASTO FIJO / PRESTAMO -->
+<div id="modalEditarGastoFijo" class="modal-overlay" onclick="if(event.target===this) cerrarModalEditarGastoFijo()">
+  <div class="modal-card" style="max-height: 90vh; overflow-y: auto; text-align: left;">
+    <div class="modal-icon-badge" style="background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.35);">✏️</div>
+    <h3 class="modal-title" style="text-align: center;">Editar Gasto Fijo / Préstamo</h3>
+    <p class="modal-subtitle" style="text-align: center; margin-bottom: 16px;">Modificá el concepto, cuotas o día de vencimiento.</p>
+
+    <input type="hidden" id="edit_fijo_fila">
+    <input type="hidden" id="edit_fijo_id_demo">
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div>
+        <label style="display:block; font-size:12px; font-weight:700; color:#e2e8f0; margin-bottom:4px;">Nombre / Categoría</label>
+        <input type="text" id="edit_fijo_categoria" placeholder="Ej: Prestamo Rio" style="width:100%;">
+      </div>
+
+      <div>
+        <label style="display:block; font-size:12px; font-weight:700; color:#e2e8f0; margin-bottom:4px;">Día de vencimiento (1 al 31)</label>
+        <input type="number" id="edit_fijo_dia" min="1" max="31" style="width:100%;">
+      </div>
+
+      <div style="margin-top:2px;">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600; color:#e2e8f0; font-size:13px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:8px 10px; border-radius:8px;">
+          <input type="checkbox" id="edit_fijo_es_prestamo" onchange="toggleCamposEditarPrestamoFijo(this.checked)" style="width:18px; height:18px; accent-color:var(--primary); cursor:pointer;">
+          <span>💳 ¿Es un préstamo o tiene cuotas?</span>
+        </label>
+      </div>
+
+      <div id="edit_fijo_prestamo_box" style="display:none; background:rgba(59,130,246,0.06); border:1px solid rgba(59,130,246,0.25); border-radius:10px; padding:12px;">
+        <div class="grid" style="gap:10px;">
+          <div>
+            <label style="display:block; font-size:12px; font-weight:700; color:#e2e8f0; margin-bottom:4px;">Cuota a pagar</label>
+            <input type="number" id="edit_fijo_cuota_actual" min="1" placeholder="Ej: 18">
+          </div>
+          <div>
+            <label style="display:block; font-size:12px; font-weight:700; color:#e2e8f0; margin-bottom:4px;">Total de cuotas</label>
+            <input type="number" id="edit_fijo_total_cuotas" min="1" placeholder="Ej: 24">
+          </div>
+          <div>
+            <label style="display:block; font-size:12px; font-weight:700; color:#e2e8f0; margin-bottom:4px;">Mes de referencia</label>
+            <select id="edit_fijo_mes_base">
+              <option value="1">Enero</option>
+              <option value="2">Febrero</option>
+              <option value="3">Marzo</option>
+              <option value="4">Abril</option>
+              <option value="5">Mayo</option>
+              <option value="6">Junio</option>
+              <option value="7">Julio</option>
+              <option value="8">Agosto</option>
+              <option value="9">Septiembre</option>
+              <option value="10">Octubre</option>
+              <option value="11">Noviembre</option>
+              <option value="12">Diciembre</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block; font-size:12px; font-weight:700; color:#e2e8f0; margin-bottom:4px;">Año de referencia</label>
+            <input type="number" id="edit_fijo_anio_base" min="2020" max="2040">
+          </div>
+          <div class="full">
+            <label style="display:block; font-size:12px; font-weight:700; color:#e2e8f0; margin-bottom:4px;">Monto estimado cuota ($)</label>
+            <input type="number" id="edit_fijo_monto" placeholder="Ej: 45000" step="any">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions" style="margin-top: 18px;">
+      <button type="button" class="modal-btn-cancel" onclick="cerrarModalEditarGastoFijo()">
+        Cancelar
+      </button>
+      <button type="button" class="modal-btn-confirm" onclick="guardarEdicionGastoFijo()">
+        ✓ Guardar Cambios
       </button>
     </div>
   </div>
@@ -3910,15 +4093,29 @@ function aplicarDatosGastosFijosUI(res){
 
   // 1. POBLAR LISTA DE PENDIENTES
   listaPendientes.innerHTML = '';
-  pendientes.forEach(p=>{
+  pendientes.forEach(p => {
     const li = document.createElement('li');
     li.style.marginBottom = '8px';
     li.style.cursor = 'pointer';
     li.title = 'Toca para cargar este gasto';
     li.onclick = () => {
       if ($('g_categoria')) $('g_categoria').value = p.categoria;
+      if ($('g_descripcion')) {
+        $('g_descripcion').value = (p.esPrestamo && p.cuotaTexto) ? (p.categoria + ' (' + p.cuotaTexto + ')') : p.categoria;
+      }
+      if ($('g_importe') && p.montoEstimado) {
+        $('g_importe').value = p.montoEstimado;
+      }
       showTab('gasto');
     };
+
+    const badgeCuota = (p.esPrestamo && p.cuotaTexto)
+      ? '<span class="badge-cuota-pill">' + p.cuotaTexto + '</span>'
+      : '';
+
+    const badgeUltima = p.esUltimaCuota
+      ? '<span style="background:rgba(234,179,8,0.25);color:#fde047;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;margin-left:4px;border:1px solid rgba(234,179,8,0.4)">🏆 ¡Última cuota!</span>'
+      : '';
 
     const badgeMes = p.esMesAnterior 
       ? '<span style="background:rgba(239,68,68,0.22);color:#fca5a5;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;margin-left:6px;border:1px solid rgba(239,68,68,0.4)">Mes anterior (' + p.mesNombre + ')</span>'
@@ -3928,8 +4125,10 @@ function aplicarDatosGastosFijosUI(res){
       ? ' — venció el día ' + p.diaVencimiento + ' (' + p.diasVencido + ' día(s) sin abonar)'
       : ' — vence hoy día ' + p.diaVencimiento;
 
-    li.innerHTML = '<strong style="color:#fff;font-size:14px">' + p.categoria + '</strong>' + badgeMes + 
-                   '<span style="color:var(--text-muted);font-size:12px;display:block;margin-top:2px;">' + textoDetalle + ' <span style="color:var(--primary);text-decoration:underline;margin-left:4px;">(Cargar ahora ⚡)</span></span>';
+    const extraMonto = p.montoEstimado ? (' · Cuota est.: <strong style="color:#e2e8f0">' + money(p.montoEstimado) + '</strong>') : '';
+
+    li.innerHTML = '<strong style="color:#fff;font-size:14px">' + escapeHtml(p.categoria) + '</strong>' + badgeCuota + badgeUltima + badgeMes + 
+                   '<span style="color:var(--text-muted);font-size:12px;display:block;margin-top:2px;">' + textoDetalle + extraMonto + ' <span style="color:var(--primary);text-decoration:underline;margin-left:4px;">(Cargar ahora ⚡)</span></span>';
     listaPendientes.appendChild(li);
   });
 
@@ -3944,10 +4143,21 @@ function aplicarDatosGastosFijosUI(res){
         li.style.marginBottom = '6px';
         li.style.color = '#e2e8f0';
         li.style.fontSize = '13px';
+
+        const badgeCuota = (p.esPrestamo && p.cuotaTexto)
+          ? ' <span style="color:#93c5fd;font-weight:600;">(' + p.cuotaTexto + ')</span>'
+          : '';
+
+        const cuotasInfo = (p.esPrestamo && p.cuotasRestantes !== undefined)
+          ? (p.cuotasRestantes > 0 
+              ? ' <span style="color:var(--text-dim);font-size:11px">(Restan ' + p.cuotasRestantes + ' cuotas)</span>'
+              : ' <span style="color:#34d399;font-weight:700;font-size:11px">🎉 ¡Préstamo completado!</span>')
+          : '';
+
         const detallePago = (p.fechaPago ? ' el ' + p.fechaPago : '') + 
                             (p.monto ? ' · <strong style="color:#34d399">' + money(p.monto) + '</strong>' : '') + 
                             (p.medio ? ' <span style="color:var(--text-dim);font-size:11px">[' + p.medio + ']</span>' : '');
-        li.innerHTML = '<span style="color:#34d399;font-weight:700;">✅ ' + p.categoria + '</span> — <span style="color:#cbd5e1">Pagado' + detallePago + '</span>';
+        li.innerHTML = '<span style="color:#34d399;font-weight:700;">✅ ' + escapeHtml(p.categoria) + '</span>' + badgeCuota + ' — <span style="color:#cbd5e1">Pagado' + detallePago + '</span>' + cuotasInfo;
         listaAlDia.appendChild(li);
       });
     }
@@ -3963,7 +4173,17 @@ function aplicarDatosGastosFijosUI(res){
         li.style.marginBottom = '5px';
         li.style.color = 'var(--text-muted)';
         li.style.fontSize = '13px';
-        li.innerHTML = '⏳ <strong style="color:#cbd5e1">' + p.categoria + '</strong> — vence el día ' + p.diaVencimiento + ' (en ' + p.diasFaltan + ' día(s))';
+
+        const badgeCuota = (p.esPrestamo && p.cuotaTexto)
+          ? ' <span style="color:#93c5fd;font-weight:600;">(' + p.cuotaTexto + ')</span>'
+          : '';
+
+        const badgeUltima = p.esUltimaCuota
+          ? ' <span style="background:rgba(234,179,8,0.25);color:#fde047;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700;">🏆 Última cuota</span>'
+          : '';
+
+        const extraMonto = p.montoEstimado ? (' · Est.: ' + money(p.montoEstimado)) : '';
+        li.innerHTML = '⏳ <strong style="color:#cbd5e1">' + escapeHtml(p.categoria) + '</strong>' + badgeCuota + badgeUltima + ' — vence el día ' + p.diaVencimiento + ' (en ' + p.diasFaltan + ' día(s))' + extraMonto;
         listaProximos.appendChild(li);
       });
     } else {
@@ -4020,7 +4240,7 @@ function renderGastosFijosPendientes(){
       fijos = [
         { id: 'fijo_1', categoria: 'Alquiler', diaVencimiento: 10, activo: true },
         { id: 'fijo_2', categoria: 'Internet / Wifi', diaVencimiento: 15, activo: true },
-        { id: 'fijo_3', categoria: 'Luz / Servicios', diaVencimiento: 20, activo: true }
+        { id: 'fijo_3', categoria: 'Prestamo Rio', diaVencimiento: 10, activo: true, esPrestamo: true, cuotaBase: 18, totalCuotas: 24, mesBase: 10, anioBase: 2026, montoEstimado: 45000 }
       ];
       localStorage.setItem('demo_gastos_fijos', JSON.stringify(fijos));
     }
@@ -4036,20 +4256,82 @@ function renderGastosFijosPendientes(){
 
     fijos.forEach(f => {
       if (f.activo === false) return;
+
+      const esPrestamo = !!f.esPrestamo || Number(f.totalCuotas) > 0;
+      const cuotaBase = Number(f.cuotaBase || f.cuotaActual || 1) || 1;
+      const totalCuotas = Number(f.totalCuotas) || 0;
+      const mesBase = Number(f.mesBase) || mesActual;
+      const anioBase = Number(f.anioBase) || anioActual;
+      const montoEstimado = Number(f.montoEstimado || f.monto || 0);
+
+      let cuotaActual = 0;
+      let cuotaTexto = '';
+      let finalizado = false;
+      let esUltimaCuota = false;
+      let cuotasRestantes = 0;
+
+      if (esPrestamo && totalCuotas > 0) {
+        const diffMeses = (anioActual - anioBase) * 12 + (mesActual - mesBase);
+        cuotaActual = cuotaBase + diffMeses;
+        finalizado = cuotaActual > totalCuotas;
+        esUltimaCuota = (cuotaActual === totalCuotas);
+        cuotasRestantes = Math.max(0, totalCuotas - cuotaActual);
+        cuotaTexto = 'Cuota ' + cuotaActual + '/' + totalCuotas;
+
+        if (finalizado) return;
+      }
+
       const catNorm = (f.categoria || '').trim().toLowerCase();
       const pagos = demoGastos.filter(g => {
         if (!g.fecha) return false;
         const [y, m] = g.fecha.split('-').map(Number);
         return y === anioActual && m === mesActual && (g.categoria || '').trim().toLowerCase() === catNorm;
       });
+
       if (pagos.length > 0) {
         const totalMonto = pagos.reduce((acc, p) => acc + (Number(p.monto) || 0), 0);
         const ultPago = pagos[pagos.length - 1];
-        alDia.push({ categoria: f.categoria, diaVencimiento: f.diaVencimiento, fechaPago: ultPago.fecha, monto: totalMonto, medio: ultPago.medio });
+        alDia.push({
+          categoria: f.categoria,
+          diaVencimiento: f.diaVencimiento,
+          fechaPago: ultPago.fecha,
+          monto: totalMonto,
+          medio: ultPago.medio,
+          esPrestamo,
+          cuotaActual,
+          totalCuotas,
+          cuotaTexto,
+          cuotasRestantes,
+          esUltimaCuota,
+          montoEstimado
+        });
       } else if (diaHoy >= f.diaVencimiento) {
-        pendientes.push({ categoria: f.categoria, diaVencimiento: f.diaVencimiento, diasVencido: diaHoy - f.diaVencimiento, mesNombre: 'actual' });
+        pendientes.push({
+          categoria: f.categoria,
+          diaVencimiento: f.diaVencimiento,
+          diasVencido: diaHoy - f.diaVencimiento,
+          mesNombre: 'actual',
+          esPrestamo,
+          cuotaActual,
+          totalCuotas,
+          cuotaTexto,
+          cuotasRestantes,
+          esUltimaCuota,
+          montoEstimado
+        });
       } else {
-        proximos.push({ categoria: f.categoria, diaVencimiento: f.diaVencimiento, diasFaltan: f.diaVencimiento - diaHoy });
+        proximos.push({
+          categoria: f.categoria,
+          diaVencimiento: f.diaVencimiento,
+          diasFaltan: f.diaVencimiento - diaHoy,
+          esPrestamo,
+          cuotaActual,
+          totalCuotas,
+          cuotaTexto,
+          cuotasRestantes,
+          esUltimaCuota,
+          montoEstimado
+        });
       }
     });
 
@@ -4297,6 +4579,10 @@ function renderConfiguracionUI() {
       opt.textContent = c;
       selFijoCat.appendChild(opt);
     });
+    const optCustom = document.createElement('option');
+    optCustom.value = '__custom__';
+    optCustom.textContent = '✏️ + Escribir otro concepto / préstamo...';
+    selFijoCat.appendChild(optCustom);
   }
 
   cargarGastosFijosConfig();
@@ -4441,6 +4727,33 @@ function agregarItemGenericoConfig(tipo, valor, callbackExito) {
 }
 
 // ---------------- GASTOS FIJOS EN CONFIGURACIÓN ----------------
+function verificarCategoriaFijoCustom(val) {
+  const inp = $('cfg_fijo_categoria_custom');
+  if (!inp) return;
+  if (val === '__custom__') {
+    inp.style.display = 'block';
+    inp.focus();
+  } else {
+    inp.style.display = 'none';
+    inp.value = '';
+  }
+}
+
+function toggleCamposPrestamoFijo(checked) {
+  const box = $('cfg_fijo_prestamo_box');
+  if (!box) return;
+  box.style.display = checked ? 'block' : 'none';
+  if (checked) {
+    const hoy = new Date();
+    if ($('cfg_fijo_mes_base') && !$('cfg_fijo_mes_base').value) {
+      $('cfg_fijo_mes_base').value = mesActualSeleccionado || (hoy.getMonth() + 1);
+    }
+    if ($('cfg_fijo_anio_base') && !$('cfg_fijo_anio_base').value) {
+      $('cfg_fijo_anio_base').value = anioActualSeleccionado || hoy.getFullYear();
+    }
+  }
+}
+
 function cargarGastosFijosConfig() {
   if (isDemoMode) {
     let fijos = JSON.parse(localStorage.getItem('demo_gastos_fijos') || 'null');
@@ -4448,11 +4761,39 @@ function cargarGastosFijosConfig() {
       fijos = [
         { id: 'fijo_1', categoria: 'Alquiler', diaVencimiento: 10, activo: true },
         { id: 'fijo_2', categoria: 'Internet / Wifi', diaVencimiento: 15, activo: true },
-        { id: 'fijo_3', categoria: 'Luz / Servicios', diaVencimiento: 20, activo: true }
+        { id: 'fijo_3', categoria: 'Prestamo Rio', diaVencimiento: 10, activo: true, esPrestamo: true, cuotaBase: 18, totalCuotas: 24, mesBase: 10, anioBase: 2026, montoEstimado: 45000 }
       ];
       localStorage.setItem('demo_gastos_fijos', JSON.stringify(fijos));
     }
-    gastosFijosConfigLista = fijos;
+    const hoy = new Date();
+    const m = mesActualSeleccionado || (hoy.getMonth() + 1);
+    const a = anioActualSeleccionado || hoy.getFullYear();
+    gastosFijosConfigLista = fijos.map(f => {
+      const esP = !!f.esPrestamo || Number(f.totalCuotas) > 0;
+      let cAct = Number(f.cuotaBase || f.cuotaActual || 1) || 1;
+      let tot = Number(f.totalCuotas) || 0;
+      let mB = Number(f.mesBase) || m;
+      let aB = Number(f.anioBase) || a;
+      let pct = 0;
+      let cRest = 0;
+      let fin = false;
+      if (esP && tot > 0) {
+        cAct += (a - aB) * 12 + (m - mB);
+        fin = cAct > tot;
+        cRest = Math.max(0, tot - cAct);
+        pct = Math.min(100, Math.max(0, Math.round((Math.max(0, cAct) / tot) * 100)));
+      }
+      return {
+        ...f,
+        esPrestamo: esP,
+        cuotaActual: cAct,
+        totalCuotas: tot,
+        porcentaje: pct,
+        cuotasRestantes: cRest,
+        finalizado: fin,
+        cuotaTexto: esP && tot > 0 ? ('Cuota ' + cAct + '/' + tot) : ''
+      };
+    });
     renderGastosFijosConfigUI();
     return;
   }
@@ -4465,7 +4806,7 @@ function cargarGastosFijosConfig() {
     .withFailureHandler(e => {
       console.error('Error cargando gastos fijos config:', e);
     })
-    .getGastosFijosConfig();
+    .getGastosFijosConfig(mesActualSeleccionado, anioActualSeleccionado);
 }
 
 function renderGastosFijosConfigUI() {
@@ -4489,9 +4830,36 @@ function renderGastosFijosConfigUI() {
 
     const info = document.createElement('div');
     info.className = 'fijo-cfg-info';
+
+    const esPrestamo = !!f.esPrestamo || Number(f.totalCuotas) > 0;
+    const badgePrestamo = esPrestamo
+      ? `<span class="badge-cuota-pill">${f.cuotaTexto || ('Cuota ' + (f.cuotaActual || f.cuotaBase || 1) + '/' + f.totalCuotas)}</span>`
+      : '';
+
+    const estadoAlerta = f.activo ? '<span style="color:#34d399;">• Alerta activa</span>' : '<span style="color:#94a3b8;">• Alerta pausada</span>';
+    const montoTxt = f.montoEstimado ? ` • Cuota: <strong style="color:#e2e8f0">${money(f.montoEstimado)}</strong>` : '';
+
+    let extraPrestamoHtml = '';
+    if (esPrestamo && f.totalCuotas > 0) {
+      const porcentaje = f.porcentaje !== undefined ? f.porcentaje : Math.min(100, Math.max(0, Math.round(((f.cuotaActual || f.cuotaBase || 1) / f.totalCuotas) * 100)));
+      const cuotasRestantes = f.cuotasRestantes !== undefined ? f.cuotasRestantes : Math.max(0, f.totalCuotas - (f.cuotaActual || f.cuotaBase || 1));
+      extraPrestamoHtml = `
+        <div class="fijo-progress-wrap" title="Progreso: ${porcentaje}%">
+          <div class="fijo-progress-bar" style="width:${porcentaje}%;"></div>
+        </div>
+        <span style="font-size:11px;color:var(--text-dim);margin-top:2px;">
+          ${f.finalizado ? '🎉 <strong style="color:#34d399">Préstamo completado</strong>' : (porcentaje + '% abonado • ' + (cuotasRestantes > 0 ? ('Quedan ' + cuotasRestantes + ' cuotas') : '¡Última cuota!'))}
+        </span>
+      `;
+    }
+
     info.innerHTML = `
-      <span class="fijo-cfg-title">${escapeHtml(f.categoria)}</span>
-      <span class="fijo-cfg-vto">Vence los días <strong>${f.diaVencimiento || 1}</strong> de cada mes ${f.activo ? '<span style="color:#34d399;">• Alerta activa</span>' : '<span style="color:#94a3b8;">• Alerta pausada</span>'}</span>
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
+        <span class="fijo-cfg-title">${escapeHtml(f.categoria)}</span>
+        ${badgePrestamo}
+      </div>
+      <span class="fijo-cfg-vto">Vence los días <strong>${f.diaVencimiento || 1}</strong> de cada mes ${estadoAlerta}${montoTxt}</span>
+      ${extraPrestamoHtml}
     `;
 
     const actions = document.createElement('div');
@@ -4499,7 +4867,7 @@ function renderGastosFijosConfigUI() {
 
     const labelSwitch = document.createElement('label');
     labelSwitch.className = 'switch-wrap';
-    labelSwitch.title = f.activo ? 'Pausar alerta de este gasto fijo' : 'Activar alerta de este gasto fijo';
+    labelSwitch.title = f.activo ? 'Pausar alerta' : 'Activar alerta';
 
     const chk = document.createElement('input');
     chk.type = 'checkbox';
@@ -4512,6 +4880,13 @@ function renderGastosFijosConfigUI() {
     labelSwitch.appendChild(chk);
     labelSwitch.appendChild(slider);
 
+    const btnEdit = document.createElement('button');
+    btnEdit.type = 'button';
+    btnEdit.className = 'btn-edit-action';
+    btnEdit.title = 'Editar gasto fijo o cuotas';
+    btnEdit.innerHTML = '✏️';
+    btnEdit.onclick = () => abrirModalEditarGastoFijo(f);
+
     const btnDel = document.createElement('button');
     btnDel.type = 'button';
     btnDel.className = 'btn-del-action';
@@ -4520,6 +4895,7 @@ function renderGastosFijosConfigUI() {
     btnDel.onclick = () => pedirConfirmarEliminarGastoFijo(f.fila, f.id, f.categoria);
 
     actions.appendChild(labelSwitch);
+    actions.appendChild(btnEdit);
     actions.appendChild(btnDel);
 
     card.appendChild(info);
@@ -4529,11 +4905,45 @@ function renderGastosFijosConfigUI() {
 }
 
 function guardarNuevoGastoFijoDesdeConfig() {
-  const cat = ($('cfg_fijo_categoria') ? $('cfg_fijo_categoria').value : '').trim();
+  const sel = $('cfg_fijo_categoria');
+  const inpCustom = $('cfg_fijo_categoria_custom');
+  let cat = sel ? sel.value : '';
+  if (cat === '__custom__' && inpCustom) {
+    cat = inpCustom.value.trim();
+  }
+  cat = cat.trim();
+
   const dia = Number($('cfg_fijo_dia') ? $('cfg_fijo_dia').value : 1) || 1;
+  const esPrestamo = $('cfg_fijo_es_prestamo') ? $('cfg_fijo_es_prestamo').checked : false;
+
+  let cuotaActual = 1;
+  let totalCuotas = 0;
+  const hoy = new Date();
+  let mesBase = Number($('cfg_fijo_mes_base') ? $('cfg_fijo_mes_base').value : (mesActualSeleccionado || (hoy.getMonth() + 1)));
+  let anioBase = Number($('cfg_fijo_anio_base') ? $('cfg_fijo_anio_base').value : (anioActualSeleccionado || hoy.getFullYear()));
+  let montoEstimado = 0;
+
+  if (esPrestamo) {
+    cuotaActual = Number($('cfg_fijo_cuota_actual') ? $('cfg_fijo_cuota_actual').value : 1) || 1;
+    totalCuotas = Number($('cfg_fijo_total_cuotas') ? $('cfg_fijo_total_cuotas').value : 24) || 24;
+    montoEstimado = Number($('cfg_fijo_monto') ? $('cfg_fijo_monto').value : 0) || 0;
+
+    if (totalCuotas < 1) {
+      mensaje('El total de cuotas debe ser mayor a 0.', true);
+      return;
+    }
+    if (cuotaActual < 1) {
+      mensaje('La cuota actual debe ser al menos 1.', true);
+      return;
+    }
+    if (cuotaActual > totalCuotas) {
+      mensaje('La cuota actual no puede superar el total de cuotas.', true);
+      return;
+    }
+  }
 
   if (!cat) {
-    mensaje('Elegí o ingresá la categoría del gasto fijo.', true);
+    mensaje('Elegí o ingresá el nombre/categoría del gasto fijo.', true);
     return;
   }
   if (dia < 1 || dia > 31) {
@@ -4541,20 +4951,46 @@ function guardarNuevoGastoFijoDesdeConfig() {
     return;
   }
 
+  const payload = {
+    categoria: cat,
+    diaVencimiento: dia,
+    esPrestamo: esPrestamo,
+    cuotaActual: cuotaActual,
+    cuotaBase: cuotaActual,
+    totalCuotas: totalCuotas,
+    mesBase: mesBase,
+    anioBase: anioBase,
+    montoEstimado: montoEstimado
+  };
+
+  const limpiarCampos = () => {
+    if (sel) sel.value = '';
+    if (inpCustom) { inpCustom.value = ''; inpCustom.style.display = 'none'; }
+    if ($('cfg_fijo_es_prestamo')) $('cfg_fijo_es_prestamo').checked = false;
+    toggleCamposPrestamoFijo(false);
+    if ($('cfg_fijo_monto')) $('cfg_fijo_monto').value = '';
+  };
+
   if (isDemoMode) {
     let fijos = JSON.parse(localStorage.getItem('demo_gastos_fijos') || '[]');
     fijos.push({
       id: 'fijo_' + Date.now(),
       categoria: cat,
       diaVencimiento: dia,
-      activo: true
+      activo: true,
+      esPrestamo: esPrestamo,
+      cuotaBase: cuotaActual,
+      totalCuotas: totalCuotas,
+      mesBase: mesBase,
+      anioBase: anioBase,
+      montoEstimado: montoEstimado
     });
     localStorage.setItem('demo_gastos_fijos', JSON.stringify(fijos));
     gastosFijosConfigLista = fijos;
-    renderGastosFijosConfigUI();
+    cargarGastosFijosConfig();
     renderGastosFijosPendientes();
-    mensaje('Gasto fijo agregado (Modo Demo)');
-    if ($('cfg_fijo_categoria')) $('cfg_fijo_categoria').value = '';
+    limpiarCampos();
+    mensaje(esPrestamo ? 'Préstamo programado (Modo Demo)' : 'Gasto fijo agregado (Modo Demo)');
     return;
   }
 
@@ -4563,11 +4999,136 @@ function guardarNuevoGastoFijoDesdeConfig() {
       gastosFijosConfigLista = lista;
       renderGastosFijosConfigUI();
       renderGastosFijosPendientes();
-      mensaje('Gasto fijo agregado.');
-      if ($('cfg_fijo_categoria')) $('cfg_fijo_categoria').value = '';
+      limpiarCampos();
+      mensaje(esPrestamo ? 'Préstamo programado con éxito.' : 'Gasto fijo agregado.');
     })
     .withFailureHandler(e => mensaje(e.message, true))
-    .addGastoFijo(cat, dia);
+    .addGastoFijo(payload);
+}
+
+function abrirModalEditarGastoFijo(f) {
+  if (!f) return;
+  const modal = $('modalEditarGastoFijo');
+  if (!modal) return;
+
+  $('edit_fijo_fila').value = f.fila || '';
+  $('edit_fijo_id_demo').value = f.id || '';
+  $('edit_fijo_categoria').value = f.categoria || '';
+  $('edit_fijo_dia').value = f.diaVencimiento || 10;
+
+  const esPrestamo = !!f.esPrestamo || Number(f.totalCuotas) > 0;
+  const chkPrest = $('edit_fijo_es_prestamo');
+  if (chkPrest) chkPrest.checked = esPrestamo;
+
+  toggleCamposEditarPrestamoFijo(esPrestamo);
+
+  $('edit_fijo_cuota_actual').value = f.cuotaActual || f.cuotaBase || 1;
+  $('edit_fijo_total_cuotas').value = f.totalCuotas || 24;
+
+  const hoy = new Date();
+  $('edit_fijo_mes_base').value = f.mesBase || mesActualSeleccionado || (hoy.getMonth() + 1);
+  $('edit_fijo_anio_base').value = f.anioBase || anioActualSeleccionado || hoy.getFullYear();
+  $('edit_fijo_monto').value = f.montoEstimado || '';
+
+  modal.classList.add('active');
+}
+
+function cerrarModalEditarGastoFijo() {
+  const modal = $('modalEditarGastoFijo');
+  if (modal) modal.classList.remove('active');
+}
+
+function toggleCamposEditarPrestamoFijo(checked) {
+  const box = $('edit_fijo_prestamo_box');
+  if (box) box.style.display = checked ? 'block' : 'none';
+}
+
+function guardarEdicionGastoFijo() {
+  const fila = $('edit_fijo_fila').value;
+  const idDemo = $('edit_fijo_id_demo').value;
+  const cat = ($('edit_fijo_categoria') ? $('edit_fijo_categoria').value : '').trim();
+  const dia = Number($('edit_fijo_dia') ? $('edit_fijo_dia').value : 10) || 10;
+  const esPrestamo = $('edit_fijo_es_prestamo') ? $('edit_fijo_es_prestamo').checked : false;
+
+  let cuotaActual = 1;
+  let totalCuotas = 0;
+  const hoy = new Date();
+  let mesBase = Number($('edit_fijo_mes_base') ? $('edit_fijo_mes_base').value : (mesActualSeleccionado || (hoy.getMonth() + 1)));
+  let anioBase = Number($('edit_fijo_anio_base') ? $('edit_fijo_anio_base').value : (anioActualSeleccionado || hoy.getFullYear()));
+  let montoEstimado = 0;
+
+  if (!cat) {
+    mensaje('Ingresá el nombre o concepto.', true);
+    return;
+  }
+  if (dia < 1 || dia > 31) {
+    mensaje('El día debe ser entre 1 y 31.', true);
+    return;
+  }
+
+  if (esPrestamo) {
+    cuotaActual = Number($('edit_fijo_cuota_actual').value) || 1;
+    totalCuotas = Number($('edit_fijo_total_cuotas').value) || 24;
+    montoEstimado = Number($('edit_fijo_monto').value) || 0;
+
+    if (totalCuotas < 1) {
+      mensaje('El total de cuotas debe ser mayor a 0.', true);
+      return;
+    }
+    if (cuotaActual < 1) {
+      mensaje('La cuota actual debe ser al menos 1.', true);
+      return;
+    }
+    if (cuotaActual > totalCuotas) {
+      mensaje('La cuota actual no puede ser mayor al total.', true);
+      return;
+    }
+  }
+
+  const payload = {
+    categoria: cat,
+    diaVencimiento: dia,
+    esPrestamo: esPrestamo,
+    cuotaActual: cuotaActual,
+    cuotaBase: cuotaActual,
+    totalCuotas: totalCuotas,
+    mesBase: mesBase,
+    anioBase: anioBase,
+    montoEstimado: montoEstimado
+  };
+
+  if (isDemoMode) {
+    let fijos = JSON.parse(localStorage.getItem('demo_gastos_fijos') || '[]');
+    const target = fijos.find(x => x.id === idDemo);
+    if (target) {
+      target.categoria = cat;
+      target.diaVencimiento = dia;
+      target.esPrestamo = esPrestamo;
+      target.cuotaBase = cuotaActual;
+      target.totalCuotas = totalCuotas;
+      target.mesBase = mesBase;
+      target.anioBase = anioBase;
+      target.montoEstimado = montoEstimado;
+      localStorage.setItem('demo_gastos_fijos', JSON.stringify(fijos));
+      gastosFijosConfigLista = fijos;
+      cargarGastosFijosConfig();
+      renderGastosFijosPendientes();
+      cerrarModalEditarGastoFijo();
+      mensaje('Gasto fijo actualizado (Modo Demo)');
+    }
+    return;
+  }
+
+  google.script.run
+    .withSuccessHandler(lista => {
+      gastosFijosConfigLista = lista;
+      renderGastosFijosConfigUI();
+      renderGastosFijosPendientes();
+      cerrarModalEditarGastoFijo();
+      mensaje('Gasto fijo actualizado.');
+    })
+    .withFailureHandler(e => mensaje(e.message, true))
+    .editarGastoFijo(fila, payload);
 }
 
 function toggleAlertaGastoFijo(fila, idDemo, nuevoEstado) {
@@ -4577,8 +5138,7 @@ function toggleAlertaGastoFijo(fila, idDemo, nuevoEstado) {
     if (target) {
       target.activo = nuevoEstado;
       localStorage.setItem('demo_gastos_fijos', JSON.stringify(fijos));
-      gastosFijosConfigLista = fijos;
-      renderGastosFijosConfigUI();
+      cargarGastosFijosConfig();
       renderGastosFijosPendientes();
       mensaje(nuevoEstado ? 'Alerta activada' : 'Alerta pausada');
     }
@@ -4606,7 +5166,7 @@ function pedirConfirmarEliminarGastoFijo(fila, idDemo, categoria) {
     fijos = fijos.filter(x => x.id !== idDemo);
     localStorage.setItem('demo_gastos_fijos', JSON.stringify(fijos));
     gastosFijosConfigLista = fijos;
-    renderGastosFijosConfigUI();
+    cargarGastosFijosConfig();
     renderGastosFijosPendientes();
     mensaje('Gasto fijo eliminado (Modo Demo)');
     return;

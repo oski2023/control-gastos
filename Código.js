@@ -59,6 +59,11 @@ function getSheet_(name) {
       sh.appendRow(['ID', 'Nombre', 'Monto Objetivo', 'Monto Actual', 'Fecha Límite', 'Color']);
       return sh;
     }
+    if (target === 'gastosfijos' || target === 'gastofijo') {
+      sh = SS.insertSheet('GastosFijos');
+      sh.appendRow(['Categoría', 'Día Vencimiento', 'Activo', 'Es Préstamo', 'Cuota Base', 'Total Cuotas', 'Mes Base', 'Año Base', 'Monto Estimado']);
+      return sh;
+    }
     throw new Error('No existe la hoja: ' + name);
   }
   return sh;
@@ -172,36 +177,187 @@ function removeConfigItem(tipo, nombre) {
   return getConfig();
 }
 
-function getGastosFijosConfig() {
+function asegurarColumnasGastosFijos_(sh) {
+  if (!sh) return;
+  const headers = ['Categoría', 'Día Vencimiento', 'Activo', 'Es Préstamo', 'Cuota Base', 'Total Cuotas', 'Mes Base', 'Año Base', 'Monto Estimado'];
+  const maxCols = sh.getMaxColumns();
+  if (maxCols < headers.length) {
+    sh.insertColumnsAfter(maxCols, headers.length - maxCols);
+  }
+  const lastCol = Math.max(sh.getLastColumn(), headers.length);
+  const fila1 = sh.getRange(1, 1, 1, headers.length).getValues()[0];
+  let cambioHeaders = false;
+  for (let c = 0; c < headers.length; c++) {
+    if (!fila1[c]) {
+      sh.getRange(1, c + 1).setValue(headers[c]);
+      cambioHeaders = true;
+    }
+  }
+}
+
+function getGastosFijosConfig(mes, anio) {
   const sh = getSheet_('GastosFijos');
+  asegurarColumnasGastosFijos_(sh);
   const last = sh.getLastRow();
   if (last < 2) return [];
-  const vals = sh.getRange(2, 1, last - 1, 3).getValues();
+
+  const hoy = new Date();
+  const mesConsulta = mes ? Number(mes) : (hoy.getMonth() + 1);
+  const anioConsulta = anio ? Number(anio) : hoy.getFullYear();
+
+  const numCols = Math.max(sh.getLastColumn(), 9);
+  const vals = sh.getRange(2, 1, last - 1, numCols).getValues();
   const lista = [];
+
   for (let i = 0; i < vals.length; i++) {
     const cat = String(vals[i][0] || '').trim();
     if (!cat) continue;
-    const dia = Number(vals[i][1]) || 1;
+    const dia = Math.max(1, Math.min(31, Number(vals[i][1]) || 1));
     const activoVal = String(vals[i][2] || 'SI').trim().toUpperCase();
     const activo = (activoVal !== 'NO' && activoVal !== 'PAUSADO' && activoVal !== 'INACTIVO');
+
+    const esPrestamoVal = String(vals[i][3] || '').trim().toUpperCase();
+    const cuotaBase = Number(vals[i][4]) || 0;
+    const totalCuotas = Number(vals[i][5]) || 0;
+    const esPrestamo = (esPrestamoVal === 'SI' || esPrestamoVal === 'TRUE' || totalCuotas > 0);
+
+    const mesBase = Number(vals[i][6]) || mesConsulta;
+    const anioBase = Number(vals[i][7]) || anioConsulta;
+    const montoEstimado = Number(vals[i][8]) || 0;
+
+    let cuotaActual = 0;
+    let cuotaTexto = '';
+    let finalizado = false;
+    let noIniciado = false;
+    let esUltimaCuota = false;
+    let cuotasRestantes = 0;
+    let porcentaje = 0;
+
+    if (esPrestamo && totalCuotas > 0) {
+      const diffMeses = (anioConsulta - anioBase) * 12 + (mesConsulta - mesBase);
+      cuotaActual = (cuotaBase || 1) + diffMeses;
+      finalizado = cuotaActual > totalCuotas;
+      noIniciado = cuotaActual < 1;
+      esUltimaCuota = (cuotaActual === totalCuotas);
+      cuotasRestantes = Math.max(0, totalCuotas - cuotaActual);
+      cuotaTexto = 'Cuota ' + Math.max(1, Math.min(cuotaActual, totalCuotas)) + '/' + totalCuotas;
+      porcentaje = Math.min(100, Math.max(0, Math.round((Math.max(0, cuotaActual) / totalCuotas) * 100)));
+    }
+
     lista.push({
       fila: i + 2,
       categoria: cat,
       diaVencimiento: dia,
-      activo: activo
+      activo: activo,
+      esPrestamo: esPrestamo,
+      cuotaBase: cuotaBase,
+      totalCuotas: totalCuotas,
+      mesBase: mesBase,
+      anioBase: anioBase,
+      montoEstimado: montoEstimado,
+      cuotaActual: cuotaActual,
+      cuotaTexto: cuotaTexto,
+      finalizado: finalizado,
+      noIniciado: noIniciado,
+      esUltimaCuota: esUltimaCuota,
+      cuotasRestantes: cuotasRestantes,
+      porcentaje: porcentaje
     });
   }
   return lista.sort((a, b) => a.categoria.localeCompare(b.categoria, 'es', { sensitivity: 'base' }));
 }
 
-function addGastoFijo(categoria, diaVencimiento) {
-  categoria = String(categoria || '').trim();
-  diaVencimiento = Math.max(1, Math.min(31, Number(diaVencimiento) || 1));
-  if (!categoria) throw new Error('Ingresá el nombre o categoría del gasto fijo.');
+function addGastoFijo(param1, diaVencimiento, esPrestamo, cuotaBase, totalCuotas, mesBase, anioBase, montoEstimado) {
+  let cat = '';
+  let dia = 10;
+  let esPrest = false;
+  let cBase = 1;
+  let tCuotas = 0;
+  let mBase = 0;
+  let aBase = 0;
+  let mEstimado = 0;
+
+  if (param1 && typeof param1 === 'object') {
+    cat = String(param1.categoria || '').trim();
+    dia = Number(param1.diaVencimiento || param1.dia || 10);
+    esPrest = !!param1.esPrestamo;
+    cBase = Number(param1.cuotaBase || param1.cuotaActual || 1) || 1;
+    tCuotas = Number(param1.totalCuotas || 0) || 0;
+    mBase = Number(param1.mesBase || 0);
+    aBase = Number(param1.anioBase || 0);
+    mEstimado = Number(param1.montoEstimado || param1.monto || 0);
+  } else {
+    cat = String(param1 || '').trim();
+    dia = Number(diaVencimiento) || 10;
+    esPrest = !!esPrestamo;
+    cBase = Number(cuotaBase) || 1;
+    tCuotas = Number(totalCuotas) || 0;
+    mBase = Number(mesBase) || 0;
+    aBase = Number(anioBase) || 0;
+    mEstimado = Number(montoEstimado) || 0;
+  }
+
+  if (!cat) throw new Error('Ingresá el nombre o categoría del gasto fijo.');
+  dia = Math.max(1, Math.min(31, dia || 1));
+
+  const hoy = new Date();
+  if (!mBase) mBase = hoy.getMonth() + 1;
+  if (!aBase) aBase = hoy.getFullYear();
 
   const sh = getSheet_('GastosFijos');
-  sh.appendRow([ categoria, diaVencimiento, 'SI' ]);
-  return getGastosFijosConfig();
+  asegurarColumnasGastosFijos_(sh);
+
+  const tieneCuotas = esPrest || tCuotas > 0;
+  sh.appendRow([
+    cat,
+    dia,
+    'SI',
+    tieneCuotas ? 'SI' : 'NO',
+    tieneCuotas ? cBase : '',
+    tieneCuotas ? tCuotas : '',
+    tieneCuotas ? mBase : '',
+    tieneCuotas ? aBase : '',
+    mEstimado || ''
+  ]);
+
+  return getGastosFijosConfig(mBase, aBase);
+}
+
+function editarGastoFijo(fila, data) {
+  fila = Number(fila);
+  const sh = getSheet_('GastosFijos');
+  asegurarColumnasGastosFijos_(sh);
+  if (fila < 2 || fila > sh.getLastRow()) {
+    throw new Error('Fila de gasto fijo no válida.');
+  }
+
+  const cat = String(data.categoria || '').trim();
+  if (!cat) throw new Error('El nombre o categoría no puede estar vacío.');
+  const dia = Math.max(1, Math.min(31, Number(data.diaVencimiento || 10)));
+  const esPrest = !!data.esPrestamo || Number(data.totalCuotas) > 0;
+  const cBase = Number(data.cuotaBase || data.cuotaActual || 1) || 1;
+  const tCuotas = Number(data.totalCuotas || 0) || 0;
+  const hoy = new Date();
+  const mBase = Number(data.mesBase) || (hoy.getMonth() + 1);
+  const aBase = Number(data.anioBase) || hoy.getFullYear();
+  const mEstimado = Number(data.montoEstimado || data.monto || 0);
+
+  const estadoActual = String(sh.getRange(fila, 3).getValue() || 'SI').trim().toUpperCase();
+  const activo = (estadoActual !== 'NO' && estadoActual !== 'PAUSADO' && estadoActual !== 'INACTIVO') ? 'SI' : 'NO';
+
+  sh.getRange(fila, 1, 1, 9).setValues([[
+    cat,
+    dia,
+    activo,
+    esPrest ? 'SI' : 'NO',
+    esPrest ? cBase : '',
+    esPrest ? tCuotas : '',
+    esPrest ? mBase : '',
+    esPrest ? aBase : '',
+    mEstimado || ''
+  ]]);
+
+  return getGastosFijosConfig(mBase, aBase);
 }
 
 function toggleGastoFijo(fila, activo) {
@@ -281,7 +437,9 @@ function addGasto(data) {
 }
 
 function getGastosFijosPendientes(mes, anio) {
-  const fijos = getSheet_('GastosFijos').getDataRange().getValues();
+  const shFijos = getSheet_('GastosFijos');
+  asegurarColumnasGastosFijos_(shFijos);
+  const fijos = shFijos.getDataRange().getValues();
   const gastos = getSheet_('Gastos').getDataRange().getValues();
   const tarjetas = getSheet_('Tarjetas').getDataRange().getValues();
   const tz = Session.getScriptTimeZone();
@@ -342,7 +500,8 @@ function getGastosFijosPendientes(mes, anio) {
         fecha: f,
         importe: Number(importe) || 0,
         medio: String(medio || ''),
-        descripcion: String(desc || '')
+        descripcion: String(desc || ''),
+        usado: false
       });
     }
   };
@@ -368,31 +527,92 @@ function getGastosFijosPendientes(mes, anio) {
     const activo = (activoVal !== 'NO' && activoVal !== 'PAUSADO' && activoVal !== 'INACTIVO');
     if (!categoria || !activo) continue;
 
+    // Campos de préstamo / cuotas
+    const esPrestamoVal = String(fijos[i][3] || '').trim().toUpperCase();
+    const cuotaBase = Number(fijos[i][4]) || 0;
+    const totalCuotas = Number(fijos[i][5]) || 0;
+    const esPrestamo = (esPrestamoVal === 'SI' || esPrestamoVal === 'TRUE' || totalCuotas > 0);
+    const mesBase = Number(fijos[i][6]) || mesActual;
+    const anioBase = Number(fijos[i][7]) || anioActual;
+    const montoEstimado = Number(fijos[i][8]) || 0;
+
+    let cuotaActual = 0;
+    let cuotaTexto = '';
+    let finalizado = false;
+    let esUltimaCuota = false;
+    let cuotasRestantes = 0;
+
+    if (esPrestamo && totalCuotas > 0) {
+      const diffMeses = (anioActual - anioBase) * 12 + (mesActual - mesBase);
+      cuotaActual = (cuotaBase || 1) + diffMeses;
+      finalizado = cuotaActual > totalCuotas;
+      esUltimaCuota = (cuotaActual === totalCuotas);
+      cuotasRestantes = Math.max(0, totalCuotas - cuotaActual);
+      cuotaTexto = 'Cuota ' + cuotaActual + '/' + totalCuotas;
+
+      // Si el préstamo ya terminó antes de este mes, no se procesa como deuda pendiente
+      if (finalizado) {
+        continue;
+      }
+    }
+
     const catKey = normCat(categoria);
-    let pagosAnt = pagosMesAnt[catKey] || 0;
-    let pagosAct = pagosMesActual[catKey] || 0;
     const listaPagosEsteMes = pagosInfoMesActual[catKey] || [];
 
-    // 1. ¿El mes actual tiene pagos registrados?
-    if (pagosAct > 0) {
-      // Ya fue pagado este mes (está al día)
-      const totalMonto = listaPagosEsteMes.reduce((acc, p) => acc + (p.importe || 0), 0);
-      const ultPago = listaPagosEsteMes[listaPagosEsteMes.length - 1] || {};
+    // Buscar si hay un pago no usado que corresponda a este gasto fijo / préstamo
+    let pagoMatcheado = null;
+
+    if (esPrestamo && totalCuotas > 0) {
+      for (let pIdx = 0; pIdx < listaPagosEsteMes.length; pIdx++) {
+        const pItem = listaPagosEsteMes[pIdx];
+        if (pItem.usado) continue;
+        const descNorm = normCat(pItem.descripcion);
+        if (descNorm.includes(String(cuotaActual)) || descNorm.includes(String(totalCuotas)) || descNorm.includes(catKey)) {
+          pagoMatcheado = pItem;
+          pItem.usado = true;
+          break;
+        }
+      }
+    }
+
+    if (!pagoMatcheado) {
+      for (let pIdx = 0; pIdx < listaPagosEsteMes.length; pIdx++) {
+        const pItem = listaPagosEsteMes[pIdx];
+        if (!pItem.usado) {
+          pagoMatcheado = pItem;
+          pItem.usado = true;
+          break;
+        }
+      }
+    }
+
+    // 1. ¿Tiene pago registrado este mes?
+    if (pagoMatcheado) {
       alDia.push({
         categoria,
         diaVencimiento,
-        monto: totalMonto || ultPago.importe || 0,
-        fechaPago: ultPago.fecha ? Utilities.formatDate(ultPago.fecha, tz, 'dd/MM/yyyy') : '',
-        medio: ultPago.medio || '',
-        cantidadPagos: pagosAct
+        monto: pagoMatcheado.importe || 0,
+        fechaPago: pagoMatcheado.fecha ? Utilities.formatDate(pagoMatcheado.fecha, tz, 'dd/MM/yyyy') : '',
+        medio: pagoMatcheado.medio || '',
+        cantidadPagos: 1,
+        esPrestamo,
+        cuotaActual,
+        totalCuotas,
+        cuotaTexto,
+        cuotasRestantes,
+        esUltimaCuota,
+        montoEstimado
       });
     } else {
       // No se ha pagado aún este mes
       // 1.a. Si tampoco se pagó el mes anterior, arrastra la deuda del mes anterior
+      let pagosAnt = pagosMesAnt[catKey] || 0;
       if (pagosAnt === 0) {
         const fechaVtoAnt = new Date(anioAnt, mesAnt - 1, diaVencimiento || 1);
         const diffMs = hoy.getTime() - fechaVtoAnt.getTime();
         const diasVencidoAnt = Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+        const cuotaAnt = esPrestamo ? Math.max(1, cuotaActual - 1) : 0;
+        const cuotaTextoAnt = esPrestamo ? ('Cuota ' + cuotaAnt + '/' + totalCuotas) : '';
 
         pendientes.push({
           categoria,
@@ -402,13 +622,19 @@ function getGastosFijosPendientes(mes, anio) {
           anio: anioAnt,
           periodo: 'anterior',
           esMesAnterior: true,
-          diasVencido: diasVencidoAnt
+          diasVencido: diasVencidoAnt,
+          esPrestamo,
+          cuotaActual: cuotaAnt,
+          totalCuotas,
+          cuotaTexto: cuotaTextoAnt,
+          cuotasRestantes: esPrestamo ? Math.max(0, totalCuotas - cuotaAnt) : 0,
+          esUltimaCuota: esPrestamo && (cuotaAnt === totalCuotas),
+          montoEstimado
         });
       }
 
       // 1.b. Pendiente o próximo en el mes actual
       if (diaActual >= diaVencimiento) {
-        // Vencido este mes
         pendientes.push({
           categoria,
           diaVencimiento,
@@ -417,14 +643,27 @@ function getGastosFijosPendientes(mes, anio) {
           anio: anioActual,
           periodo: 'actual',
           esMesAnterior: false,
-          diasVencido: diaActual - diaVencimiento
+          diasVencido: diaActual - diaVencimiento,
+          esPrestamo,
+          cuotaActual,
+          totalCuotas,
+          cuotaTexto,
+          cuotasRestantes,
+          esUltimaCuota,
+          montoEstimado
         });
       } else {
-        // Vence más adelante en el mes
         proximos.push({
           categoria,
           diaVencimiento,
-          diasFaltan: diaVencimiento - diaActual
+          diasFaltan: diaVencimiento - diaActual,
+          esPrestamo,
+          cuotaActual,
+          totalCuotas,
+          cuotaTexto,
+          cuotasRestantes,
+          esUltimaCuota,
+          montoEstimado
         });
       }
     }
@@ -600,7 +839,7 @@ function getInitialData(mes, anio) {
   return {
     config: getConfig(),
     resumen: getResumen(mes, anio),
-    gastosFijosConfig: getGastosFijosConfig(),
+    gastosFijosConfig: getGastosFijosConfig(mes, anio),
     presupuestos: getPresupuestosConfig(),
     metasAhorro: getMetasAhorro()
   };
