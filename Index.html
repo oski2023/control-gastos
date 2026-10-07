@@ -1444,6 +1444,222 @@ input:checked + .switch-slider:before {
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
+/* FASE B: ESTILOS DE COTIZACIONES, PRESUPUESTOS Y METAS */
+.dolar-widget {
+  background: linear-gradient(180deg, rgba(16, 28, 48, 0.75) 0%, rgba(10, 18, 32, 0.8) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: var(--radius-xl);
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.4);
+}
+
+.dolar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.dolar-chip {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: all 0.2s ease;
+}
+
+.dolar-chip:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(56, 189, 248, 0.25);
+  transform: translateY(-2px);
+}
+
+.dolar-chip-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.dolar-chip-val {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.dolar-chip-sub {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+/* BARRAS DE PROGRESO DE PRESUPUESTOS */
+.budget-bar-wrap {
+  width: 100%;
+  height: 7px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-top: 6px;
+  position: relative;
+}
+
+.budget-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.budget-bar-fill.green {
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+}
+
+.budget-bar-fill.amber {
+  background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+}
+
+.budget-bar-fill.red {
+  background: linear-gradient(90deg, #ef4444 0%, #b91c1c 100%);
+}
+
+/* CARDS DE METAS DE AHORRO */
+.metas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.meta-card {
+  background: linear-gradient(180deg, rgba(20, 31, 52, 0.75) 0%, rgba(14, 22, 38, 0.8) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xl);
+  padding: 18px 20px;
+  box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.meta-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+.meta-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.meta-title-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.meta-icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(56, 189, 248, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.meta-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.meta-fechas {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.meta-amounts {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-variant-numeric: tabular-nums;
+}
+
+.meta-actual {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.meta-objetivo {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.meta-actions-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.btn-aportar {
+  flex: 1;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transition: all 0.2s;
+}
+
+.btn-aportar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.btn-aportar:active {
+  transform: scale(0.97);
+}
+
+.btn-meta-del {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #fca5a5;
+  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-meta-del:hover {
+  background: rgba(239, 68, 68, 0.25);
+  color: #fff;
+}
+
 /* RESPONSIVE */
 @media (max-width: 900px), (max-height: 650px) and (orientation: landscape) {
   .sidebar {
@@ -1668,6 +1884,7 @@ body.is-landscape .hamburger-btn {
   <nav class="sidebar" id="sidebar">
     <button type="button" class="tab active" data-tab="resumen" onclick="showTab('resumen',this)">📊 Resumen</button>
     <button type="button" class="tab" data-tab="detalle" onclick="showTab('detalle',this)">📋 Detalle Categorías</button>
+    <button type="button" class="tab" data-tab="metas" onclick="showTab('metas',this)">🎯 Metas de Ahorro</button>
     <button type="button" class="tab" data-tab="gasto" onclick="showTab('gasto',this)">⚡ + Gasto</button>
     <button type="button" class="tab" data-tab="ingreso" onclick="showTab('ingreso',this)">📥 + Ingreso</button>
     <button type="button" class="tab" data-tab="tarjeta" onclick="showTab('tarjeta',this)">💳 + Tarjeta</button>
@@ -1831,6 +2048,61 @@ body.is-landscape .hamburger-btn {
           </div>
         </div>
 
+        <!-- FASE B: MERCADO DE DIVISAS & COTIZACIÓN EN VIVO -->
+        <div class="dolar-widget">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:18px;">💵</span>
+              <div>
+                <span style="font-size:13px;font-weight:800;color:#fff;">Mercado de Divisas en Vivo</span>
+                <span id="dolarFechaActualizacion" style="font-size:10px;color:var(--text-muted);display:block;">Cotizaciones oficiales de Argentina</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <button type="button" onclick="cargarCotizacionesDolar(true)" class="btn-subtle" title="Actualizar cotización" style="padding:4px 8px;font-size:12px;border-radius:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;cursor:pointer;">
+                🔄
+              </button>
+            </div>
+          </div>
+
+          <div class="dolar-grid" id="gridCotizacionesDolar">
+            <div class="dolar-chip">
+              <span class="dolar-chip-title">Blue</span>
+              <span class="dolar-chip-val" id="dolar_val_blue">$ ---</span>
+              <span class="dolar-chip-sub" id="dolar_sub_blue">Cargando...</span>
+            </div>
+            <div class="dolar-chip">
+              <span class="dolar-chip-title">MEP / Bolsa</span>
+              <span class="dolar-chip-val" id="dolar_val_mep">$ ---</span>
+              <span class="dolar-chip-sub" id="dolar_sub_mep">Cargando...</span>
+            </div>
+            <div class="dolar-chip">
+              <span class="dolar-chip-title">Cripto USDT</span>
+              <span class="dolar-chip-val" id="dolar_val_cripto">$ ---</span>
+              <span class="dolar-chip-sub" id="dolar_sub_cripto">Cargando...</span>
+            </div>
+            <div class="dolar-chip">
+              <span class="dolar-chip-title">Tarjeta</span>
+              <span class="dolar-chip-val" id="dolar_val_tarjeta">$ ---</span>
+              <span class="dolar-chip-sub" id="dolar_sub_tarjeta">Cargando...</span>
+            </div>
+          </div>
+
+          <div id="patrimonioDolarBox" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text-muted);flex-wrap:wrap;gap:6px;">
+            <span>Equivalente en Dólar Blue:</span>
+            <span id="patrimonioDolarValor" style="color:#38bdf8;font-weight:800;font-variant-numeric:tabular-nums;">u$s ---</span>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+          <button type="button" onclick="showTab('metas', this)" style="flex:1;min-width:140px;padding:12px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:13px;font-weight:700;border-radius:var(--radius-md);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <span>🎯</span> Metas de Ahorro
+          </button>
+          <button type="button" onclick="exportarBalanceMensualCSV()" style="flex:1;min-width:140px;padding:12px 14px;background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.25);color:var(--primary);font-size:13px;font-weight:700;border-radius:var(--radius-md);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <span>📥</span> Exportar Excel (CSV)
+          </button>
+        </div>
+
         <h3>Gastos por categoría</h3>
         <div style="position:relative;width:100%;height:250px;margin-bottom:24px;">
           <div id="avisoSinGastos" style="display:none;width:100%;height:100%;align-items:center;justify-content:center;color:var(--text-dim);font-weight:600;font-size:14px;border:1px dashed var(--border-subtle);border-radius:var(--radius-lg);"></div>
@@ -1877,9 +2149,30 @@ body.is-landscape .hamburger-btn {
         <button type="button" class="btn-mes-nav" onclick="cambiarMesRelativo(1)" title="Mes siguiente">▶</button>
       </div>
 
-      <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.04);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.04);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:12px;">
         <span style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;">Total Gastado en el Mes:</span>
         <span id="detalleTotalMonto" style="font-size:20px;font-weight:800;color:var(--primary);">$ 0,00</span>
+      </div>
+
+      <!-- BARRA DE ACCIÓN Y PRESUPUESTOS -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+        <button type="button" onclick="abrirModalPresupuestos()" style="background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.3);color:var(--primary);padding:8px 14px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+          <span>🎯</span> Definir Presupuestos
+        </button>
+        <button type="button" onclick="exportarBalanceMensualCSV()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+          <span>📥</span> Exportar Excel (CSV)
+        </button>
+      </div>
+
+      <!-- RESUMEN DE SALUD PRESUPUESTARIA -->
+      <div id="bannerSaludPresupuesto" style="display:none;background:rgba(255,255,255,0.03);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:6px;">
+          <span style="color:var(--text-muted);font-weight:700;" id="txtPresupuestoGlobalLabel">Presupuesto mensual consumido:</span>
+          <span style="font-weight:800;color:#fff;" id="txtPresupuestoGlobalVal">$ 0 / $ 0 (0%)</span>
+        </div>
+        <div class="budget-bar-wrap">
+          <div id="barPresupuestoGlobal" class="budget-bar-fill green" style="width: 0%;"></div>
+        </div>
       </div>
 
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;padding:0 2px;font-size:12px;color:var(--text-muted);">
@@ -1900,6 +2193,30 @@ body.is-landscape .hamburger-btn {
           <tbody id="categorias"></tbody>
         </table>
       </div>
+    </section>
+
+    <!-- METAS DE AHORRO Y FONDOS -->
+    <section id="metas" class="card hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+        <h2 style="margin:0;">🎯 Metas de Ahorro y Fondos</h2>
+        <button type="button" onclick="abrirModalNuevaMeta()" style="background:linear-gradient(135deg,#0ea5e9 0%,#2563eb 100%);color:#fff;border:none;border-radius:10px;padding:9px 15px;font-weight:700;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(37,99,235,0.35);">
+          <span>+</span> Nueva Meta
+        </button>
+      </div>
+      <p style="color:var(--text-muted);font-size:13px;margin:0 0 16px;line-height:1.4;">
+        Establecé objetivos financieros (vacaciones, fondo de emergencia, compras grandes) y seguí tu progreso mes a mes.
+      </p>
+
+      <div id="metasVacio" style="display:none;text-align:center;padding:36px 16px;background:rgba(255,255,255,0.02);border:1px dashed var(--border-subtle);border-radius:var(--radius-xl);color:var(--text-muted);">
+        <div style="font-size:36px;margin-bottom:8px;">🎯</div>
+        <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:4px;">No tenés metas de ahorro activas</div>
+        <div style="font-size:13px;color:var(--text-dim);margin-bottom:16px;">Creá tu primera meta para empezar a planificar tus sueños o fondo de reserva.</div>
+        <button type="button" onclick="abrirModalNuevaMeta()" style="background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.35);color:var(--primary);padding:10px 18px;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;">
+          + Crear primera meta
+        </button>
+      </div>
+
+      <div class="metas-grid" id="gridMetasAhorro"></div>
     </section>
 
     <!-- GASTO COMPLETO -->
@@ -2184,6 +2501,9 @@ body.is-landscape .hamburger-btn {
         <button type="button" id="btn_cfg_cat" class="cfg-tab-btn active" onclick="cambiarTabConfig('cat')">
           🏷️ Categorías
         </button>
+        <button type="button" id="btn_cfg_presup" class="cfg-tab-btn" onclick="abrirModalPresupuestos()">
+          🎯 Presupuestos
+        </button>
         <button type="button" id="btn_cfg_fijos" class="cfg-tab-btn" onclick="cambiarTabConfig('fijos')">
           ⏰ Gastos Fijos
         </button>
@@ -2396,6 +2716,91 @@ body.is-landscape .hamburger-btn {
   </div>
 </div>
 
+<!-- MODAL CONFIGURAR PRESUPUESTOS MENSUALES -->
+<div id="modalPresupuestos" class="modal-overlay" onclick="if(event.target===this) cerrarModalPresupuestos()">
+  <div class="modal-card" style="max-height: 85vh; display: flex; flex-direction: column;">
+    <div class="modal-icon-badge">🎯</div>
+    <h3 class="modal-title">Presupuestos Mensuales</h3>
+    <p class="modal-subtitle">Fijá el tope máximo que deseás gastar en cada categoría por mes.</p>
+    
+    <div id="listaInputsPresupuestos" style="overflow-y: auto; max-height: 48vh; padding-right: 4px; text-align: left; margin-bottom: 14px;">
+      <!-- Generado dinámicamente -->
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="modal-btn-cancel" onclick="cerrarModalPresupuestos()">Cancelar</button>
+      <button type="button" class="modal-btn-confirm" onclick="guardarPresupuestosDesdeModal()">💾 Guardar Límites</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUEVA META DE AHORRO -->
+<div id="modalNuevaMeta" class="modal-overlay" onclick="if(event.target===this) cerrarModalNuevaMeta()">
+  <div class="modal-card" style="text-align: left;">
+    <div class="modal-icon-badge">🎯</div>
+    <h3 class="modal-title" style="text-align: center;">Nueva Meta de Ahorro</h3>
+    <p class="modal-subtitle" style="text-align: center;">Definí tu objetivo y cuánto querés juntar.</p>
+
+    <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px;">
+      <div>
+        <label>Nombre del Objetivo</label>
+        <input type="text" id="meta_input_nombre" placeholder="Ej.: Vacaciones en Brasil, Auto...">
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div>
+          <label>Monto Objetivo ($)</label>
+          <input type="number" id="meta_input_objetivo" placeholder="$ 500000" min="1">
+        </div>
+        <div>
+          <label>Ahorro Inicial ($)</label>
+          <input type="number" id="meta_input_actual" placeholder="$ 0" min="0" value="0">
+        </div>
+      </div>
+      <div>
+        <label>Fecha Estimada <span class="opcional">(opcional)</span></label>
+        <input type="date" id="meta_input_fecha">
+      </div>
+      <div>
+        <label>Icono</label>
+        <div style="display: flex; gap: 8px; overflow-x: auto; padding: 4px 0;" id="meta_icon_selector">
+          <button type="button" class="btn-subtle meta-icon-opt active" onclick="seleccionarEmojiMeta('🎯', this)" style="padding:6px 12px;font-size:18px;border-radius:10px;cursor:pointer;">🎯</button>
+          <button type="button" class="btn-subtle meta-icon-opt" onclick="seleccionarEmojiMeta('🏖️', this)" style="padding:6px 12px;font-size:18px;border-radius:10px;cursor:pointer;">🏖️</button>
+          <button type="button" class="btn-subtle meta-icon-opt" onclick="seleccionarEmojiMeta('🚗', this)" style="padding:6px 12px;font-size:18px;border-radius:10px;cursor:pointer;">🚗</button>
+          <button type="button" class="btn-subtle meta-icon-opt" onclick="seleccionarEmojiMeta('🛡️', this)" style="padding:6px 12px;font-size:18px;border-radius:10px;cursor:pointer;">🛡️</button>
+          <button type="button" class="btn-subtle meta-icon-opt" onclick="seleccionarEmojiMeta('🏠', this)" style="padding:6px 12px;font-size:18px;border-radius:10px;cursor:pointer;">🏠</button>
+          <button type="button" class="btn-subtle meta-icon-opt" onclick="seleccionarEmojiMeta('📱', this)" style="padding:6px 12px;font-size:18px;border-radius:10px;cursor:pointer;">📱</button>
+          <button type="button" class="btn-subtle meta-icon-opt" onclick="seleccionarEmojiMeta('✈️', this)" style="padding:6px 12px;font-size:18px;border-radius:10px;cursor:pointer;">✈️</button>
+          <button type="button" class="btn-subtle meta-icon-opt" onclick="seleccionarEmojiMeta('🎁', this)" style="padding:6px 12px;font-size:18px;border-radius:10px;cursor:pointer;">🎁</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="modal-btn-cancel" onclick="cerrarModalNuevaMeta()">Cancelar</button>
+      <button type="button" class="modal-btn-confirm" onclick="guardarNuevaMetaAccion()">+ Crear Meta</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL APORTE A META DE AHORRO -->
+<div id="modalAporteMeta" class="modal-overlay" onclick="if(event.target===this) cerrarModalAporteMeta()">
+  <div class="modal-card">
+    <div class="modal-icon-badge green">💰</div>
+    <h3 id="modalAporteTitulo" class="modal-title">Aportar a Meta</h3>
+    <p id="modalAporteSubtitulo" class="modal-subtitle">Ingresá el monto que vas a sumar a este objetivo</p>
+
+    <div style="margin-bottom: 18px;">
+      <label>Monto a sumar ($)</label>
+      <input type="number" id="meta_aporte_monto" class="input-hero" placeholder="$ 0" min="1">
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="modal-btn-cancel" onclick="cerrarModalAporteMeta()">Cancelar</button>
+      <button type="button" class="modal-btn-confirm green" onclick="confirmarAporteMetaAccion()">+ Sumar Aporte</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 
@@ -2412,6 +2817,13 @@ let config = {
   medios:[],
   entidades:[]
 };
+
+// --- FASE B: ESTADO GLOBAL PRESUPUESTOS, METAS Y COTIZACIONES ---
+let presupuestosGlobal = {};
+let metasAhorroGlobal = [];
+let emojiMetaSeleccionado = '🎯';
+let idMetaParaAporte = null;
+let cotizacionesDolar = null;
 
 const SERVER_IS_DEMO = <?!= (typeof isDemoParam !== 'undefined' && isDemoParam) ? 'true' : 'false' ?>;
 let isDemoMode = SERVER_IS_DEMO;
@@ -3782,7 +4194,7 @@ document.addEventListener('click', function(e) {
 
 function showTab(id, btn){
 
-  ['resumen','detalle','gasto','rapido','ingreso', 'historial', 'tarjeta', 'configuracion'].forEach(x => {
+  ['resumen','detalle','gasto','rapido','ingreso', 'historial', 'tarjeta', 'configuracion', 'metas'].forEach(x => {
     const seccion = $(x);
     if(seccion) seccion.classList.add('hidden');
   });
@@ -3820,6 +4232,16 @@ function showTab(id, btn){
 
   if(id === 'configuracion'){
     renderConfiguracionUI();
+  }
+
+  if(id === 'metas'){
+    renderMetasUI();
+  }
+
+  if(id === 'detalle'){
+    if (typeof renderTablaCategorias === 'function' && ultimoResumen) {
+      renderTablaCategorias(ultimoResumen);
+    }
   }
 
   if(id === 'tarjeta'){
@@ -4589,10 +5011,16 @@ function renderTablaCategorias(r) {
       items.push({
         categoria: c,
         monto: monto,
-        esFijoPagado: esGastoFijoPagado(c, monto)
+        esFijoPagado: esGastoFijoPagado(c, monto),
+        presupuesto: Number((presupuestosGlobal && presupuestosGlobal[c]) || 0)
       });
     }
   });
+
+  // Actualizar banner global de salud presupuestaria si existen presupuestos
+  if (typeof actualizarSaludPresupuestosUI === 'function') {
+    actualizarSaludPresupuestosUI(items);
+  }
 
   if (items.length === 0) {
     const tr = document.createElement('tr');
@@ -4607,6 +5035,25 @@ function renderTablaCategorias(r) {
 
   items.forEach(item => {
     const tr = document.createElement('tr');
+    
+    // Armar barra de presupuesto si la categoría tiene límite fijado
+    let htmlPresupuesto = '';
+    if (item.presupuesto > 0) {
+      const pct = Math.round((item.monto / item.presupuesto) * 100);
+      const restante = item.presupuesto - item.monto;
+      const claseColor = pct >= 100 ? 'red' : (pct >= 70 ? 'amber' : 'green');
+      const widthPct = Math.min(pct, 100);
+      
+      const textoDetalle = restante >= 0
+        ? '<span style="font-size:11px;color:var(--text-muted);">Límite: ' + money(item.presupuesto) + ' · Restante: <b style="color:#34d399;">' + money(restante) + '</b> (' + pct + '%)</span>'
+        : '<span style="font-size:11px;color:#f87171;font-weight:700;">⚠️ Excedido por ' + money(Math.abs(restante)) + ' (' + pct + '%)</span>';
+
+      htmlPresupuesto = '<div style="margin-top:6px;width:100%;">' +
+        '<div class="budget-bar-wrap"><div class="budget-bar-fill ' + claseColor + '" style="width:' + widthPct + '%;"></div></div>' +
+        '<div style="margin-top:3px;display:flex;justify-content:space-between;align-items:center;">' + textoDetalle + '</div>' +
+      '</div>';
+    }
+
     if (item.esFijoPagado) {
       tr.style.background = 'rgba(16, 185, 129, 0.08)';
       tr.style.borderLeft = '3px solid #10b981';
@@ -4616,14 +5063,20 @@ function renderTablaCategorias(r) {
             '<span style="color:#10b981;font-weight:700;">' + item.categoria + '</span>' +
             '<span style="background:rgba(16,185,129,0.18);color:#34d399;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;border:1px solid rgba(16,185,129,0.35);letter-spacing:0.02em;">Fijo pagado</span>' +
           '</div>' +
+          htmlPresupuesto +
         '</td>' +
-        '<td style="padding:12px 10px;text-align:right;font-weight:800;color:#10b981;font-size:15px;">' +
+        '<td style="padding:12px 10px;text-align:right;font-weight:800;color:#10b981;font-size:15px;vertical-align:top;">' +
           money(item.monto) +
         '</td>';
     } else {
       tr.innerHTML =
-        '<td style="padding:12px 10px;color:var(--text-main);font-weight:500;">' + item.categoria + '</td>' +
-        '<td style="padding:12px 10px;text-align:right;font-weight:700;color:var(--text-main);">' + money(item.monto) + '</td>';
+        '<td style="padding:12px 10px;">' +
+          '<span style="color:var(--text-main);font-weight:600;">' + item.categoria + '</span>' +
+          htmlPresupuesto +
+        '</td>' +
+        '<td style="padding:12px 10px;text-align:right;font-weight:700;color:var(--text-main);vertical-align:top;">' +
+          money(item.monto) +
+        '</td>';
     }
     tbody.appendChild(tr);
   });
@@ -4695,6 +5148,9 @@ function renderResumen(r){
   renderGraficoCategorias(r.porCategoria || {});
   renderGraficoEvolucion();
   renderGastosFijosPendientes();
+  if (typeof actualizarEquivalenteDolar === 'function') {
+    actualizarEquivalenteDolar(r.disponible || 0);
+  }
 }
 
 function refresh(){
@@ -4720,6 +5176,19 @@ function refresh(){
     if (!gastosFijosConfigLista || !gastosFijosConfigLista.length) {
       cargarGastosFijosConfig();
     }
+
+    presupuestosGlobal = JSON.parse(localStorage.getItem('demo_presupuestos') || '{}');
+    const mGuardadas = localStorage.getItem('demo_metas');
+    if (!mGuardadas) {
+      metasAhorroGlobal = [
+        { id: 'meta_1', nombre: 'Fondo de Emergencia', objetivo: 500000, actual: 320000, fechaLimite: '2026-12-31', emoji: '🛡️', color: '#10b981' },
+        { id: 'meta_2', nombre: 'Vacaciones Brasil', objetivo: 1200000, actual: 650000, fechaLimite: '2027-02-15', emoji: '🏖️', color: '#38bdf8' }
+      ];
+      localStorage.setItem('demo_metas', JSON.stringify(metasAhorroGlobal));
+    } else {
+      try { metasAhorroGlobal = JSON.parse(mGuardadas); } catch(e) { metasAhorroGlobal = []; }
+    }
+
     aplicarUltimasSelecciones();
     renderResumen(getDemoResumen(mesActualSeleccionado, anioActualSeleccionado));
     return;
@@ -4730,6 +5199,12 @@ function refresh(){
       config = data.config;
       if (data.gastosFijosConfig) {
         gastosFijosConfigLista = data.gastosFijosConfig;
+      }
+      if (data.presupuestos) {
+        presupuestosGlobal = data.presupuestos;
+      }
+      if (data.metasAhorro) {
+        metasAhorroGlobal = data.metasAhorro;
       }
       renderResumen(data.resumen);
 
@@ -5523,6 +5998,491 @@ function ejecutarGuardarTarjeta(d){
     .addTarjeta(d);
 }
 
+// ====================================================================
+// FASE B: SISTEMA DE PRESUPUESTOS INTELIGENTES (BUDGETS)
+// ====================================================================
+
+function actualizarSaludPresupuestosUI(items) {
+  const banner = $('bannerSaludPresupuesto');
+  if (!banner) return;
+
+  const categoriasConPresupuesto = Object.keys(presupuestosGlobal).filter(c => Number(presupuestosGlobal[c]) > 0);
+  if (categoriasConPresupuesto.length === 0) {
+    banner.style.display = 'none';
+    return;
+  }
+
+  let totalPresupuestado = 0;
+  let totalConsumido = 0;
+
+  categoriasConPresupuesto.forEach(c => {
+    const presup = Number(presupuestosGlobal[c]) || 0;
+    totalPresupuestado += presup;
+    const catItem = items ? items.find(it => it.categoria === c) : null;
+    if (catItem) {
+      totalConsumido += catItem.monto;
+    } else if (ultimoResumen && ultimoResumen.porCategoria && ultimoResumen.porCategoria[c]) {
+      totalConsumido += Number(ultimoResumen.porCategoria[c]) || 0;
+    }
+  });
+
+  const pct = totalPresupuestado > 0 ? Math.round((totalConsumido / totalPresupuestado) * 100) : 0;
+  const claseColor = pct >= 100 ? 'red' : (pct >= 70 ? 'amber' : 'green');
+  const bar = $('barPresupuestoGlobal');
+  const valTxt = $('txtPresupuestoGlobalVal');
+
+  if (bar) {
+    bar.className = 'budget-bar-fill ' + claseColor;
+    bar.style.width = Math.min(pct, 100) + '%';
+  }
+  if (valTxt) {
+    valTxt.textContent = money(totalConsumido) + ' / ' + money(totalPresupuestado) + ' (' + pct + '%)';
+    if (pct >= 100) {
+      valTxt.style.color = '#f87171';
+    } else {
+      valTxt.style.color = '#fff';
+    }
+  }
+
+  banner.style.display = 'block';
+}
+
+function abrirModalPresupuestos() {
+  const contenedor = $('listaInputsPresupuestos');
+  if (!contenedor) return;
+  contenedor.innerHTML = '';
+
+  const categorias = (config && Array.isArray(config.categorias) && config.categorias.length)
+    ? [...config.categorias].sort((a,b) => a.localeCompare(b, 'es'))
+    : ['Supermercado', 'Servicios', 'Comida / Delivery', 'Transporte', 'Salud', 'Educación', 'Entretenimiento', 'Hogar', 'Varios'];
+
+  categorias.forEach(cat => {
+    const valActual = (presupuestosGlobal && presupuestosGlobal[cat]) ? presupuestosGlobal[cat] : '';
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);';
+    row.innerHTML = `
+      <span style="font-size:13px;font-weight:600;color:#fff;flex:1;">${escapeHtml(cat)}</span>
+      <div style="width:130px;">
+        <input type="number" class="input-presupuesto-item" data-cat="${escapeHtml(cat)}" value="${valActual}" placeholder="$ Sin tope" min="0" step="500" style="padding:8px 10px;font-size:13px;text-align:right;font-weight:700;">
+      </div>
+    `;
+    contenedor.appendChild(row);
+  });
+
+  const modal = $('modalPresupuestos');
+  if (modal) {
+    modal.classList.add('active');
+  }
+}
+
+function cerrarModalPresupuestos() {
+  const modal = $('modalPresupuestos');
+  if (modal) {
+    modal.classList.remove('active');
+  }
+}
+
+function guardarPresupuestosDesdeModal() {
+  const inputs = document.querySelectorAll('.input-presupuesto-item');
+  const nuevoMap = {};
+  inputs.forEach(inp => {
+    const cat = inp.getAttribute('data-cat');
+    const val = Number(inp.value) || 0;
+    if (cat && val > 0) {
+      nuevoMap[cat] = val;
+    }
+  });
+
+  presupuestosGlobal = nuevoMap;
+  if (isDemoMode) {
+    localStorage.setItem('demo_presupuestos', JSON.stringify(nuevoMap));
+    cerrarModalPresupuestos();
+    mensaje('✓ Presupuestos guardados con éxito.');
+    if (ultimoResumen) renderTablaCategorias(ultimoResumen);
+    return;
+  }
+
+  google.script.run
+    .withSuccessHandler(res => {
+      presupuestosGlobal = res || nuevoMap;
+      cerrarModalPresupuestos();
+      mensaje('✓ Presupuestos actualizados.');
+      if (ultimoResumen) renderTablaCategorias(ultimoResumen);
+    })
+    .withFailureHandler(e => {
+      console.error('Error al guardar presupuestos:', e);
+      mensaje('Error al guardar presupuestos: ' + e.message, true);
+    })
+    .guardarPresupuestos(nuevoMap);
+}
+
+// ====================================================================
+// FASE B: MERCADO DE DIVISAS EN VIVO (DOLARAPI.COM)
+// ====================================================================
+
+function cargarCotizacionesDolar(forceRefresh) {
+  const cacheKey = 'cache_dolar_rates';
+  const cacheTimeKey = 'cache_dolar_rates_time';
+  const ahora = Date.now();
+  const cacheGuardado = localStorage.getItem(cacheKey);
+  const cacheTiempo = Number(localStorage.getItem(cacheTimeKey)) || 0;
+
+  if (!forceRefresh && cacheGuardado && (ahora - cacheTiempo < 10 * 60 * 1000)) {
+    try {
+      cotizacionesDolar = JSON.parse(cacheGuardado);
+      aplicarCotizacionesDolarUI(cotizacionesDolar);
+      return;
+    } catch(e) {}
+  }
+
+  fetch('https://dolarapi.com/v1/dolares')
+    .then(r => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(data => {
+      cotizacionesDolar = data;
+      localStorage.setItem(cacheKey, JSON.stringify(data));
+      localStorage.setItem(cacheTimeKey, String(ahora));
+      aplicarCotizacionesDolarUI(data);
+      if (forceRefresh) mensaje('✓ Cotizaciones del dólar actualizadas.');
+    })
+    .catch(err => {
+      console.warn('No se pudo obtener cotizaciones en vivo:', err);
+      if (cacheGuardado) {
+        try {
+          cotizacionesDolar = JSON.parse(cacheGuardado);
+          aplicarCotizacionesDolarUI(cotizacionesDolar);
+        } catch(e) {}
+      }
+    });
+}
+
+function aplicarCotizacionesDolarUI(datos) {
+  if (!Array.isArray(datos)) return;
+
+  const buscarCasa = casa => datos.find(d => (d.casa || '').toLowerCase() === casa.toLowerCase());
+  const blue = buscarCasa('blue');
+  const mep = buscarCasa('bolsa') || buscarCasa('mep');
+  const cripto = buscarCasa('cripto');
+  const tarjeta = buscarCasa('tarjeta');
+
+  if (blue && $('dolar_val_blue')) {
+    $('dolar_val_blue').textContent = '$ ' + Math.round(blue.venta || 0).toLocaleString('es-AR');
+    $('dolar_sub_blue').textContent = 'Compra: $' + Math.round(blue.compra || 0);
+  }
+  if (mep && $('dolar_val_mep')) {
+    $('dolar_val_mep').textContent = '$ ' + Math.round(mep.venta || 0).toLocaleString('es-AR');
+    $('dolar_sub_mep').textContent = 'Compra: $' + Math.round(mep.compra || 0);
+  }
+  if (cripto && $('dolar_val_cripto')) {
+    $('dolar_val_cripto').textContent = '$ ' + Math.round(cripto.venta || 0).toLocaleString('es-AR');
+    $('dolar_sub_cripto').textContent = 'USDT / Binance';
+  }
+  if (tarjeta && $('dolar_val_tarjeta')) {
+    $('dolar_val_tarjeta').textContent = '$ ' + Math.round(tarjeta.venta || 0).toLocaleString('es-AR');
+    $('dolar_sub_tarjeta').textContent = 'Oficial + recargos';
+  }
+
+  const lblFecha = $('dolarFechaActualizacion');
+  if (lblFecha) {
+    const ahora = new Date();
+    lblFecha.textContent = 'Actualizado ' + ahora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' hs';
+  }
+
+  if (ultimoResumen && ultimoResumen.disponible !== undefined) {
+    actualizarEquivalenteDolar(ultimoResumen.disponible);
+  }
+}
+
+function actualizarEquivalenteDolar(montoDisponible) {
+  const lbl = $('patrimonioDolarValor');
+  if (!lbl) return;
+
+  if (!cotizacionesDolar || !Array.isArray(cotizacionesDolar)) {
+    lbl.textContent = 'u$s ---';
+    return;
+  }
+
+  const blue = cotizacionesDolar.find(d => (d.casa || '').toLowerCase() === 'blue');
+  const ventaBlue = (blue && Number(blue.venta)) ? Number(blue.venta) : 0;
+
+  if (ventaBlue <= 0 || montoDisponible <= 0) {
+    lbl.textContent = 'u$s 0';
+    return;
+  }
+
+  const enUsd = Math.round(montoDisponible / ventaBlue);
+  lbl.textContent = 'u$s ' + enUsd.toLocaleString('es-AR') + ' (Blue $' + ventaBlue + ')';
+}
+
+// ====================================================================
+// FASE B: METAS DE AHORRO Y FONDOS
+// ====================================================================
+
+function renderMetasUI() {
+  const cont = $('gridMetasAhorro');
+  const vacio = $('metasVacio');
+  if (!cont) return;
+  cont.innerHTML = '';
+
+  if (!metasAhorroGlobal || metasAhorroGlobal.length === 0) {
+    if (vacio) vacio.style.display = 'block';
+    return;
+  }
+
+  if (vacio) vacio.style.display = 'none';
+
+  metasAhorroGlobal.forEach(m => {
+    const objetivo = Number(m.objetivo) || 1;
+    const actual = Number(m.actual) || 0;
+    const pct = Math.min(100, Math.round((actual / objetivo) * 100));
+    const falta = Math.max(0, objetivo - actual);
+    const completada = actual >= objetivo;
+
+    const emoji = m.emoji || '🎯';
+    const claseBarra = completada ? 'green' : (pct >= 50 ? 'amber' : 'green');
+
+    const card = document.createElement('div');
+    card.className = 'meta-card';
+    card.innerHTML = `
+      <div class="meta-header">
+        <div class="meta-title-box">
+          <div class="meta-icon-badge">${emoji}</div>
+          <div>
+            <div class="meta-title">${escapeHtml(m.nombre)}</div>
+            <div class="meta-fechas">${m.fechaLimite ? ('Meta: ' + escapeHtml(m.fechaLimite)) : 'Sin fecha límite'}</div>
+          </div>
+        </div>
+        <button type="button" class="btn-meta-del" onclick="eliminarMetaAccion('${m.id}')" title="Eliminar meta">🗑️</button>
+      </div>
+
+      <div>
+        <div class="meta-amounts">
+          <div>
+            <span style="font-size:11px;color:var(--text-muted);display:block;text-transform:uppercase;letter-spacing:0.04em;">Ahorrado</span>
+            <span class="meta-actual">${money(actual)}</span>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:11px;color:var(--text-muted);display:block;text-transform:uppercase;letter-spacing:0.04em;">Objetivo</span>
+            <span class="meta-objetivo">${money(objetivo)}</span>
+          </div>
+        </div>
+
+        <div class="budget-bar-wrap" style="height:10px;margin-top:8px;">
+          <div class="budget-bar-fill ${claseBarra}" style="width:${pct}%;"></div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:12px;">
+          <span style="color:#38bdf8;font-weight:700;">${pct}% completado</span>
+          <span style="color:var(--text-dim);">${completada ? '🎉 ¡Meta cumplida!' : ('Faltan ' + money(falta))}</span>
+        </div>
+      </div>
+
+      <div class="meta-actions-bar">
+        <button type="button" class="btn-aportar" onclick="abrirModalAporte('${m.id}')">
+          <span>💰</span> + Aportar Ahorro
+        </button>
+      </div>
+    `;
+    cont.appendChild(card);
+  });
+}
+
+function abrirModalNuevaMeta() {
+  const modal = $('modalNuevaMeta');
+  if (!modal) return;
+  $('meta_input_nombre').value = '';
+  $('meta_input_objetivo').value = '';
+  $('meta_input_actual').value = '0';
+  $('meta_input_fecha').value = '';
+  emojiMetaSeleccionado = '🎯';
+  document.querySelectorAll('.meta-icon-opt').forEach(b => b.classList.remove('active'));
+  const first = document.querySelector('.meta-icon-opt');
+  if (first) first.classList.add('active');
+  modal.classList.add('active');
+}
+
+function cerrarModalNuevaMeta() {
+  const modal = $('modalNuevaMeta');
+  if (modal) modal.classList.remove('active');
+}
+
+function seleccionarEmojiMeta(emoji, btn) {
+  emojiMetaSeleccionado = emoji;
+  document.querySelectorAll('.meta-icon-opt').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+function guardarNuevaMetaAccion() {
+  const nombre = ($('meta_input_nombre').value || '').trim();
+  const objetivo = Number($('meta_input_objetivo').value) || 0;
+  const actual = Number($('meta_input_actual').value) || 0;
+  const fecha = $('meta_input_fecha').value || '';
+
+  if (!nombre) {
+    mensaje('Por favor ingresá el nombre de la meta.', true);
+    return;
+  }
+  if (objetivo <= 0) {
+    mensaje('El monto objetivo debe ser mayor a $0.', true);
+    return;
+  }
+
+  const nueva = {
+    id: 'meta_' + Date.now(),
+    nombre: nombre,
+    objetivo: objetivo,
+    actual: actual,
+    fechaLimite: fecha,
+    emoji: emojiMetaSeleccionado,
+    color: '#38bdf8'
+  };
+
+  if (isDemoMode) {
+    if (!metasAhorroGlobal) metasAhorroGlobal = [];
+    metasAhorroGlobal.push(nueva);
+    localStorage.setItem('demo_metas', JSON.stringify(metasAhorroGlobal));
+    cerrarModalNuevaMeta();
+    renderMetasUI();
+    mensaje('✓ Meta creada con éxito.');
+    return;
+  }
+
+  google.script.run
+    .withSuccessHandler(res => {
+      metasAhorroGlobal = res || [];
+      cerrarModalNuevaMeta();
+      renderMetasUI();
+      mensaje('✓ Meta guardada en tu planilla.');
+    })
+    .withFailureHandler(e => {
+      console.error('Error al guardar meta:', e);
+      mensaje('Error al guardar meta: ' + e.message, true);
+    })
+    .guardarMetaAhorro(nueva);
+}
+
+function abrirModalAporte(id) {
+  idMetaParaAporte = id;
+  const meta = metasAhorroGlobal ? metasAhorroGlobal.find(m => m.id === id) : null;
+  if (!meta) return;
+
+  if ($('modalAporteTitulo')) $('modalAporteTitulo').textContent = 'Aportar a: ' + meta.nombre;
+  if ($('meta_aporte_monto')) {
+    $('meta_aporte_monto').value = '';
+    setTimeout(() => $('meta_aporte_monto').focus(), 150);
+  }
+  const modal = $('modalAporteMeta');
+  if (modal) modal.classList.add('active');
+}
+
+function cerrarModalAporteMeta() {
+  idMetaParaAporte = null;
+  const modal = $('modalAporteMeta');
+  if (modal) modal.classList.remove('active');
+}
+
+function confirmarAporteMetaAccion() {
+  if (!idMetaParaAporte) return;
+  const monto = Number($('meta_aporte_monto').value) || 0;
+  if (monto <= 0) {
+    mensaje('Ingresá un importe válido para sumar.', true);
+    return;
+  }
+
+  if (isDemoMode) {
+    const meta = metasAhorroGlobal.find(m => m.id === idMetaParaAporte);
+    if (meta) {
+      meta.actual = (Number(meta.actual) || 0) + monto;
+      localStorage.setItem('demo_metas', JSON.stringify(metasAhorroGlobal));
+      cerrarModalAporteMeta();
+      renderMetasUI();
+      mensaje('✓ ¡Aporte de ' + money(monto) + ' sumado a ' + meta.nombre + '!');
+    }
+    return;
+  }
+
+  google.script.run
+    .withSuccessHandler(res => {
+      metasAhorroGlobal = res || [];
+      cerrarModalAporteMeta();
+      renderMetasUI();
+      mensaje('✓ ¡Aporte registrado con éxito!');
+    })
+    .withFailureHandler(e => {
+      console.error('Error al aportar a la meta:', e);
+      mensaje('Error al registrar aporte: ' + e.message, true);
+    })
+    .aportarMetaAhorro(idMetaParaAporte, monto);
+}
+
+function eliminarMetaAccion(id) {
+  if (!confirm('¿Deseás eliminar esta meta de ahorro?')) return;
+
+  if (isDemoMode) {
+    metasAhorroGlobal = metasAhorroGlobal.filter(m => m.id !== id);
+    localStorage.setItem('demo_metas', JSON.stringify(metasAhorroGlobal));
+    renderMetasUI();
+    mensaje('✓ Meta eliminada.');
+    return;
+  }
+
+  google.script.run
+    .withSuccessHandler(res => {
+      metasAhorroGlobal = res || [];
+      renderMetasUI();
+      mensaje('✓ Meta eliminada.');
+    })
+    .withFailureHandler(e => {
+      console.error('Error al eliminar meta:', e);
+      mensaje('Error al eliminar: ' + e.message, true);
+    })
+    .eliminarMetaAhorro(id);
+}
+
+// ====================================================================
+// FASE B: EXPORTADOR DE BALANCE MENSUAL (CSV / EXCEL)
+// ====================================================================
+
+function exportarBalanceMensualCSV() {
+  const mes = mesActualSeleccionado || (new Date().getMonth() + 1);
+  const anio = anioActualSeleccionado || new Date().getFullYear();
+  const nombresMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+  const nombreMes = nombresMeses[mes - 1];
+
+  let csvContent = "\uFEFF"; // UTF-8 BOM
+  csvContent += `CONTROL DE GASTOS - BALANCE MENSUAL;${nombreMes} ${anio}\n\n`;
+  
+  csvContent += `RESUMEN EJECUTIVO\n`;
+  csvContent += `Concepto;Monto\n`;
+  csvContent += `Ingresos Netos;$ ${ultimoResumen.ingresoTotal || 0}\n`;
+  csvContent += `Gastos del Mes;$ ${ultimoResumen.gastoTotal || 0}\n`;
+  csvContent += `Consumo Tarjetas Crédito;$ ${ultimoResumen.tarjetaTotal || 0}\n`;
+  csvContent += `Dinero Disponible Final;$ ${ultimoResumen.disponible || 0}\n\n`;
+
+  csvContent += `DESGLOSE POR CATEGORÍA\n`;
+  csvContent += `Categoría;Monto Gastado;Presupuesto Mensual;Diferencia\n`;
+  const porCat = (ultimoResumen && ultimoResumen.porCategoria) ? ultimoResumen.porCategoria : {};
+  for (const cat in porCat) {
+    const gastado = Number(porCat[cat]) || 0;
+    const presup = Number((presupuestosGlobal && presupuestosGlobal[cat]) || 0);
+    const dif = presup > 0 ? (presup - gastado) : '';
+    csvContent += `"${cat}";$ ${gastado};${presup > 0 ? '$ ' + presup : 'Sin tope'};${presup > 0 ? '$ ' + dif : '-'}\n`;
+  }
+  csvContent += `\n`;
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `Balance_${nombreMes}_${anio}_ControlGastos.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  mensaje('✓ Balance descargado en Excel (CSV).');
+}
+
 window.onload = () => {
   checkModoDemo();
 
@@ -5542,6 +6502,8 @@ window.onload = () => {
 
   initSelectorMes();
   refresh();
+  cargarCotizacionesDolar();
+
   if (!isDemoMode) {
     sincronizarPendientes(); // por si quedó algo pendiente de la última vez
   }

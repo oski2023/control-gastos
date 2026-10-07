@@ -49,6 +49,16 @@ function getSheet_(name) {
       sh.appendRow(['Fecha', 'Descripción', 'Entidad', 'Categoría', 'Importe Total', 'Cuotas', 'Cuota Mensual', 'Primera Cuota', 'Fecha de Registro']);
       return sh;
     }
+    if (target === 'presupuestos' || target === 'presupuesto') {
+      sh = SS.insertSheet('Presupuestos');
+      sh.appendRow(['Categoría', 'Monto Presupuesto']);
+      return sh;
+    }
+    if (target === 'metasahorro' || target === 'metas' || target === 'meta') {
+      sh = SS.insertSheet('MetasAhorro');
+      sh.appendRow(['ID', 'Nombre', 'Monto Objetivo', 'Monto Actual', 'Fecha Límite', 'Color']);
+      return sh;
+    }
     throw new Error('No existe la hoja: ' + name);
   }
   return sh;
@@ -590,7 +600,9 @@ function getInitialData(mes, anio) {
   return {
     config: getConfig(),
     resumen: getResumen(mes, anio),
-    gastosFijosConfig: getGastosFijosConfig()
+    gastosFijosConfig: getGastosFijosConfig(),
+    presupuestos: getPresupuestosConfig(),
+    metasAhorro: getMetasAhorro()
   };
 }
 
@@ -1013,4 +1025,163 @@ function eliminarMovimiento(tipo, fila, datosVerificacion) {
   const anio = (datosVerificacion && datosVerificacion.anio) ? Number(datosVerificacion.anio) : hoy.getFullYear();
   return getResumen(mes, anio);
 }
+
+// ====================================================================
+// FASE B: SISTEMA DE PRESUPUESTOS POR CATEGORÍA Y METAS DE AHORRO
+// ====================================================================
+
+function getPresupuestosConfig() {
+  try {
+    const sh = getSheet_('Presupuestos');
+    const last = sh.getLastRow();
+    if (last < 2) return {};
+    const values = sh.getRange(2, 1, last - 1, 2).getValues();
+    const map = {};
+    for (let i = 0; i < values.length; i++) {
+      const cat = String(values[i][0] || '').trim();
+      const monto = Number(values[i][1]) || 0;
+      if (cat && monto > 0) {
+        map[cat] = monto;
+      }
+    }
+    return map;
+  } catch (e) {
+    console.error('Error al obtener presupuestos:', e);
+    return {};
+  }
+}
+
+function guardarPresupuestos(presupuestosMap) {
+  try {
+    const sh = getSheet_('Presupuestos');
+    const last = sh.getLastRow();
+    if (last >= 2) {
+      sh.getRange(2, 1, last - 1, 2).clearContent();
+    }
+    const filas = [];
+    if (presupuestosMap && typeof presupuestosMap === 'object') {
+      for (const cat in presupuestosMap) {
+        const monto = Number(presupuestosMap[cat]) || 0;
+        if (cat.trim() && monto > 0) {
+          filas.push([cat.trim(), monto]);
+        }
+      }
+    }
+    if (filas.length > 0) {
+      sh.getRange(2, 1, filas.length, 2).setValues(filas);
+    }
+    return getPresupuestosConfig();
+  } catch (e) {
+    console.error('Error al guardar presupuestos:', e);
+    throw new Error('No se pudieron guardar los presupuestos: ' + e.message);
+  }
+}
+
+function getMetasAhorro() {
+  try {
+    const sh = getSheet_('MetasAhorro');
+    const last = sh.getLastRow();
+    if (last < 2) return [];
+    const values = sh.getRange(2, 1, last - 1, 6).getValues();
+    const tz = Session.getScriptTimeZone();
+    const metas = [];
+    for (let i = 0; i < values.length; i++) {
+      const id = String(values[i][0] || ('meta_' + (i + 1))).trim();
+      const nombre = String(values[i][1] || '').trim();
+      if (!nombre) continue;
+      const objetivo = Number(values[i][2]) || 0;
+      const actual = Number(values[i][3]) || 0;
+      let fechaLimite = values[i][4];
+      if (fechaLimite instanceof Date) {
+        fechaLimite = Utilities.formatDate(fechaLimite, tz, 'yyyy-MM-dd');
+      } else {
+        fechaLimite = String(fechaLimite || '');
+      }
+      const color = String(values[i][5] || '#38bdf8').trim();
+      metas.push({
+        id,
+        nombre,
+        objetivo,
+        actual,
+        fechaLimite,
+        color
+      });
+    }
+    return metas;
+  } catch (e) {
+    console.error('Error al obtener metas de ahorro:', e);
+    return [];
+  }
+}
+
+function guardarMetaAhorro(meta) {
+  try {
+    const sh = getSheet_('MetasAhorro');
+    const nombre = String(meta.nombre || '').trim();
+    if (!nombre) throw new Error('Ingresá un nombre para la meta.');
+    const objetivo = Number(meta.objetivo) || 0;
+    if (objetivo <= 0) throw new Error('El monto objetivo debe ser mayor a 0.');
+    const actual = Math.max(0, Number(meta.actual) || 0);
+    const fechaLimite = meta.fechaLimite ? parseFechaLocal_(meta.fechaLimite) : '';
+    const color = meta.color || '#38bdf8';
+    
+    const last = sh.getLastRow();
+    let filaEncontrada = -1;
+    if (meta.id && last >= 2) {
+      const ids = sh.getRange(2, 1, last - 1, 1).getValues().map(r => String(r[0]));
+      const idx = ids.indexOf(String(meta.id));
+      if (idx !== -1) {
+        filaEncontrada = idx + 2;
+      }
+    }
+
+    if (filaEncontrada !== -1) {
+      sh.getRange(filaEncontrada, 2, 1, 5).setValues([[nombre, objetivo, actual, fechaLimite, color]]);
+    } else {
+      const nuevoId = meta.id || ('meta_' + Date.now());
+      sh.appendRow([nuevoId, nombre, objetivo, actual, fechaLimite, color]);
+    }
+    return getMetasAhorro();
+  } catch (e) {
+    console.error('Error al guardar meta de ahorro:', e);
+    throw new Error('Error al guardar meta: ' + e.message);
+  }
+}
+
+function aportarMetaAhorro(id, montoAportado) {
+  try {
+    const sh = getSheet_('MetasAhorro');
+    const last = sh.getLastRow();
+    if (last < 2) throw new Error('Meta no encontrada.');
+    const ids = sh.getRange(2, 1, last - 1, 1).getValues().map(r => String(r[0]));
+    const idx = ids.indexOf(String(id));
+    if (idx === -1) throw new Error('Meta no encontrada.');
+    const fila = idx + 2;
+    const actual = Number(sh.getRange(fila, 4).getValue()) || 0;
+    const nuevoTotal = Math.max(0, actual + (Number(montoAportado) || 0));
+    sh.getRange(fila, 4).setValue(nuevoTotal);
+    return getMetasAhorro();
+  } catch (e) {
+    console.error('Error al aportar a la meta:', e);
+    throw new Error('Error al aportar: ' + e.message);
+  }
+}
+
+function eliminarMetaAhorro(id) {
+  try {
+    const sh = getSheet_('MetasAhorro');
+    const last = sh.getLastRow();
+    if (last < 2) return [];
+    const ids = sh.getRange(2, 1, last - 1, 1).getValues().map(r => String(r[0]));
+    const idx = ids.indexOf(String(id));
+    if (idx !== -1) {
+      sh.deleteRow(idx + 2);
+    }
+    return getMetasAhorro();
+  } catch (e) {
+    console.error('Error al eliminar meta:', e);
+    throw new Error('Error al eliminar meta: ' + e.message);
+  }
+}
+
 
