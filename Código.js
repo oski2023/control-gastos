@@ -1265,6 +1265,138 @@ function eliminarMovimiento(tipo, fila, datosVerificacion) {
   return getResumen(mes, anio);
 }
 
+function obtenerDetalleCategoria(categoria, mes, anio) {
+  const hoy = new Date();
+  mes = mes ? Number(mes) : (hoy.getMonth() + 1);
+  anio = anio ? Number(anio) : hoy.getFullYear();
+  categoria = String(categoria || '').trim();
+
+  const tz = Session.getScriptTimeZone();
+  const data = getSheet_('Gastos').getDataRange().getValues();
+  const movimientos = [];
+
+  for (let i = 1; i < data.length; i++) {
+    const f = data[i][0];
+    if (!(f instanceof Date)) continue;
+    if (f.getFullYear() === anio && (f.getMonth() + 1) === mes) {
+      const cat = String(data[i][2] || '').trim();
+      if (cat.toLowerCase() === categoria.toLowerCase()) {
+        const fStr = Utilities.formatDate(f, tz, 'dd/MM/yyyy');
+        const fISO = Utilities.formatDate(f, tz, 'yyyy-MM-dd');
+        movimientos.push({
+          fila: i + 1,
+          fecha: fStr,
+          fechaISO: fISO,
+          descripcion: String(data[i][1] || '').trim(),
+          categoria: cat,
+          entidad: String(data[i][3] || '').trim(),
+          medio: String(data[i][4] || '').trim(),
+          importe: Number(data[i][5]) || 0
+        });
+      }
+    }
+  }
+
+  // Ordenar movimientos por fecha descendente (más recientes primero)
+  movimientos.sort((a, b) => (b.fechaISO || '').localeCompare(a.fechaISO || ''));
+
+  return {
+    categoria: categoria,
+    mes: mes,
+    anio: anio,
+    total: movimientos.reduce((acc, m) => acc + (m.importe || 0), 0),
+    movimientos: movimientos
+  };
+}
+
+function editarMovimiento(tipo, fila, datosNuevos, datosVerificacion) {
+  tipo = String(tipo || 'gasto').toLowerCase();
+  let sheetName = 'Gastos';
+  if (tipo.indexOf('ingreso') !== -1) {
+    sheetName = 'Ingresos';
+  } else if (tipo.indexOf('tarjeta') !== -1) {
+    sheetName = 'Tarjetas';
+  }
+
+  const sh = getSheet_(sheetName);
+  const data = sh.getDataRange().getValues();
+  let filaAEditar = -1;
+
+  // 1. Intentar por fila sugerida
+  if (fila && Number(fila) >= 2 && Number(fila) <= data.length) {
+    const idx = Number(fila) - 1;
+    const row = data[idx];
+    let coincide = true;
+    if (datosVerificacion && datosVerificacion.monto !== undefined && datosVerificacion.monto !== null && datosVerificacion.monto !== '') {
+      const importeHoja = sheetName === 'Ingresos' ? Number(row[3]) : (sheetName === 'Gastos' ? Number(row[5]) : Number(row[4]));
+      if (Math.abs(importeHoja - Number(datosVerificacion.monto)) > 0.02) {
+        coincide = false;
+      }
+    }
+    if (coincide) {
+      filaAEditar = Number(fila);
+    }
+  }
+
+  // 2. Si no coincide, buscar por datos de verificación
+  if (filaAEditar === -1 && datosVerificacion) {
+    const tz = Session.getScriptTimeZone();
+    for (let i = data.length - 1; i >= 1; i--) {
+      const row = data[i];
+      const f = row[0];
+      const fStr = f instanceof Date ? Utilities.formatDate(f, tz, 'dd/MM/yyyy') : String(f || '');
+      const descHoja = String(row[1] || '').trim();
+      const importeHoja = sheetName === 'Ingresos' ? Number(row[3]) : (sheetName === 'Gastos' ? Number(row[5]) : Number(row[4]));
+
+      const coincideImporte = (datosVerificacion.monto !== undefined && datosVerificacion.monto !== null && datosVerificacion.monto !== '')
+        ? Math.abs(importeHoja - Number(datosVerificacion.monto)) < 0.02
+        : true;
+
+      const coincideDesc = datosVerificacion.descripcion
+        ? descHoja.toLowerCase() === String(datosVerificacion.descripcion).trim().toLowerCase()
+        : true;
+
+      const coincideFecha = datosVerificacion.fecha
+        ? (fStr === datosVerificacion.fecha || String(datosVerificacion.fecha).indexOf(fStr) !== -1 || fStr.indexOf(String(datosVerificacion.fecha)) !== -1)
+        : true;
+
+      if (coincideImporte && (coincideDesc || coincideFecha)) {
+        filaAEditar = i + 1;
+        break;
+      }
+    }
+  }
+
+  if (filaAEditar < 2) {
+    throw new Error('No se pudo encontrar el movimiento a editar en la hoja ' + sheetName + '.');
+  }
+
+  // Aplicar cambios en Gastos (A: Fecha, B: Desc, C: Cat, D: Entidad, E: Medio, F: Importe)
+  if (sheetName === 'Gastos') {
+    if (datosNuevos.fecha) {
+      sh.getRange(filaAEditar, 1).setValue(parseFechaLocal_(datosNuevos.fecha));
+    }
+    sh.getRange(filaAEditar, 2).setValue(String(datosNuevos.descripcion || '').trim());
+    if (datosNuevos.categoria) {
+      sh.getRange(filaAEditar, 3).setValue(String(datosNuevos.categoria).trim());
+    }
+    if (datosNuevos.entidad !== undefined) {
+      sh.getRange(filaAEditar, 4).setValue(String(datosNuevos.entidad || '').trim());
+    }
+    if (datosNuevos.medio) {
+      sh.getRange(filaAEditar, 5).setValue(String(datosNuevos.medio).trim());
+    }
+    if (datosNuevos.importe !== undefined && datosNuevos.importe !== null && datosNuevos.importe !== '') {
+      sh.getRange(filaAEditar, 6).setValue(Number(datosNuevos.importe) || 0);
+    }
+  }
+
+  const hoy = new Date();
+  const mes = (datosVerificacion && datosVerificacion.mes) ? Number(datosVerificacion.mes) : (hoy.getMonth() + 1);
+  const anio = (datosVerificacion && datosVerificacion.anio) ? Number(datosVerificacion.anio) : hoy.getFullYear();
+  return getResumen(mes, anio);
+}
+
 // ====================================================================
 // FASE B: SISTEMA DE PRESUPUESTOS POR CATEGORÍA Y METAS DE AHORRO
 // ====================================================================

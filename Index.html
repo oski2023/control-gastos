@@ -1116,6 +1116,48 @@ tbody tr:hover td {
   transform: scale(0.95);
 }
 
+/* FILAS INTERACTIVAS EN DETALLE CATEGORÍAS */
+.tabla-categoria-row {
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.tabla-categoria-row:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+.tabla-categoria-row:active {
+  transform: scale(0.995);
+}
+
+.modal-nav-paginador {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 6px 12px;
+  margin-bottom: 14px;
+}
+.modal-nav-pag-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.modal-nav-pag-btn:hover:not(:disabled) {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.modal-nav-pag-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
 /* CONFIGURACIÓN Y PERSONALIZACIÓN */
 .cfg-tabs {
   display: flex;
@@ -2808,6 +2850,94 @@ body.is-landscape .hamburger-btn {
   </div>
 </div>
 
+<!-- MODAL DETALLE DEL PAGO / COMPRA POR CATEGORIA -->
+<div id="modalDetalleGastoCategoria" class="modal-overlay" onclick="if(event.target===this) cerrarModalDetalleCategoria()">
+  <div class="modal-card">
+    <div id="modalDetalleCatIconBadge" class="modal-icon-badge orange">💸</div>
+    <h3 id="modalDetalleCatTitulo" class="modal-title">Detalle del pago / compra</h3>
+    <p id="modalDetalleCatSubtitulo" class="modal-subtitle">Gasto en la categoría</p>
+
+    <!-- Paginador si la categoría tiene múltiples compras -->
+    <div id="modalDetalleCatPaginador" class="modal-nav-paginador" style="display:none;">
+      <button type="button" class="modal-nav-pag-btn" id="modalDetalleCatBtnPrev" onclick="cambiarMovimientoDetalle(-1)">◀ Anterior</button>
+      <span id="modalDetalleCatPaginadorTexto" style="font-size:12px; font-weight:700; color:var(--text-main);">1 de 1</span>
+      <button type="button" class="modal-nav-pag-btn" id="modalDetalleCatBtnNext" onclick="cambiarMovimientoDetalle(1)">Siguiente ▶</button>
+    </div>
+
+    <!-- Bloque de Monto idéntico al de confirmación de carga -->
+    <div id="modalDetalleCatMontoWrap" class="modal-monto-wrap">
+      <span class="modal-monto-label">Monto del movimiento</span>
+      <div id="modalDetalleCatMonto" class="modal-monto orange">$ 0,00</div>
+    </div>
+
+    <!-- Caja de Detalles -->
+    <div id="modalDetalleCatDetalles" class="modal-details-box"></div>
+
+    <!-- Botones de Acción inferiores solicitados: Corregir y Salir -->
+    <div class="modal-actions">
+      <button type="button" class="modal-btn-cancel" onclick="iniciarCorreccionGastoDetalle()">
+        ✏️ Corregir
+      </button>
+      <button type="button" class="modal-btn-confirm" onclick="cerrarModalDetalleCategoria()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff; box-shadow: none;">
+        ✕ Salir
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR MOVIMIENTO / CORREGIR GASTO -->
+<div id="modalEditarMovimientoCategoria" class="modal-overlay" onclick="if(event.target===this) cerrarModalEditarMovimientoCategoria()">
+  <div class="modal-card" style="max-height: 90vh; overflow-y: auto; text-align: left;">
+    <div class="modal-icon-badge orange">✏️</div>
+    <h3 class="modal-title" style="text-align: center;">Corregir Movimiento</h3>
+    <p class="modal-subtitle" style="text-align: center; margin-bottom: 16px;">Modificá los datos del gasto y guardá los cambios.</p>
+
+    <input type="hidden" id="edit_mov_fila">
+    <input type="hidden" id="edit_mov_id_demo">
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div>
+        <label style="display:block; font-size:12px; font-weight:700; color:#e2e8f0; margin-bottom:4px;">Importe ($)</label>
+        <input type="number" id="edit_mov_importe" step="any" placeholder="0.00" style="width:100%; font-size:16px; font-weight:700;">
+      </div>
+
+      <div>
+        <label style="display:block; font-size:12px; font-weight:700; color:#e2e8f0; margin-bottom:4px;">Fecha</label>
+        <input type="date" id="edit_mov_fecha" style="width:100%;">
+      </div>
+
+      <div>
+        <label style="display:block; font-size:12px; font-weight:700; color:#e2e8f0; margin-bottom:4px;">Categoría</label>
+        <select id="edit_mov_categoria" style="width:100%;"></select>
+      </div>
+
+      <div>
+        <label style="display:block; font-size:12px; font-weight:700; color:#e2e8f0; margin-bottom:4px;">Medio de pago</label>
+        <select id="edit_mov_medio" style="width:100%;"></select>
+      </div>
+
+      <div>
+        <label style="display:block; font-size:12px; font-weight:700; color:#e2e8f0; margin-bottom:4px;">Entidad</label>
+        <select id="edit_mov_entidad" style="width:100%;"></select>
+      </div>
+
+      <div>
+        <label style="display:block; font-size:12px; font-weight:700; color:#e2e8f0; margin-bottom:4px;">Descripción <span class="opcional">(opcional)</span></label>
+        <input type="text" id="edit_mov_desc" placeholder="Ej: Compra supermercado" style="width:100%;">
+      </div>
+    </div>
+
+    <div class="modal-actions" style="margin-top: 18px;">
+      <button type="button" class="modal-btn-cancel" onclick="cerrarModalEditarMovimientoCategoria()">
+        Cancelar
+      </button>
+      <button type="button" id="btnGuardarEdicionMovimiento" class="modal-btn-confirm orange" onclick="guardarCorreccionMovimientoCategoria()">
+        ✓ Guardar Cambios
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL DE CONFIRMACION DE BORRADO -->
 <div id="modalConfirmarEliminar" class="modal-overlay" onclick="if(event.target===this) cerrarModalConfirmarEliminar()">
   <div class="modal-card">
@@ -3219,6 +3349,340 @@ function cerrarModalAlerta() {
     }, 150);
   }
   campoAFocarAlCerrarAlerta = null;
+}
+
+// ====================================================================
+// GESTIÓN DE MODAL DETALLE DE GASTO POR CATEGORÍA Y CORRECCIÓN
+// ====================================================================
+let movimientosDetalleCategoriaActual = [];
+let indiceMovimientoDetalleActual = 0;
+let categoriaDetalleActualNombre = '';
+
+function abrirModalDetalleCategoria(categoria) {
+  categoriaDetalleActualNombre = categoria;
+  movimientosDetalleCategoriaActual = [];
+  indiceMovimientoDetalleActual = 0;
+
+  if (isDemoMode) {
+    const todosGastos = JSON.parse(localStorage.getItem('demo_gastos') || '[]');
+    const filtrados = [];
+    todosGastos.forEach(g => {
+      const p = String(g.fecha || '').split('-');
+      if (Number(p[0]) === anioActualSeleccionado && Number(p[1]) === mesActualSeleccionado) {
+        if (String(g.categoria || '').trim().toLowerCase() === String(categoria).trim().toLowerCase()) {
+          filtrados.push({
+            id: g.id,
+            fecha: formatFechaVisual(g.fecha),
+            fechaISO: g.fecha,
+            descripcion: g.descripcion || '',
+            categoria: g.categoria || categoria,
+            entidad: g.entidad || '',
+            medio: g.medio || '',
+            importe: Number(g.importe) || 0
+          });
+        }
+      }
+    });
+
+    // Ordenar descendente por fecha
+    filtrados.sort((a, b) => (b.fechaISO || '').localeCompare(a.fechaISO || ''));
+
+    if (filtrados.length === 0) {
+      // Si no hay en demo_gastos pero había en el resumen simulado, crear un placeholder editable
+      const montoTotal = (ultimoResumen && ultimoResumen.porCategoria) ? Number(ultimoResumen.porCategoria[categoria] || 0) : 0;
+      filtrados.push({
+        id: 'gas_demo_gen_' + Date.now(),
+        fecha: formatFechaVisual(today()),
+        fechaISO: today(),
+        descripcion: 'Gasto en ' + categoria,
+        categoria: categoria,
+        entidad: (config && config.entidades && config.entidades[0]) || 'Efectivo',
+        medio: (config && config.medios && config.medios[0]) || 'Débito',
+        importe: montoTotal > 0 ? montoTotal : 1
+      });
+    }
+
+    movimientosDetalleCategoriaActual = filtrados;
+    renderContenidoModalDetalleGasto();
+    const modal = $('modalDetalleGastoCategoria');
+    if (modal) modal.classList.add('active');
+    return;
+  }
+
+  // Modo conectado con Google Apps Script
+  const modal = $('modalDetalleGastoCategoria');
+  if (modal) {
+    // Mostrar estado temporal de carga
+    $('modalDetalleCatTitulo').textContent = 'Cargando detalle...';
+    $('modalDetalleCatSubtitulo').textContent = categoria;
+    $('modalDetalleCatMonto').textContent = '$ ...';
+    $('modalDetalleCatDetalles').innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-muted);">⏳ Buscando pagos de ' + escapeHtml(categoria) + '...</div>';
+    $('modalDetalleCatPaginador').style.display = 'none';
+    modal.classList.add('active');
+  }
+
+  google.script.run
+    .withSuccessHandler(res => {
+      const lista = (res && res.movimientos) ? res.movimientos : [];
+      if (lista.length === 0) {
+        // Fallback: si no devolvió movimientos específicos pero hay total en porCategoria
+        const montoTotal = (ultimoResumen && ultimoResumen.porCategoria) ? Number(ultimoResumen.porCategoria[categoria] || 0) : 0;
+        movimientosDetalleCategoriaActual = [{
+          fila: 0,
+          fecha: formatFechaVisual(today()),
+          fechaISO: today(),
+          descripcion: 'Gasto en ' + categoria,
+          categoria: categoria,
+          entidad: (config && config.entidades && config.entidades[0]) || '',
+          medio: (config && config.medios && config.medios[0]) || '',
+          importe: montoTotal
+        }];
+      } else {
+        movimientosDetalleCategoriaActual = lista;
+      }
+      indiceMovimientoDetalleActual = 0;
+      renderContenidoModalDetalleGasto();
+    })
+    .withFailureHandler(err => {
+      console.error('Error al obtener detalle de categoría:', err);
+      // Fallback con el total que ya tenemos
+      const montoTotal = (ultimoResumen && ultimoResumen.porCategoria) ? Number(ultimoResumen.porCategoria[categoria] || 0) : 0;
+      movimientosDetalleCategoriaActual = [{
+        fila: 0,
+        fecha: formatFechaVisual(today()),
+        fechaISO: today(),
+        descripcion: 'Gasto en ' + categoria,
+        categoria: categoria,
+        entidad: '',
+        medio: '',
+        importe: montoTotal
+      }];
+      indiceMovimientoDetalleActual = 0;
+      renderContenidoModalDetalleGasto();
+    })
+    .obtenerDetalleCategoria(categoria, mesActualSeleccionado, anioActualSeleccionado);
+}
+
+function renderContenidoModalDetalleGasto() {
+  const modal = $('modalDetalleGastoCategoria');
+  if (!modal) return;
+
+  const totalMovs = movimientosDetalleCategoriaActual.length;
+  if (totalMovs === 0) {
+    cerrarModalDetalleCategoria();
+    mensaje('No se encontraron movimientos registrados en esta categoría.', true);
+    return;
+  }
+
+  if (indiceMovimientoDetalleActual < 0) indiceMovimientoDetalleActual = 0;
+  if (indiceMovimientoDetalleActual >= totalMovs) indiceMovimientoDetalleActual = totalMovs - 1;
+
+  const mov = movimientosDetalleCategoriaActual[indiceMovimientoDetalleActual];
+
+  // Paginador si hay múltiples movimientos
+  const paginador = $('modalDetalleCatPaginador');
+  if (totalMovs > 1) {
+    paginador.style.display = 'flex';
+    $('modalDetalleCatPaginadorTexto').textContent = (indiceMovimientoDetalleActual + 1) + ' de ' + totalMovs + ' compras';
+    $('modalDetalleCatBtnPrev').disabled = (indiceMovimientoDetalleActual === 0);
+    $('modalDetalleCatBtnNext').disabled = (indiceMovimientoDetalleActual === totalMovs - 1);
+  } else {
+    paginador.style.display = 'none';
+  }
+
+  // Título y Subtítulo solicitados: "Detalle del pago / compra"
+  $('modalDetalleCatTitulo').textContent = 'Detalle del pago / compra';
+  $('modalDetalleCatSubtitulo').textContent = mov.descripcion ? mov.descripcion : ('Gasto en ' + (mov.categoria || categoriaDetalleActualNombre));
+
+  // Monto
+  $('modalDetalleCatMonto').textContent = money(mov.importe || 0);
+
+  // Filas en la caja de detalles idéntica a la imagen del usuario
+  const filas = [
+    { label: 'Fecha', valor: mov.fecha || formatFechaVisual(mov.fechaISO) },
+    { label: 'Categoría', valor: mov.categoria || categoriaDetalleActualNombre },
+    { label: 'Medio de pago', valor: mov.medio || 'No especificado' },
+    { label: 'Entidad', valor: mov.entidad || 'No especificada' },
+    { label: 'Descripción', valor: mov.descripcion || 'Sin descripción' }
+  ];
+
+  let htmlDetalles = '';
+  filas.forEach(f => {
+    htmlDetalles += `
+      <div class="modal-detail-row">
+        <span class="modal-detail-label">${escapeHtml(f.label)}</span>
+        <span class="modal-detail-value">${escapeHtml(String(f.valor))}</span>
+      </div>
+    `;
+  });
+  $('modalDetalleCatDetalles').innerHTML = htmlDetalles;
+}
+
+function cambiarMovimientoDetalle(delta) {
+  const totalMovs = movimientosDetalleCategoriaActual.length;
+  if (totalMovs <= 1) return;
+  const nuevoIdx = indiceMovimientoDetalleActual + delta;
+  if (nuevoIdx >= 0 && nuevoIdx < totalMovs) {
+    indiceMovimientoDetalleActual = nuevoIdx;
+    renderContenidoModalDetalleGasto();
+  }
+}
+
+function cerrarModalDetalleCategoria() {
+  const modal = $('modalDetalleGastoCategoria');
+  if (modal) modal.classList.remove('active');
+}
+
+function iniciarCorreccionGastoDetalle() {
+  if (!movimientosDetalleCategoriaActual || !movimientosDetalleCategoriaActual.length) return;
+  const mov = movimientosDetalleCategoriaActual[indiceMovimientoDetalleActual];
+  if (!mov) return;
+
+  // Llenar selects de configuración
+  fillSelect('edit_mov_categoria', (config && config.categorias) || []);
+  fillSelect('edit_mov_medio', (config && config.medios) || []);
+  fillSelect('edit_mov_entidad', (config && config.entidades) || []);
+
+  // Prefill valores
+  $('edit_mov_fila').value = mov.fila || '';
+  $('edit_mov_id_demo').value = mov.id || '';
+  $('edit_mov_importe').value = mov.importe || '';
+  
+  // Convertir fecha a YYYY-MM-DD
+  let fISO = mov.fechaISO;
+  if (!fISO && mov.fecha) {
+    const partes = String(mov.fecha).split('/');
+    if (partes.length === 3) {
+      fISO = `${partes[2]}-${partes[1]}-${partes[0]}`;
+    }
+  }
+  $('edit_mov_fecha').value = fISO || today();
+
+  if (mov.categoria && $('edit_mov_categoria')) {
+    $('edit_mov_categoria').value = mov.categoria;
+  }
+  if (mov.medio && $('edit_mov_medio')) {
+    $('edit_mov_medio').value = mov.medio;
+  }
+  if (mov.entidad && $('edit_mov_entidad')) {
+    $('edit_mov_entidad').value = mov.entidad;
+  }
+  if ($('edit_mov_desc')) {
+    $('edit_mov_desc').value = mov.descripcion || '';
+  }
+
+  // Ocultar modal de detalle y abrir modal de edición
+  cerrarModalDetalleCategoria();
+  const mEdit = $('modalEditarMovimientoCategoria');
+  if (mEdit) mEdit.classList.add('active');
+}
+
+function cerrarModalEditarMovimientoCategoria() {
+  const mEdit = $('modalEditarMovimientoCategoria');
+  if (mEdit) mEdit.classList.remove('active');
+}
+
+function guardarCorreccionMovimientoCategoria() {
+  const importeVal = parseFloat($('edit_mov_importe').value);
+  const fechaVal = $('edit_mov_fecha').value;
+  const catVal = $('edit_mov_categoria').value;
+  const medVal = $('edit_mov_medio').value;
+  const entVal = $('edit_mov_entidad').value;
+  const descVal = ($('edit_mov_desc').value || '').trim();
+
+  if (isNaN(importeVal) || importeVal <= 0) {
+    mensaje('Por favor ingresá un importe válido.', true);
+    $('edit_mov_importe').focus();
+    return;
+  }
+  if (!fechaVal) {
+    mensaje('Por favor seleccioná una fecha.', true);
+    $('edit_mov_fecha').focus();
+    return;
+  }
+  if (!catVal) {
+    mensaje('Por favor seleccioná una categoría.', true);
+    $('edit_mov_categoria').focus();
+    return;
+  }
+
+  const movActual = movimientosDetalleCategoriaActual[indiceMovimientoDetalleActual] || {};
+  const btn = $('btnGuardarEdicionMovimiento');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Guardando...';
+  }
+
+  const datosNuevos = {
+    fecha: fechaVal,
+    importe: importeVal,
+    categoria: catVal,
+    medio: medVal,
+    entidad: entVal,
+    descripcion: descVal
+  };
+
+  if (isDemoMode) {
+    const demoId = $('edit_mov_id_demo').value;
+    const gastosDemo = JSON.parse(localStorage.getItem('demo_gastos') || '[]');
+    let idx = gastosDemo.findIndex(g => g.id === demoId);
+
+    if (idx === -1) {
+      // Buscar por fecha/importe/categoria
+      idx = gastosDemo.findIndex(g => {
+        return Math.abs((Number(g.importe) || 0) - (Number(movActual.importe) || 0)) < 0.02 &&
+               (g.categoria === movActual.categoria);
+      });
+    }
+
+    if (idx !== -1) {
+      gastosDemo[idx] = Object.assign({}, gastosDemo[idx], datosNuevos);
+      localStorage.setItem('demo_gastos', JSON.stringify(gastosDemo));
+    } else {
+      // Si era un item generado en demo, agregarlo
+      gastosDemo.push(Object.assign({ id: 'gas_' + Date.now() }, datosNuevos));
+      localStorage.setItem('demo_gastos', JSON.stringify(gastosDemo));
+    }
+
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '✓ Guardar Cambios';
+    }
+    cerrarModalEditarMovimientoCategoria();
+    renderResumen(getDemoResumen(mesActualSeleccionado, anioActualSeleccionado));
+    mensaje('✓ Gasto corregido correctamente (Modo Demo).');
+    return;
+  }
+
+  // Guardar en Google Apps Script
+  const filaHoja = Number($('edit_mov_fila').value) || movActual.fila;
+  const datosVerif = {
+    monto: movActual.importe,
+    descripcion: movActual.descripcion,
+    fecha: movActual.fecha,
+    mes: mesActualSeleccionado,
+    anio: anioActualSeleccionado
+  };
+
+  google.script.run
+    .withSuccessHandler(nuevoResumen => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '✓ Guardar Cambios';
+      }
+      cerrarModalEditarMovimientoCategoria();
+      renderResumen(nuevoResumen);
+      mensaje('✓ Gasto corregido correctamente.');
+    })
+    .withFailureHandler(err => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '✓ Guardar Cambios';
+      }
+      console.error('Error al editar movimiento:', err);
+      mensaje('Error al guardar corrección: ' + err.message, true);
+    })
+    .editarMovimiento('gasto', filaHoja, datosNuevos, datosVerif);
 }
 
 function eliminarMovimientoDemo(tipo, id, itemVerif) {
@@ -5643,6 +6107,10 @@ function renderTablaCategorias(r) {
       '</div>';
     }
 
+    tr.className = 'tabla-categoria-row';
+    tr.title = 'Hacé clic para ver el detalle de ' + item.categoria;
+    tr.onclick = () => abrirModalDetalleCategoria(item.categoria);
+
     if (item.esFijoPagado) {
       tr.style.background = 'rgba(16, 185, 129, 0.08)';
       tr.style.borderLeft = '3px solid #10b981';
@@ -5654,8 +6122,8 @@ function renderTablaCategorias(r) {
           '</div>' +
           htmlPresupuesto +
         '</td>' +
-        '<td style="padding:12px 10px;text-align:right;font-weight:800;color:#10b981;font-size:15px;vertical-align:top;">' +
-          money(item.monto) +
+        '<td style="padding:12px 10px;text-align:right;font-weight:800;color:#10b981;font-size:15px;vertical-align:top;white-space:nowrap;">' +
+          money(item.monto) + ' <span style="font-size:14px;color:rgba(16,185,129,0.6);margin-left:4px;">›</span>' +
         '</td>';
     } else {
       tr.innerHTML =
@@ -5663,8 +6131,8 @@ function renderTablaCategorias(r) {
           '<span style="color:var(--text-main);font-weight:600;">' + item.categoria + '</span>' +
           htmlPresupuesto +
         '</td>' +
-        '<td style="padding:12px 10px;text-align:right;font-weight:700;color:var(--text-main);vertical-align:top;">' +
-          money(item.monto) +
+        '<td style="padding:12px 10px;text-align:right;font-weight:700;color:var(--text-main);vertical-align:top;white-space:nowrap;">' +
+          money(item.monto) + ' <span style="font-size:14px;color:var(--text-dim);margin-left:4px;">›</span>' +
         '</td>';
     }
     tbody.appendChild(tr);
