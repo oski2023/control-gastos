@@ -10,6 +10,12 @@ function doGet(e) {
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
+function autorizarPermisosDrive() {
+  const folder = getOrCreateFolderImgGastos_();
+  Logger.log('Acceso a Google Drive correcto. ID de carpeta: ' + folder.getId());
+  return 'Permisos de Drive autorizados correctamente.';
+}
+
 function verificarEstadoDemo() {
   try {
     const sh = getSheet_('Configuración');
@@ -461,7 +467,7 @@ function guardarImagenEnDrive_(base64Data, nombreArchivo) {
     return file.getUrl();
   } catch (err) {
     console.error('Error al guardar comprobante en Drive:', err);
-    return '';
+    throw new Error('No se pudo guardar la foto en Drive: ' + err.message + '. (Recordá autorizar los permisos de Drive en Apps Script)');
   }
 }
 

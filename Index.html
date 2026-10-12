@@ -3623,7 +3623,8 @@ function abrirModalDetalleCategoria(categoria) {
             categoria: g.categoria || categoria,
             entidad: g.entidad || '',
             medio: g.medio || '',
-            importe: Number(g.importe) || 0
+            importe: Number(g.importe) || 0,
+            comprobante: g.comprobante || ''
           });
         }
       }
@@ -4417,7 +4418,8 @@ function verDetalle(tipo, titulo) {
         descripcion: x.descripcion || 'Tarjeta',
         entidad: x.entidad || 'Tarjeta',
         cuota: (x.cuotas || 1) + ' cuota(s)',
-        monto: Number(x.importe) || 0
+        monto: Number(x.importe) || 0,
+        comprobante: x.comprobante || ''
       }));
     } else if (tipo === 'tarjetas_consumo') {
       const tar = JSON.parse(localStorage.getItem('demo_tarjetas') || '[]');
@@ -4437,7 +4439,8 @@ function verDetalle(tipo, titulo) {
         descripcion: x.descripcion || 'Tarjeta',
         entidad: x.entidad || 'Tarjeta',
         cuotas: x.cuotas || 1,
-        monto: Number(x.importe) || 0
+        monto: Number(x.importe) || 0,
+        comprobante: x.comprobante || ''
       }));
     } else {
       const gas = JSON.parse(localStorage.getItem('demo_gastos') || '[]');
@@ -4457,7 +4460,8 @@ function verDetalle(tipo, titulo) {
         categoria: x.categoria || '',
         entidad: x.entidad || '',
         descripcion: x.descripcion || '',
-        monto: Number(x.importe) || 0
+        monto: Number(x.importe) || 0,
+        comprobante: x.comprobante || ''
       }));
     }
     renderizarDetalle(tipo, datos);
