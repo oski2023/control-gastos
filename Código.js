@@ -757,8 +757,27 @@ function getGastosFijosPendientes(mes, anio) {
   };
 }
 
+function asegurarColumnasTarjetas_(sh) {
+  if (sh.getLastRow() === 0) {
+    sh.appendRow(['Fecha', 'Descripción', 'Entidad', 'Categoría', 'Importe Total', 'Cuotas', 'Cuota Mensual', 'Primera Cuota', 'Fecha de Registro', 'Comprobante']);
+    return;
+  }
+  const lastCol = Math.max(sh.getLastColumn(), 10);
+  const headers = sh.getRange(1, 1, 1, lastCol).getValues()[0];
+  if (!headers[9] || String(headers[9]).trim() === '') {
+    sh.getRange(1, 10).setValue('Comprobante');
+  }
+}
+
 function addTarjeta(data) {
   const sh = getSheet_('Tarjetas');
+  asegurarColumnasTarjetas_(sh);
+
+  let comprobanteUrl = '';
+  if (data.comprobanteBase64) {
+    comprobanteUrl = guardarImagenEnDrive_(data.comprobanteBase64, data.comprobanteNombre);
+  }
+
   const importe = Number(data.importe) || 0;
   const cuotas = Number(data.cuotas) || 1;
   const f = parseFechaLocal_(data.fecha);
@@ -771,7 +790,8 @@ function addTarjeta(data) {
     cuotas,
     cuotas ? importe / cuotas : importe,
     data.primeraCuota ? parseFechaLocal_(data.primeraCuota + '-01') : '',
-    new Date()
+    new Date(),
+    comprobanteUrl || ''
   ]);
   const mes = data.mesSeleccionado ? Number(data.mesSeleccionado) : (f.getMonth() + 1);
   const anio = data.anioSeleccionado ? Number(data.anioSeleccionado) : f.getFullYear();
@@ -1061,7 +1081,8 @@ function obtenerDetalleV2(tipo, mes, anio) {
           entidad: r[2],
           categoria: r[3],
           monto: cuotas > 1 ? cuotaMensual : importe,
-          cuotas: cuotaTexto
+          cuotas: cuotaTexto,
+          comprobante: String(r[9] || '').trim()
         });
       }
     }
@@ -1083,7 +1104,8 @@ function obtenerDetalleV2(tipo, mes, anio) {
           entidad: r[2],
           categoria: r[3],
           monto: Number(r[4]) || 0,
-          cuotas: (r[5] || 1) + ' cuota(s)'
+          cuotas: (r[5] || 1) + ' cuota(s)',
+          comprobante: String(r[9] || '').trim()
         });
       }
     }
@@ -1470,6 +1492,17 @@ function editarMovimiento(tipo, fila, datosNuevos, datosVerificacion) {
       sh.getRange(filaAEditar, 8).setValue(urlComprobante);
     } else if (datosNuevos.eliminarComprobante) {
       sh.getRange(filaAEditar, 8).setValue('');
+    }
+  }
+
+  // Aplicar cambios en Tarjetas (J: Comprobante)
+  if (sheetName === 'Tarjetas') {
+    asegurarColumnasTarjetas_(sh);
+    if (datosNuevos.comprobanteBase64) {
+      const urlComprobante = guardarImagenEnDrive_(datosNuevos.comprobanteBase64, datosNuevos.comprobanteNombre);
+      sh.getRange(filaAEditar, 10).setValue(urlComprobante);
+    } else if (datosNuevos.eliminarComprobante) {
+      sh.getRange(filaAEditar, 10).setValue('');
     }
   }
 

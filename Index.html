@@ -2739,8 +2739,30 @@ body.is-landscape .hamburger-btn {
         <div class="full">
           <label>Primera cuota <span class="opcional">(opcional - por defecto mes siguiente)</span></label>
           <input id="t_primera" type="month">
-        </div>      
+        </div>
 
+        <div class="full ticket-upload-section">
+          <label>Comprobante o Ticket <span class="opcional">(opcional)</span></label>
+          <input type="file" id="t_ticket_file" accept="image/*" capture="environment" style="display:none;" onchange="manejarArchivoTicketTarjeta(this)">
+          
+          <div id="t_ticket_placeholder" class="ticket-dropzone" onclick="$('t_ticket_file').click()">
+            <div class="ticket-dropzone-icon">📷</div>
+            <div class="ticket-dropzone-texts">
+              <span class="ticket-dropzone-title">Sacar foto o subir comprobante</span>
+              <span class="ticket-dropzone-sub">Cámara o archivo (se guardará en Google Drive / img_gastos)</span>
+            </div>
+          </div>
+
+          <div id="t_ticket_preview_box" class="ticket-preview-box" style="display:none;">
+            <img id="t_ticket_img_preview" class="ticket-preview-thumb" src="" alt="Ticket" onclick="abrirVisorTicket(this.src, 'Comprobante seleccionado')">
+            <div class="ticket-preview-info">
+              <span id="t_ticket_nombre" class="ticket-preview-nombre">ticket.jpg</span>
+              <span id="t_ticket_tamano" class="ticket-preview-size">~250 KB</span>
+            </div>
+            <button type="button" class="ticket-btn-remove" onclick="removerTicketTarjeta()" title="Quitar comprobante">✕</button>
+          </div>
+        </div>
+        
         <button type="button" class="save full" onclick="guardarTarjeta()">
           Guardar compra con tarjeta
         </button>
@@ -6643,6 +6665,7 @@ window.addEventListener('online', sincronizarPendientes);
 // MANEJO DE COMPROBANTES / TICKETS EN GOOGLE DRIVE (img_gastos)
 // ====================================================================
 let ticketSeleccionadoActual = null;
+let ticketSeleccionadoTarjetaActual = null;
 let ticketEditActual = null;
 let ticketEditEliminado = false;
 
@@ -6722,6 +6745,39 @@ function removerTicketSeleccionado() {
   const placeholder = $('g_ticket_placeholder');
   const previewBox = $('g_ticket_preview_box');
   const previewImg = $('g_ticket_img_preview');
+
+  if (previewImg) previewImg.src = '';
+  if (placeholder) placeholder.style.display = 'flex';
+  if (previewBox) previewBox.style.display = 'none';
+}
+
+function manejarArchivoTicketTarjeta(input) {
+  if (!input || !input.files || !input.files[0]) return;
+  const file = input.files[0];
+  comprimirImagenEnNavegador(file, function(res) {
+    if (!res) return;
+    ticketSeleccionadoTarjetaActual = res;
+    const placeholder = $('t_ticket_placeholder');
+    const previewBox = $('t_ticket_preview_box');
+    const previewImg = $('t_ticket_img_preview');
+    const nombreEl = $('t_ticket_nombre');
+    const tamanoEl = $('t_ticket_tamano');
+
+    if (previewImg) previewImg.src = res.vistaPrevia;
+    if (nombreEl) nombreEl.textContent = res.nombre;
+    if (tamanoEl) tamanoEl.textContent = res.tamanoTexto + ' (listo para subir)';
+    if (placeholder) placeholder.style.display = 'none';
+    if (previewBox) previewBox.style.display = 'flex';
+  });
+}
+
+function removerTicketTarjeta() {
+  ticketSeleccionadoTarjetaActual = null;
+  const fileInput = $('t_ticket_file');
+  if (fileInput) fileInput.value = '';
+  const placeholder = $('t_ticket_placeholder');
+  const previewBox = $('t_ticket_preview_box');
+  const previewImg = $('t_ticket_img_preview');
 
   if (previewImg) previewImg.src = '';
   if (placeholder) placeholder.style.display = 'flex';
@@ -7480,6 +7536,8 @@ function guardarTarjeta(){
     categoria: catVal,
     cuotas: cuotasEl ? (parseInt(cuotasEl.value, 10) || 1) : 1,
     primeraCuota: primEl ? primEl.value : '',
+    comprobanteBase64: ticketSeleccionadoTarjetaActual ? ticketSeleccionadoTarjetaActual.base64 : '',
+    comprobanteNombre: ticketSeleccionadoTarjetaActual ? ticketSeleccionadoTarjetaActual.nombre : '',
     mesSeleccionado: mesActualSeleccionado,
     anioSeleccionado: anioActualSeleccionado
   };
@@ -7503,6 +7561,13 @@ function guardarTarjeta(){
     filasModal.push({ label: 'Primera cuota', valor: d.primeraCuota });
   } else {
     filasModal.push({ label: 'Primera cuota', valor: 'Próximo mes' });
+  }
+
+  if (d.comprobanteBase64) {
+    filasModal.push({
+      label: 'Comprobante',
+      valor: '📷 ' + (d.comprobanteNombre || '1 comprobante adjunto') + ' (se guardará en img_gastos)'
+    });
   }
 
   abrirModalConfirmarCarga({
@@ -7531,10 +7596,12 @@ function ejecutarGuardarTarjeta(d){
       entidad: d.entidad,
       categoria: d.categoria,
       cuotas: Number(d.cuotas) || 1,
-      primeraCuota: d.primeraCuota
+      primeraCuota: d.primeraCuota,
+      comprobante: d.comprobanteBase64 || ''
     });
     localStorage.setItem('demo_tarjetas', JSON.stringify(tarjetas));
     cerrarModalConfirmarCarga();
+    removerTicketTarjeta();
     renderResumen(getDemoResumen(mesActualSeleccionado, anioActualSeleccionado));
     mensaje('Compra con tarjeta guardada (Modo Demo)');
     if ($('t_importe')) $('t_importe').value = '';
@@ -7546,6 +7613,7 @@ function ejecutarGuardarTarjeta(d){
   if (!navigator.onLine) {
     encolarPendiente('tarjeta', d);
     cerrarModalConfirmarCarga();
+    removerTicketTarjeta();
     mensaje('Sin conexión: la compra con tarjeta quedó guardada en el celular y se va a enviar solo cuando vuelva la señal.');
     if ($('t_importe')) $('t_importe').value = '';
     if ($('t_desc')) $('t_desc').value = '';
@@ -7556,8 +7624,9 @@ function ejecutarGuardarTarjeta(d){
   google.script.run
     .withSuccessHandler(r => {
       cerrarModalConfirmarCarga();
+      removerTicketTarjeta();
       renderResumen(r);
-      mensaje('Compra con tarjeta guardada.');
+      mensaje('Compra con tarjeta guardada y comprobante subido a Google Drive.');
       if ($('t_importe')) $('t_importe').value = '';
       if ($('t_desc')) $('t_desc').value = '';
       aplicarUltimasSelecciones();
@@ -7565,6 +7634,7 @@ function ejecutarGuardarTarjeta(d){
     .withFailureHandler(e => {
       cerrarModalConfirmarCarga();
       encolarPendiente('tarjeta', d);
+      removerTicketTarjeta();
       mensaje('No se pudo enviar ahora, quedó guardada para reintentar cuando haya conexión.', true);
       if ($('t_importe')) $('t_importe').value = '';
       if ($('t_desc')) $('t_desc').value = '';
