@@ -745,6 +745,163 @@ select option {
   border-color: rgba(255, 255, 255, 0.25);
 }
 
+/* COMPROBANTES / TICKETS EN DRIVE */
+.ticket-upload-section {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.ticket-dropzone {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px dashed var(--border-light);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.ticket-dropzone:hover {
+  border-color: var(--primary);
+  background: rgba(56, 189, 248, 0.06);
+}
+
+.ticket-dropzone-icon {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.ticket-dropzone-texts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.ticket-dropzone-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.ticket-dropzone-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.ticket-preview-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(14, 21, 36, 0.9);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.ticket-preview-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  cursor: pointer;
+  border: 1px solid var(--border-light);
+  transition: transform 0.15s ease;
+  background: #000;
+}
+
+.ticket-preview-thumb:hover {
+  transform: scale(1.05);
+}
+
+.ticket-preview-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+  text-align: left;
+}
+
+.ticket-preview-nombre {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ticket-preview-size {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.ticket-btn-remove {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: all 0.15s ease;
+}
+
+.ticket-btn-remove:hover {
+  background: rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+}
+
+.btn-ticket-action {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+  border-radius: 6px;
+  padding: 4px 7px;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.btn-ticket-action:hover {
+  background: rgba(56, 189, 248, 0.25);
+  transform: scale(1.08);
+}
+
+.btn-ticket-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.btn-ticket-link:hover {
+  background: rgba(56, 189, 248, 0.22);
+}
+
 /* BOTONES DE ACCION (ESTILO FINTECH) */
 button.save {
   background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
@@ -2395,6 +2552,28 @@ body.is-landscape .hamburger-btn {
           <label>Descripción <span class="opcional">(opcional)</span></label>
           <input id="g_desc" type="text" placeholder="Ej.: compra del supermercado">
         </div>
+
+        <div class="full ticket-upload-section">
+          <label>Comprobante o Ticket <span class="opcional">(opcional)</span></label>
+          <input type="file" id="g_ticket_file" accept="image/*" capture="environment" style="display:none;" onchange="manejarArchivoTicket(this)">
+          
+          <div id="g_ticket_placeholder" class="ticket-dropzone" onclick="$('g_ticket_file').click()">
+            <div class="ticket-dropzone-icon">📷</div>
+            <div class="ticket-dropzone-texts">
+              <span class="ticket-dropzone-title">Sacar foto o subir comprobante</span>
+              <span class="ticket-dropzone-sub">Cámara o archivo (se guardará en Google Drive / img_gastos)</span>
+            </div>
+          </div>
+
+          <div id="g_ticket_preview_box" class="ticket-preview-box" style="display:none;">
+            <img id="g_ticket_img_preview" class="ticket-preview-thumb" src="" alt="Ticket" onclick="abrirVisorTicket(this.src, 'Comprobante seleccionado')">
+            <div class="ticket-preview-info">
+              <span id="g_ticket_nombre" class="ticket-preview-nombre">ticket.jpg</span>
+              <span id="g_ticket_tamano" class="ticket-preview-size">~250 KB</span>
+            </div>
+            <button type="button" class="ticket-btn-remove" onclick="removerTicketSeleccionado()" title="Quitar comprobante">✕</button>
+          </div>
+        </div>
         
         <button type="button" class="save full" onclick="guardarGasto()">
           Guardar gasto
@@ -2925,6 +3104,28 @@ body.is-landscape .hamburger-btn {
         <label style="display:block; font-size:12px; font-weight:700; color:#e2e8f0; margin-bottom:4px;">Descripción <span class="opcional">(opcional)</span></label>
         <input type="text" id="edit_mov_desc" placeholder="Ej: Compra supermercado" style="width:100%;">
       </div>
+
+      <div class="ticket-upload-section">
+        <label style="display:block; font-size:12px; font-weight:700; color:#e2e8f0; margin-bottom:4px;">Comprobante o Ticket <span class="opcional">(opcional)</span></label>
+        <input type="file" id="edit_ticket_file" accept="image/*" capture="environment" style="display:none;" onchange="manejarArchivoTicketEdit(this)">
+
+        <div id="edit_ticket_placeholder" class="ticket-dropzone" onclick="$('edit_ticket_file').click()">
+          <div class="ticket-dropzone-icon">📷</div>
+          <div class="ticket-dropzone-texts">
+            <span class="ticket-dropzone-title">Cambiar o adjuntar comprobante</span>
+            <span class="ticket-dropzone-sub">Cámara o archivo para Drive / img_gastos</span>
+          </div>
+        </div>
+
+        <div id="edit_ticket_preview_box" class="ticket-preview-box" style="display:none;">
+          <img id="edit_ticket_img_preview" class="ticket-preview-thumb" src="" alt="Ticket" onclick="abrirVisorTicket(this.src, 'Comprobante')">
+          <div class="ticket-preview-info">
+            <span id="edit_ticket_nombre" class="ticket-preview-nombre">ticket.jpg</span>
+            <span id="edit_ticket_tamano" class="ticket-preview-size">Comprobante</span>
+          </div>
+          <button type="button" class="ticket-btn-remove" onclick="removerTicketEdit()" title="Quitar comprobante">✕</button>
+        </div>
+      </div>
     </div>
 
     <div class="modal-actions" style="margin-top: 18px;">
@@ -2958,6 +3159,28 @@ body.is-landscape .hamburger-btn {
       </button>
       <button type="button" id="modalEliminarBtnConfirmar" class="modal-btn-confirm delete" onclick="ejecutarEliminarAccion()">
         🗑️ Sí, Eliminar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VISOR DE TICKET / COMPROBANTE -->
+<div id="modalVisorTicket" class="modal-overlay" onclick="if(event.target===this) cerrarVisorTicket()">
+  <div class="modal-card" style="max-width: 500px; width: 92%; max-height: 92vh; display: flex; flex-direction: column; padding: 20px;">
+    <div class="modal-icon-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; margin-bottom: 10px;">🧾</div>
+    <h3 id="modalVisorTicketTitulo" class="modal-title" style="font-size: 18px; margin-bottom: 4px;">Comprobante de Gasto</h3>
+    <p id="modalVisorTicketSubtitulo" class="modal-subtitle" style="font-size: 12px; margin-bottom: 14px;">Ticket guardado en Google Drive / img_gastos</p>
+
+    <div style="flex: 1; min-height: 200px; max-height: 52vh; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); border-radius: 12px; border: 1px solid var(--border-subtle); overflow: hidden; position: relative;">
+      <img id="modalVisorTicketImg" src="" alt="Comprobante" style="max-width: 100%; max-height: 52vh; object-fit: contain; border-radius: 8px;">
+    </div>
+
+    <div class="modal-actions" style="margin-top: 16px; display: flex; gap: 8px;">
+      <a id="modalVisorTicketDriveBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn-ticket-link" style="flex: 1; justify-content: center; padding: 10px 14px; font-size: 13px;">
+        📂 Abrir en Drive ↗
+      </a>
+      <button type="button" class="modal-btn-confirm" onclick="cerrarVisorTicket()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff; box-shadow: none; padding: 10px 18px;">
+        ✕ Cerrar
       </button>
     </div>
   </div>
@@ -3506,12 +3729,22 @@ function renderContenidoModalDetalleGasto() {
     { label: 'Descripción', valor: mov.descripcion || 'Sin descripción' }
   ];
 
+  if (mov.comprobante) {
+    const safeUrl = String(mov.comprobante).replace(/'/g, "\\'");
+    const safeTit = escapeHtml((mov.descripcion || mov.categoria || 'Gasto') + ' - ' + money(mov.importe));
+    filas.push({
+      label: 'Comprobante',
+      valor: `<button type="button" class="btn-ticket-link" onclick="abrirVisorTicket('${safeUrl}', '${safeTit}')">🧾 Ver Foto del Ticket</button>`,
+      isHtml: true
+    });
+  }
+
   let htmlDetalles = '';
   filas.forEach(f => {
     htmlDetalles += `
       <div class="modal-detail-row">
         <span class="modal-detail-label">${escapeHtml(f.label)}</span>
-        <span class="modal-detail-value">${escapeHtml(String(f.valor))}</span>
+        <span class="modal-detail-value">${f.isHtml ? f.valor : escapeHtml(String(f.valor))}</span>
       </div>
     `;
   });
@@ -3571,6 +3804,18 @@ function iniciarCorreccionGastoDetalle() {
     $('edit_mov_desc').value = mov.descripcion || '';
   }
 
+  // Cargar ticket si existe en el movimiento
+  ticketEditActual = null;
+  ticketEditEliminado = false;
+  const inputEditFile = $('edit_ticket_file');
+  if (inputEditFile) inputEditFile.value = '';
+
+  if (mov.comprobante) {
+    mostrarPreviewTicketEdit(mov.comprobante, 'Comprobante guardado', 'En Google Drive');
+  } else {
+    ocultarPreviewTicketEdit();
+  }
+
   // Ocultar modal de detalle y abrir modal de edición
   cerrarModalDetalleCategoria();
   const mEdit = $('modalEditarMovimientoCategoria');
@@ -3622,6 +3867,13 @@ function guardarCorreccionMovimientoCategoria() {
     descripcion: descVal
   };
 
+  if (ticketEditActual && ticketEditActual.base64) {
+    datosNuevos.comprobanteBase64 = ticketEditActual.base64;
+    datosNuevos.comprobanteNombre = ticketEditActual.nombre;
+  } else if (ticketEditEliminado) {
+    datosNuevos.eliminarComprobante = true;
+  }
+
   if (isDemoMode) {
     const demoId = $('edit_mov_id_demo').value;
     const gastosDemo = JSON.parse(localStorage.getItem('demo_gastos') || '[]');
@@ -3633,6 +3885,12 @@ function guardarCorreccionMovimientoCategoria() {
         return Math.abs((Number(g.importe) || 0) - (Number(movActual.importe) || 0)) < 0.02 &&
                (g.categoria === movActual.categoria);
       });
+    }
+
+    if (ticketEditActual && ticketEditActual.base64) {
+      datosNuevos.comprobante = ticketEditActual.base64;
+    } else if (ticketEditEliminado) {
+      datosNuevos.comprobante = '';
     }
 
     if (idx !== -1) {
@@ -4243,7 +4501,27 @@ function renderizarDetalle(tipo, datos) {
     if (puedeBorrar) {
       const tdAccion = document.createElement('td');
       tdAccion.style.textAlign = 'center';
-      tdAccion.style.width = '48px';
+      tdAccion.style.whiteSpace = 'nowrap';
+      tdAccion.style.width = d.comprobante ? '76px' : '48px';
+
+      const wrapAcciones = document.createElement('div');
+      wrapAcciones.style.display = 'inline-flex';
+      wrapAcciones.style.gap = '6px';
+      wrapAcciones.style.alignItems = 'center';
+      wrapAcciones.style.justifyContent = 'center';
+
+      if (d.comprobante) {
+        const btnTicket = document.createElement('button');
+        btnTicket.type = 'button';
+        btnTicket.className = 'btn-ticket-action';
+        btnTicket.title = 'Ver comprobante / ticket';
+        btnTicket.innerHTML = '🧾';
+        btnTicket.onclick = function() {
+          abrirVisorTicket(d.comprobante, (d.descripcion || d.categoria || 'Gasto') + ' - ' + money(d.monto));
+        };
+        wrapAcciones.appendChild(btnTicket);
+      }
+
       const btnDel = document.createElement('button');
       btnDel.type = 'button';
       btnDel.className = 'btn-del-action';
@@ -4262,7 +4540,8 @@ function renderizarDetalle(tipo, datos) {
           tipoDetalle: tipo
         });
       };
-      tdAccion.appendChild(btnDel);
+      wrapAcciones.appendChild(btnDel);
+      tdAccion.appendChild(wrapAcciones);
       tr.appendChild(tdAccion);
     }
 
@@ -4437,7 +4716,27 @@ function cargarHistorial(){
 
       const tdAccion = document.createElement('td');
       tdAccion.style.textAlign = 'center';
-      tdAccion.style.width = '48px';
+      tdAccion.style.whiteSpace = 'nowrap';
+      tdAccion.style.width = f.comprobante ? '76px' : '48px';
+
+      const wrapAcciones = document.createElement('div');
+      wrapAcciones.style.display = 'inline-flex';
+      wrapAcciones.style.gap = '6px';
+      wrapAcciones.style.alignItems = 'center';
+      wrapAcciones.style.justifyContent = 'center';
+
+      if (tipoSolicitado === 'gasto' && f.comprobante) {
+        const btnTicket = document.createElement('button');
+        btnTicket.type = 'button';
+        btnTicket.className = 'btn-ticket-action';
+        btnTicket.title = 'Ver ticket / comprobante';
+        btnTicket.innerHTML = '🧾';
+        btnTicket.onclick = function() {
+          abrirVisorTicket(f.comprobante, (f.descripcion || f.categoria || 'Gasto') + ' - ' + money(imp));
+        };
+        wrapAcciones.appendChild(btnTicket);
+      }
+
       const btnDel = document.createElement('button');
       btnDel.type = 'button';
       btnDel.className = 'btn-del-action';
@@ -4454,7 +4753,8 @@ function cargarHistorial(){
           origenVista: 'historial'
         });
       };
-      tdAccion.appendChild(btnDel);
+      wrapAcciones.appendChild(btnDel);
+      tdAccion.appendChild(wrapAcciones);
       tr.appendChild(tdAccion);
       tbody.appendChild(tr);
     });
@@ -4493,7 +4793,27 @@ function cargarHistorial(){
 
         const tdAccion = document.createElement('td');
         tdAccion.style.textAlign = 'center';
-        tdAccion.style.width = '48px';
+        tdAccion.style.whiteSpace = 'nowrap';
+        tdAccion.style.width = f.comprobante ? '76px' : '48px';
+
+        const wrapAcciones = document.createElement('div');
+        wrapAcciones.style.display = 'inline-flex';
+        wrapAcciones.style.gap = '6px';
+        wrapAcciones.style.alignItems = 'center';
+        wrapAcciones.style.justifyContent = 'center';
+
+        if (tipoSolicitado === 'gasto' && f.comprobante) {
+          const btnTicket = document.createElement('button');
+          btnTicket.type = 'button';
+          btnTicket.className = 'btn-ticket-action';
+          btnTicket.title = 'Ver ticket / comprobante';
+          btnTicket.innerHTML = '🧾';
+          btnTicket.onclick = function() {
+            abrirVisorTicket(f.comprobante, (f.descripcion || f.categoria || 'Gasto') + ' - ' + money(f.importe));
+          };
+          wrapAcciones.appendChild(btnTicket);
+        }
+
         const btnDel = document.createElement('button');
         btnDel.type = 'button';
         btnDel.className = 'btn-del-action';
@@ -4510,7 +4830,8 @@ function cargarHistorial(){
             origenVista: 'historial'
           });
         };
-        tdAccion.appendChild(btnDel);
+        wrapAcciones.appendChild(btnDel);
+        tdAccion.appendChild(wrapAcciones);
         tr.appendChild(tdAccion);
         tbody.appendChild(tr);
       });
@@ -6318,6 +6639,187 @@ window.addEventListener('online', sincronizarPendientes);
 
 // --- Fin Bloque de guardado offline ---
 
+// ====================================================================
+// MANEJO DE COMPROBANTES / TICKETS EN GOOGLE DRIVE (img_gastos)
+// ====================================================================
+let ticketSeleccionadoActual = null;
+let ticketEditActual = null;
+let ticketEditEliminado = false;
+
+function comprimirImagenEnNavegador(file, callback) {
+  if (!file) {
+    callback(null);
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const maxDim = 1280;
+      let width = img.width;
+      let height = img.height;
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+      
+      const aproxKb = Math.round((dataUrl.length * 3 / 4) / 1024);
+      callback({
+        base64: dataUrl,
+        nombre: (file.name || 'ticket.jpg').replace(/\.[^/.]+$/, '') + '.jpg',
+        tamanoTexto: aproxKb > 1024 ? (aproxKb / 1024).toFixed(1) + ' MB' : aproxKb + ' KB',
+        vistaPrevia: dataUrl
+      });
+    };
+    img.onerror = function() {
+      callback({
+        base64: e.target.result,
+        nombre: file.name || 'ticket.jpg',
+        tamanoTexto: Math.round(file.size / 1024) + ' KB',
+        vistaPrevia: e.target.result
+      });
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function manejarArchivoTicket(input) {
+  if (!input || !input.files || !input.files[0]) return;
+  const file = input.files[0];
+  comprimirImagenEnNavegador(file, function(res) {
+    if (!res) return;
+    ticketSeleccionadoActual = res;
+    const placeholder = $('g_ticket_placeholder');
+    const previewBox = $('g_ticket_preview_box');
+    const previewImg = $('g_ticket_img_preview');
+    const nombreEl = $('g_ticket_nombre');
+    const tamanoEl = $('g_ticket_tamano');
+
+    if (previewImg) previewImg.src = res.vistaPrevia;
+    if (nombreEl) nombreEl.textContent = res.nombre;
+    if (tamanoEl) tamanoEl.textContent = res.tamanoTexto + ' (listo para subir)';
+    if (placeholder) placeholder.style.display = 'none';
+    if (previewBox) previewBox.style.display = 'flex';
+  });
+}
+
+function removerTicketSeleccionado() {
+  ticketSeleccionadoActual = null;
+  const fileInput = $('g_ticket_file');
+  if (fileInput) fileInput.value = '';
+  const placeholder = $('g_ticket_placeholder');
+  const previewBox = $('g_ticket_preview_box');
+  const previewImg = $('g_ticket_img_preview');
+
+  if (previewImg) previewImg.src = '';
+  if (placeholder) placeholder.style.display = 'flex';
+  if (previewBox) previewBox.style.display = 'none';
+}
+
+function manejarArchivoTicketEdit(input) {
+  if (!input || !input.files || !input.files[0]) return;
+  const file = input.files[0];
+  comprimirImagenEnNavegador(file, function(res) {
+    if (!res) return;
+    ticketEditActual = res;
+    ticketEditEliminado = false;
+    mostrarPreviewTicketEdit(res.vistaPrevia, res.nombre, res.tamanoTexto + ' (nuevo)');
+  });
+}
+
+function mostrarPreviewTicketEdit(src, nombre, tamano) {
+  const placeholder = $('edit_ticket_placeholder');
+  const previewBox = $('edit_ticket_preview_box');
+  const previewImg = $('edit_ticket_img_preview');
+  const nombreEl = $('edit_ticket_nombre');
+  const tamanoEl = $('edit_ticket_tamano');
+
+  let imgUrl = src;
+  if (src && src.indexOf('drive.google.com') !== -1) {
+    const idMatch = src.match(/[-\w]{25,}/);
+    if (idMatch && idMatch[0]) {
+      imgUrl = 'https://drive.google.com/thumbnail?id=' + idMatch[0] + '&sz=w600';
+    }
+  }
+
+  if (previewImg) previewImg.src = imgUrl;
+  if (nombreEl) nombreEl.textContent = nombre || 'Comprobante';
+  if (tamanoEl) tamanoEl.textContent = tamano || 'En Google Drive';
+  if (placeholder) placeholder.style.display = 'none';
+  if (previewBox) previewBox.style.display = 'flex';
+}
+
+function ocultarPreviewTicketEdit() {
+  const placeholder = $('edit_ticket_placeholder');
+  const previewBox = $('edit_ticket_preview_box');
+  const previewImg = $('edit_ticket_img_preview');
+  if (previewImg) previewImg.src = '';
+  if (placeholder) placeholder.style.display = 'flex';
+  if (previewBox) previewBox.style.display = 'none';
+}
+
+function removerTicketEdit() {
+  ticketEditActual = null;
+  ticketEditEliminado = true;
+  const fileInput = $('edit_ticket_file');
+  if (fileInput) fileInput.value = '';
+  ocultarPreviewTicketEdit();
+}
+
+function abrirVisorTicket(urlOrBase64, titulo) {
+  if (!urlOrBase64) return;
+  const modal = $('modalVisorTicket');
+  if (!modal) return;
+
+  const titEl = $('modalVisorTicketTitulo');
+  if (titEl) titEl.textContent = titulo || 'Comprobante de Gasto';
+
+  let imgUrl = urlOrBase64;
+  let driveLink = '';
+
+  if (urlOrBase64.indexOf('drive.google.com') !== -1) {
+    driveLink = urlOrBase64;
+    const idMatch = urlOrBase64.match(/[-\w]{25,}/);
+    if (idMatch && idMatch[0]) {
+      imgUrl = 'https://drive.google.com/thumbnail?id=' + idMatch[0] + '&sz=w1200';
+    }
+  }
+
+  const imgEl = $('modalVisorTicketImg');
+  if (imgEl) imgEl.src = imgUrl;
+
+  const btnDrive = $('modalVisorTicketDriveBtn');
+  if (btnDrive) {
+    if (driveLink) {
+      btnDrive.href = driveLink;
+      btnDrive.style.display = 'inline-flex';
+    } else {
+      btnDrive.style.display = 'none';
+    }
+  }
+
+  modal.classList.add('active');
+}
+
+function cerrarVisorTicket() {
+  const modal = $('modalVisorTicket');
+  if (modal) modal.classList.remove('active');
+  const imgEl = $('modalVisorTicketImg');
+  if (imgEl) imgEl.src = '';
+}
+
 function guardarGasto(){
   const importeEl = $('g_importe');
   const fechaEl = $('g_fecha');
@@ -6331,6 +6833,8 @@ function guardarGasto(){
     categoria: catEl ? catEl.value : '',
     entidad: $('g_entidad') ? $('g_entidad').value : '',
     medio: medEl ? medEl.value : '',
+    comprobanteBase64: ticketSeleccionadoActual ? ticketSeleccionadoActual.base64 : '',
+    comprobanteNombre: ticketSeleccionadoActual ? ticketSeleccionadoActual.nombre : '',
     mesSeleccionado: mesActualSeleccionado,
     anioSeleccionado: anioActualSeleccionado
   };
@@ -6366,6 +6870,21 @@ function guardarGasto(){
     return;
   }
 
+  const filasConfirm = [
+    { label: 'Fecha', valor: formatFechaVisual(d.fecha) },
+    { label: 'Categoría', valor: d.categoria },
+    { label: 'Medio de pago', valor: d.medio },
+    { label: 'Entidad', valor: d.entidad },
+    { label: 'Descripción', valor: d.descripcion || 'Sin descripción' }
+  ];
+
+  if (d.comprobanteBase64) {
+    filasConfirm.push({
+      label: 'Comprobante',
+      valor: '📷 ' + (d.comprobanteNombre || '1 imagen adjunta') + ' (se guardará en img_gastos)'
+    });
+  }
+
   abrirModalConfirmarCarga({
     tipo: 'gasto',
     titulo: '¿Registrar Gasto?',
@@ -6373,13 +6892,7 @@ function guardarGasto(){
     icono: '💸',
     colorTema: 'orange',
     monto: Number(d.importe),
-    filas: [
-      { label: 'Fecha', valor: formatFechaVisual(d.fecha) },
-      { label: 'Categoría', valor: d.categoria },
-      { label: 'Medio de pago', valor: d.medio },
-      { label: 'Entidad', valor: d.entidad },
-      { label: 'Descripción', valor: d.descripcion || 'Sin descripción' }
-    ],
+    filas: filasConfirm,
     onConfirm: () => ejecutarGuardarGasto(d)
   });
 }
@@ -6398,10 +6911,12 @@ function ejecutarGuardarGasto(d){
       descripcion: d.descripcion,
       categoria: d.categoria,
       entidad: d.entidad,
-      medio: d.medio
+      medio: d.medio,
+      comprobante: d.comprobanteBase64 || ''
     });
     localStorage.setItem('demo_gastos', JSON.stringify(gastos));
     cerrarModalConfirmarCarga();
+    removerTicketSeleccionado();
     renderResumen(getDemoResumen(mesActualSeleccionado, anioActualSeleccionado));
     mensaje('Gasto guardado (Modo Demo)');
     $('g_importe').value = '';
@@ -6416,6 +6931,7 @@ function ejecutarGuardarGasto(d){
   if(!navigator.onLine){
     encolarPendiente('gasto', d);
     cerrarModalConfirmarCarga();
+    removerTicketSeleccionado();
     mensaje('Sin conexión: el gasto quedó guardado en el celular y se va a enviar solo cuando vuelva la señal.');
     $('g_importe').value = '';
     $('g_desc').value = '';    
@@ -6429,8 +6945,9 @@ function ejecutarGuardarGasto(d){
   google.script.run
     .withSuccessHandler(r => {
       cerrarModalConfirmarCarga();
+      removerTicketSeleccionado();
       renderResumen(r);
-      mensaje('Gasto guardado.');
+      mensaje('Gasto guardado y comprobante subido a Google Drive.');
       $('g_importe').value = '';
       $('g_desc').value = '';      
       $('g_categoria').value = localStorage.getItem('ultimaCategoria') || '';
@@ -6441,6 +6958,7 @@ function ejecutarGuardarGasto(d){
     .withFailureHandler(e => {
       cerrarModalConfirmarCarga();
       encolarPendiente('gasto', d);
+      removerTicketSeleccionado();
       mensaje('No se pudo enviar ahora, quedó guardado para reintentar.', true);
     })
     .addGasto(d);

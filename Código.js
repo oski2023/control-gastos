@@ -419,8 +419,73 @@ function addIngreso(data) {
   return getResumen(mes, anio);
 }
 
+function getOrCreateFolderImgGastos_() {
+  const folderName = 'img_gastos';
+  const folders = DriveApp.getFoldersByName(folderName);
+  if (folders.hasNext()) {
+    return folders.next();
+  }
+  return DriveApp.createFolder(folderName);
+}
+
+function guardarImagenEnDrive_(base64Data, nombreArchivo) {
+  if (!base64Data) return '';
+  try {
+    const folder = getOrCreateFolderImgGastos_();
+    let contentType = 'image/jpeg';
+    let rawBase64 = String(base64Data);
+
+    if (rawBase64.indexOf(';base64,') !== -1) {
+      const parts = rawBase64.split(';base64,');
+      contentType = parts[0].replace(/^data:/i, '') || 'image/jpeg';
+      rawBase64 = parts[1];
+    }
+
+    const tz = Session.getScriptTimeZone();
+    const fechaStr = Utilities.formatDate(new Date(), tz, 'yyyyMMdd_HHmmss');
+    const extMatch = (nombreArchivo || '').match(/\.([a-zA-Z0-9]+)$/);
+    const ext = extMatch ? extMatch[1].toLowerCase() : (contentType.indexOf('png') !== -1 ? 'png' : 'jpg');
+    const limpio = (nombreArchivo || 'ticket').replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const finalName = 'gasto_' + fechaStr + '_' + (limpio || 'ticket') + '.' + ext;
+
+    const decoded = Utilities.base64Decode(rawBase64);
+    const blob = Utilities.newBlob(decoded, contentType, finalName);
+    const file = folder.createFile(blob);
+
+    try {
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    } catch (eShare) {
+      // Si la cuenta o dominio no permite ANYONE_WITH_LINK, continúa igual
+    }
+
+    return file.getUrl();
+  } catch (err) {
+    console.error('Error al guardar comprobante en Drive:', err);
+    return '';
+  }
+}
+
+function asegurarColumnasGastos_(sh) {
+  if (sh.getLastRow() === 0) {
+    sh.appendRow(['Fecha', 'Descripción', 'Categoría', 'Entidad', 'Medio', 'Importe', 'Fecha de Registro', 'Comprobante']);
+    return;
+  }
+  const lastCol = Math.max(sh.getLastColumn(), 8);
+  const headers = sh.getRange(1, 1, 1, lastCol).getValues()[0];
+  if (!headers[7] || String(headers[7]).trim() === '') {
+    sh.getRange(1, 8).setValue('Comprobante');
+  }
+}
+
 function addGasto(data) {
   const sh = getSheet_('Gastos');
+  asegurarColumnasGastos_(sh);
+
+  let comprobanteUrl = '';
+  if (data.comprobanteBase64) {
+    comprobanteUrl = guardarImagenEnDrive_(data.comprobanteBase64, data.comprobanteNombre);
+  }
+
   const f = parseFechaLocal_(data.fecha);
   sh.appendRow([
     f,
@@ -429,7 +494,8 @@ function addGasto(data) {
     data.entidad || '',
     data.medio || '',
     Number(data.importe) || 0,
-    new Date()
+    new Date(),
+    comprobanteUrl || ''
   ]);
   const mes = data.mesSeleccionado ? Number(data.mesSeleccionado) : (f.getMonth() + 1);
   const anio = data.anioSeleccionado ? Number(data.anioSeleccionado) : f.getFullYear();
@@ -869,7 +935,8 @@ function getHistorial(filtros) {
         categoria: String(data[i][2] || ''),
         entidad: String(data[i][3] || ''),
         medio: String(data[i][4] || ''),
-        importe: Number(data[i][5]) || 0
+        importe: Number(data[i][5]) || 0,
+        comprobante: String(data[i][7] || '').trim()
       });
     } else {
       filas.push({
@@ -891,7 +958,12 @@ function getHistorial(filtros) {
       descripcion: f.descripcion,
       importe: f.importe
     };
-    if (tipo === 'gasto') { base.categoria = f.categoria; base.entidad = f.entidad; base.medio = f.medio; }
+    if (tipo === 'gasto') { 
+      base.categoria = f.categoria; 
+      base.entidad = f.entidad; 
+      base.medio = f.medio; 
+      base.comprobante = f.comprobante;
+    }
     else { base.tipo = f.tipo; }
     return base;
   });
@@ -1033,7 +1105,8 @@ function obtenerDetalleV2(tipo, mes, anio) {
           categoria: r[2],
           entidad: r[3],
           descripcion: r[1],
-          monto: Number(r[5]) || 0
+          monto: Number(r[5]) || 0,
+          comprobante: String(r[7] || '').trim()
         });
       }
     }
@@ -1054,7 +1127,8 @@ function obtenerDetalleV2(tipo, mes, anio) {
           categoria: r[2],
           entidad: r[3],
           descripcion: r[1],
-          monto: Number(r[5]) || 0
+          monto: Number(r[5]) || 0,
+          comprobante: String(r[7] || '').trim()
         });
       }
     }
@@ -1291,7 +1365,8 @@ function obtenerDetalleCategoria(categoria, mes, anio) {
           categoria: cat,
           entidad: String(data[i][3] || '').trim(),
           medio: String(data[i][4] || '').trim(),
-          importe: Number(data[i][5]) || 0
+          importe: Number(data[i][5]) || 0,
+          comprobante: String(data[i][7] || '').trim()
         });
       }
     }
@@ -1371,8 +1446,9 @@ function editarMovimiento(tipo, fila, datosNuevos, datosVerificacion) {
     throw new Error('No se pudo encontrar el movimiento a editar en la hoja ' + sheetName + '.');
   }
 
-  // Aplicar cambios en Gastos (A: Fecha, B: Desc, C: Cat, D: Entidad, E: Medio, F: Importe)
+  // Aplicar cambios en Gastos (A: Fecha, B: Desc, C: Cat, D: Entidad, E: Medio, F: Importe, H: Comprobante)
   if (sheetName === 'Gastos') {
+    asegurarColumnasGastos_(sh);
     if (datosNuevos.fecha) {
       sh.getRange(filaAEditar, 1).setValue(parseFechaLocal_(datosNuevos.fecha));
     }
@@ -1388,6 +1464,12 @@ function editarMovimiento(tipo, fila, datosNuevos, datosVerificacion) {
     }
     if (datosNuevos.importe !== undefined && datosNuevos.importe !== null && datosNuevos.importe !== '') {
       sh.getRange(filaAEditar, 6).setValue(Number(datosNuevos.importe) || 0);
+    }
+    if (datosNuevos.comprobanteBase64) {
+      const urlComprobante = guardarImagenEnDrive_(datosNuevos.comprobanteBase64, datosNuevos.comprobanteNombre);
+      sh.getRange(filaAEditar, 8).setValue(urlComprobante);
+    } else if (datosNuevos.eliminarComprobante) {
+      sh.getRange(filaAEditar, 8).setValue('');
     }
   }
 
